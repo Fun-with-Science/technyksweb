@@ -3,11 +3,13 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start:web": "nx serve web",
-    "start:api": "nx serve api",
+    "build": "nx build web",
     "build:web": "nx build web",
     "build:api": "nx build api",
     "build:all": "nx run-many -t build",
+    "start": "nx serve web",
+    "start:web": "nx serve web",
+    "start:api": "nx serve api",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev"
   },
