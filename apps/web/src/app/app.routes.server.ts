@@ -22,6 +22,10 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
+    path: 'admin/courses/:id/manage',
+    renderMode: RenderMode.Client,
+  },
+  {
     path: 'checkout',
     renderMode: RenderMode.Client,
   },

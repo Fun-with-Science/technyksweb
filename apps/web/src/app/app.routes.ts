@@ -38,6 +38,11 @@ export const appRoutes: Routes = [
     loadComponent: () => import('./features/admin/admin-dashboard.component').then(m => m.AdminDashboardComponent),
   },
   {
+    path: 'admin/courses/:id/manage',
+    canActivate: [adminGuard],
+    loadComponent: () => import('./features/admin/course-editor.component').then(m => m.CourseEditorComponent),
+  },
+  {
     path: 'auth/login',
     loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent),
   },
