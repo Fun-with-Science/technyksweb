@@ -252,28 +252,104 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                 ></textarea>
               </div>
 
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Difficulty Level</label>
-                  <select
-                    [ngModel]="course()?.level"
-                    (ngModelChange)="updateCourseField('level', $event)"
-                    class="w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']"
-                  >
-                    <option value="Beginner">Beginner Level</option>
-                    <option value="Intermediate">Intermediate Level</option>
-                    <option value="Advanced">Advanced Level</option>
-                  </select>
+              <!-- Topics & Category Selection -->
+              <div>
+                <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-2">What is primarily taught in your course?</label>
+                <div class="flex flex-wrap gap-2 mb-3">
+                  <span class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#6B21A8] px-3.5 py-1.5 rounded-full">Automation</span>
+                  <span class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#6B21A8] px-3.5 py-1.5 rounded-full">n8n</span>
+                  <span class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#6B21A8] px-3.5 py-1.5 rounded-full">AI Agents & Agentic AI</span>
                 </div>
 
-                <div>
-                  <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Thumbnail Image Asset Path</label>
-                  <input
-                    type="text"
-                    [ngModel]="course()?.thumbnail"
-                    (ngModelChange)="updateCourseField('thumbnail', $event)"
-                    class="w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']"
-                  />
+                <label class="block font-['JetBrains_Mono'] text-[11px] text-[#a18d7b] uppercase mb-1">Most representative topic</label>
+                <select
+                  [ngModel]="course()?.level"
+                  (ngModelChange)="updateCourseField('level', $event)"
+                  class="w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']"
+                >
+                  <option value="Advanced">AI Agents & Agentic AI</option>
+                  <option value="Intermediate">Architectural Intelligence & Monorepos</option>
+                  <option value="Beginner">Full-Stack SaaS Blueprint</option>
+                </select>
+              </div>
+
+              <!-- Course Image Upload & Preview Card (Screenshot 5) -->
+              <div class="border-t border-[#1E293B] pt-6">
+                <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white mb-4">Course image</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <!-- Image Preview Box -->
+                  <div class="relative w-full h-44 bg-[#040810] border border-[#1E293B] rounded-lg overflow-hidden flex items-center justify-center">
+                    <img [src]="course()?.thumbnail || '/assets/agentic-ai.jpg'" class="w-full h-full object-cover" />
+                  </div>
+
+                  <!-- Upload Controls & Guidelines -->
+                  <div class="flex flex-col gap-3 font-['Inter'] text-xs">
+                    <p class="text-[#d9c3af]">
+                      Upload your course image here. Important guidelines: <span class="font-['JetBrains_Mono'] text-white font-bold">750x422 pixels</span>; .jpg, .jpeg, .gif, or .png. No text on the image.
+                    </p>
+                    <div class="flex gap-2">
+                      <input
+                        type="text"
+                        [ngModel]="course()?.thumbnail"
+                        (ngModelChange)="updateCourseField('thumbnail', $event)"
+                        placeholder="/assets/agentic-ai.jpg"
+                        class="flex-grow bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']"
+                      />
+                      <button (click)="saveAllChanges()" class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-4 py-2 rounded shrink-0">
+                        Upload File
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Promotional Video Upload & Player Box (Screenshot 5) -->
+              <div class="border-t border-[#1E293B] pt-6">
+                <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white mb-4">Promotional video</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <!-- Video Player Box -->
+                  <div class="relative w-full h-44 bg-[#040810] border border-[#1E293B] rounded-lg flex flex-col justify-between p-4">
+                    <div class="flex-grow flex items-center justify-center">
+                      <span class="material-symbols-outlined text-4xl text-white opacity-80">play_circle</span>
+                    </div>
+                    <div class="flex items-center justify-between text-[#a18d7b] font-['JetBrains_Mono'] text-[10px]">
+                      <span>0:00 / 0:00</span>
+                      <span class="material-symbols-outlined text-sm">settings</span>
+                    </div>
+                  </div>
+
+                  <!-- Upload Controls & Guidelines -->
+                  <div class="flex flex-col gap-3 font-['Inter'] text-xs">
+                    <p class="text-[#d9c3af]">
+                      Your promo video is a quick and compelling way for students to preview what they'll learn in your course. Students considering your course are more likely to enroll.
+                    </p>
+                    <div class="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Bunny Stream Promo Video ID (e.g. promo_1)"
+                        class="flex-grow bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']"
+                      />
+                      <button (click)="saveAllChanges()" class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-4 py-2 rounded shrink-0">
+                        Upload File
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Instructor Profile Section (Screenshot 5) -->
+              <div class="border-t border-[#1E293B] pt-6 mb-4">
+                <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white mb-4">Instructor profile(s)</h3>
+                <div class="border border-[#378ADD]/30 bg-[#378ADD]/10 rounded-lg p-4 flex items-center gap-3 text-xs text-[#378ADD] font-['JetBrains_Mono'] mb-4">
+                  <span class="material-symbols-outlined text-base">check_circle</span>
+                  <span>All instructor bios are complete!</span>
+                </div>
+
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-[#E8931A] flex items-center justify-center font-bold text-[#040810] font-['Hanken_Grotesk']">
+                    TA
+                  </div>
+                  <span class="font-['Hanken_Grotesk'] text-sm font-bold text-white">Technyks Senior Instructor</span>
                 </div>
               </div>
             </div>
