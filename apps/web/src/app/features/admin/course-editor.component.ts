@@ -11,7 +11,7 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="min-h-screen bg-[#040810] text-[#e0e3e5] pt-16 flex flex-col">
-      <!-- Top Header Navigation Bar -->
+      <!-- Top Header Navigation & Status Bar -->
       <div class="bg-[#121A2B] border-b border-[#1E293B] px-6 py-4 flex items-center justify-between sticky top-16 z-30 shadow-md">
         <div class="flex items-center gap-4">
           <a routerLink="/admin" class="text-[#a18d7b] hover:text-white flex items-center gap-1 font-['JetBrains_Mono'] text-xs">
@@ -34,10 +34,24 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
         </div>
 
         <div class="flex items-center gap-3">
+          <!-- LIVE / DRAFT Status Toggle Button -->
+          <button
+            (click)="togglePublishStatus()"
+            [class.bg-[#378ADD]]="course()?.status === 'LIVE'"
+            [class.bg-[#E8931A]]="course()?.status !== 'LIVE'"
+            class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] px-4 py-2 rounded transition-all shadow flex items-center gap-1.5"
+          >
+            <span class="material-symbols-outlined text-sm">
+              {{ course()?.status === 'LIVE' ? 'public' : 'lock' }}
+            </span>
+            {{ course()?.status === 'LIVE' ? 'Course is LIVE (Public)' : 'Make Course LIVE (Public)' }}
+          </button>
+
           <a [routerLink]="['/courses', course()?.slug]" target="_blank" class="font-['JetBrains_Mono'] text-xs text-[#378ADD] hover:underline flex items-center gap-1">
             Preview Student View <span class="material-symbols-outlined text-sm">open_in_new</span>
           </a>
-          <button (click)="saveAllChanges()" class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] bg-[#E8931A] px-5 py-2 rounded hover:bg-[#E8931A]/90 transition-all shadow-lg flex items-center gap-1">
+
+          <button (click)="saveAllChanges()" class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-5 py-2 rounded transition-all shadow-lg flex items-center gap-1">
             <span class="material-symbols-outlined text-sm">save</span>
             Save Changes
           </button>
@@ -77,17 +91,6 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                 <span>Course Landing Page</span>
                 <span class="material-symbols-outlined text-sm">article</span>
               </button>
-
-              <button
-                (click)="activeTab.set('intended')"
-                [class.bg-[#121A2B]]="activeTab() === 'intended'"
-                [class.text-[#E8931A]]="activeTab() === 'intended'"
-                [class.text-[#d9c3af]]="activeTab() !== 'intended'"
-                class="text-left px-4 py-2.5 rounded hover:bg-[#121A2B]/60 transition-all font-medium flex items-center justify-between"
-              >
-                <span>Intended Learners</span>
-                <span class="material-symbols-outlined text-sm">groups</span>
-              </button>
             </nav>
           </div>
 
@@ -124,7 +127,7 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
         <!-- Right Main Studio Content Area -->
         <main class="flex-grow bg-[#121A2B] technical-border rounded-lg p-6 md:p-8 min-h-[650px]">
           
-          <!-- TAB 1: CURRICULUM BUILDER (Screenshot 3) -->
+          <!-- TAB 1: CURRICULUM BUILDER -->
           @if (activeTab() === 'curriculum') {
             <div>
               <div class="flex items-center justify-between border-b border-[#1E293B] pb-6 mb-6">
@@ -211,7 +214,7 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
             </div>
           }
 
-          <!-- TAB 2: COURSE LANDING PAGE (Screenshot 4) -->
+          <!-- TAB 2: COURSE LANDING PAGE -->
           @if (activeTab() === 'landing') {
             <div class="flex flex-col gap-6 max-w-3xl">
               <div class="border-b border-[#1E293B] pb-4">
@@ -229,7 +232,6 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                   (ngModelChange)="updateCourseField('title', $event)"
                   class="w-full bg-[#040810] border border-[#1E293B] rounded px-4 py-2.5 text-xs text-white font-['Hanken_Grotesk'] font-bold"
                 />
-                <span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b] block mt-1">Your title should be a mix of attention-grabbing, informative, and optimized for search.</span>
               </div>
 
               <div>
@@ -252,37 +254,14 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                 ></textarea>
               </div>
 
-              <!-- Topics & Category Selection -->
-              <div>
-                <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-2">What is primarily taught in your course?</label>
-                <div class="flex flex-wrap gap-2 mb-3">
-                  <span class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#6B21A8] px-3.5 py-1.5 rounded-full">Automation</span>
-                  <span class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#6B21A8] px-3.5 py-1.5 rounded-full">n8n</span>
-                  <span class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#6B21A8] px-3.5 py-1.5 rounded-full">AI Agents & Agentic AI</span>
-                </div>
-
-                <label class="block font-['JetBrains_Mono'] text-[11px] text-[#a18d7b] uppercase mb-1">Most representative topic</label>
-                <select
-                  [ngModel]="course()?.level"
-                  (ngModelChange)="updateCourseField('level', $event)"
-                  class="w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']"
-                >
-                  <option value="Advanced">AI Agents & Agentic AI</option>
-                  <option value="Intermediate">Architectural Intelligence & Monorepos</option>
-                  <option value="Beginner">Full-Stack SaaS Blueprint</option>
-                </select>
-              </div>
-
-              <!-- Course Image Upload & Preview Card (Screenshot 5) -->
+              <!-- Course Image Upload & Preview Card -->
               <div class="border-t border-[#1E293B] pt-6">
                 <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white mb-4">Course image</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <!-- Image Preview Box -->
                   <div class="relative w-full h-44 bg-[#040810] border border-[#1E293B] rounded-lg overflow-hidden flex items-center justify-center">
                     <img [src]="course()?.thumbnail || '/assets/agentic-ai.jpg'" class="w-full h-full object-cover" />
                   </div>
 
-                  <!-- Upload Controls & Guidelines -->
                   <div class="flex flex-col gap-3 font-['Inter'] text-xs">
                     <p class="text-[#d9c3af]">
                       Upload your course image here. Important guidelines: <span class="font-['JetBrains_Mono'] text-white font-bold">750x422 pixels</span>; .jpg, .jpeg, .gif, or .png. No text on the image.
@@ -303,11 +282,10 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                 </div>
               </div>
 
-              <!-- Promotional Video Upload & Player Box (Screenshot 5) -->
+              <!-- Promotional Video Upload & Player Box -->
               <div class="border-t border-[#1E293B] pt-6">
                 <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white mb-4">Promotional video</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <!-- Video Player Box -->
                   <div class="relative w-full h-44 bg-[#040810] border border-[#1E293B] rounded-lg flex flex-col justify-between p-4">
                     <div class="flex-grow flex items-center justify-center">
                       <span class="material-symbols-outlined text-4xl text-white opacity-80">play_circle</span>
@@ -318,10 +296,9 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                     </div>
                   </div>
 
-                  <!-- Upload Controls & Guidelines -->
                   <div class="flex flex-col gap-3 font-['Inter'] text-xs">
                     <p class="text-[#d9c3af]">
-                      Your promo video is a quick and compelling way for students to preview what they'll learn in your course. Students considering your course are more likely to enroll.
+                      Your promo video is a quick and compelling way for students to preview what they'll learn in your course.
                     </p>
                     <div class="flex gap-2">
                       <input
@@ -336,26 +313,10 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                   </div>
                 </div>
               </div>
-
-              <!-- Instructor Profile Section (Screenshot 5) -->
-              <div class="border-t border-[#1E293B] pt-6 mb-4">
-                <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white mb-4">Instructor profile(s)</h3>
-                <div class="border border-[#378ADD]/30 bg-[#378ADD]/10 rounded-lg p-4 flex items-center gap-3 text-xs text-[#378ADD] font-['JetBrains_Mono'] mb-4">
-                  <span class="material-symbols-outlined text-base">check_circle</span>
-                  <span>All instructor bios are complete!</span>
-                </div>
-
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-[#E8931A] flex items-center justify-center font-bold text-[#040810] font-['Hanken_Grotesk']">
-                    TA
-                  </div>
-                  <span class="font-['Hanken_Grotesk'] text-sm font-bold text-white">Technyks Senior Instructor</span>
-                </div>
-              </div>
             </div>
           }
 
-          <!-- TAB 3: PROMOTIONS & COUPONS (Screenshot 2) -->
+          <!-- TAB 3: PROMOTIONS & COUPONS -->
           @if (activeTab() === 'promotions') {
             <div class="flex flex-col gap-6">
               <div class="border-b border-[#1E293B] pb-4">
@@ -368,7 +329,6 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
               <!-- Refer Students Card -->
               <div class="border border-[#1E293B] bg-[#040810]/60 rounded-lg p-6 flex flex-col gap-3">
                 <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white">Refer students</h3>
-                <p class="font-['Inter'] text-xs text-[#d9c3af]">Any time a student uses this link, we will credit you with the direct enrollment sale.</p>
                 <div class="flex gap-3 max-w-xl">
                   <input
                     type="text"
@@ -387,7 +347,6 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                 <div class="flex justify-between items-center">
                   <div>
                     <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white">Monthly Coupons</h3>
-                    <p class="font-['Inter'] text-xs text-[#d9c3af]">Create promo codes for your students.</p>
                   </div>
                   <button (click)="showCouponForm = !showCouponForm" class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#378ADD] px-4 py-2 rounded hover:bg-[#378ADD]/90 transition-colors">
                     Create Coupon
@@ -413,31 +372,6 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                     </button>
                   </div>
                 }
-              </div>
-
-              <!-- Coupons Table -->
-              <div class="border border-[#1E293B] bg-[#040810]/60 rounded-lg p-6">
-                <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white mb-4">Active & Expired Coupons</h3>
-                <table class="w-full text-left font-['Inter'] text-xs text-[#d9c3af]">
-                  <thead class="font-['JetBrains_Mono'] text-[11px] uppercase text-[#a18d7b] bg-[#121A2B] border-b border-[#1E293B]">
-                    <tr>
-                      <th class="p-3">Code</th>
-                      <th class="p-3">Discount</th>
-                      <th class="p-3">Status</th>
-                      <th class="p-3">Redemptions</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-[#1E293B]/40">
-                    @for (coupon of coupons(); track coupon.id) {
-                      <tr>
-                        <td class="p-3 font-['JetBrains_Mono'] font-bold text-[#E8931A]">{{ coupon.code }}</td>
-                        <td class="p-3 font-['JetBrains_Mono'] text-white">₹{{ coupon.discountAmount || 500 }}</td>
-                        <td class="p-3 font-['JetBrains_Mono'] text-[#378ADD]">ACTIVE</td>
-                        <td class="p-3 font-['JetBrains_Mono'] text-[#a18d7b]">{{ coupon.timesUsed }} / Unlimited</td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
               </div>
             </div>
           }
@@ -498,6 +432,23 @@ export class CourseEditorComponent implements OnInit {
 
     this.adminService.getCoupons().subscribe({
       next: (data) => this.coupons.set(data)
+    });
+  }
+
+  togglePublishStatus() {
+    const current = this.course();
+    if (!current) return;
+    const newStatus = current.status === 'LIVE' ? 'DRAFT' : 'LIVE';
+    const updated: Course = {
+      ...current,
+      status: newStatus,
+      isPublished: newStatus === 'LIVE'
+    };
+    this.course.set(updated);
+    this.coursesService.saveCourse(updated).subscribe({
+      next: () => {
+        alert(`Course is now ${newStatus === 'LIVE' ? 'LIVE (Public)' : 'DRAFT (Private)'}! Changes saved.`);
+      }
     });
   }
 
@@ -582,7 +533,8 @@ export class CourseEditorComponent implements OnInit {
 
     const updated: Course = {
       ...current,
-      modules: this.modules()
+      modules: this.modules(),
+      isPublished: current.status === 'LIVE'
     };
 
     this.coursesService.saveCourse(updated).subscribe({
