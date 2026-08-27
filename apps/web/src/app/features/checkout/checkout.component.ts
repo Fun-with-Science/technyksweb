@@ -1,0 +1,265 @@
+import { Component, signal, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { PaymentsService, CouponValidationResult } from '../../core/services/payments.service';
+import { AuthService } from '../../core/services/auth.service';
+
+declare var Razorpay: any;
+
+@Component({
+  selector: 'app-checkout',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule],
+  template: `
+    <div class="px-6 md:px-16 pt-24 pb-20 max-w-5xl mx-auto">
+      <div class="mb-8">
+        <span class="font-['JetBrains_Mono'] text-xs uppercase text-[#378ADD] tracking-widest font-semibold">// SECURE CHECKOUT</span>
+        <h1 class="font-['Hanken_Grotesk'] text-3xl font-bold text-white mt-1">Complete Your Enrollment</h1>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Form Column -->
+        <div class="lg:col-span-2 flex flex-col gap-6">
+          <!-- Item Summary Card -->
+          <div class="bg-[#121A2B] technical-border rounded p-6">
+            <h2 class="font-['Hanken_Grotesk'] text-lg font-bold text-white mb-2">Order Summary</h2>
+            <div class="flex justify-between items-center py-3 border-b border-[#1E293B]">
+              <div>
+                <div class="font-['Hanken_Grotesk'] font-bold text-white text-base">{{ itemTitle() }}</div>
+                <div class="font-['JetBrains_Mono'] text-xs text-[#d9c3af]">Lifetime Access & Source Code</div>
+              </div>
+              <div class="font-['JetBrains_Mono'] text-lg font-bold text-white">
+                ₹{{ originalAmount().toLocaleString('en-IN') }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Coupon Code Input -->
+          <div class="bg-[#121A2B] technical-border rounded p-6">
+            <h3 class="font-['JetBrains_Mono'] text-xs uppercase text-[#E8931A] font-bold mb-4">// COUPON CODE</h3>
+            <div class="flex gap-3">
+              <input
+                type="text"
+                [(ngModel)]="couponCode"
+                placeholder="Enter code (e.g. TECHNYKS50)"
+                class="flex-grow bg-[#040810] border border-[#1E293B] focus:border-[#E8931A] focus:outline-none rounded px-4 py-2.5 text-xs text-white font-['JetBrains_Mono'] uppercase"
+              />
+              <button
+                (click)="applyCoupon()"
+                [disabled]="isApplyingCoupon()"
+                class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] bg-[#E8931A] px-5 py-2.5 rounded hover:bg-[#E8931A]/90 transition-colors"
+              >
+                Apply
+              </button>
+            </div>
+
+            @if (couponSuccess()) {
+              <div class="mt-3 text-xs font-['JetBrains_Mono'] text-[#378ADD] flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm">check_circle</span>
+                Coupon {{ couponResult()?.code }} applied! Discount: ₹{{ couponResult()?.calculatedDiscount }}
+              </div>
+            }
+
+            @if (couponError()) {
+              <div class="mt-3 text-xs font-['JetBrains_Mono'] text-[#ffb4ab] flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm">error</span>
+                {{ couponError() }}
+              </div>
+            }
+          </div>
+
+          <!-- Payment Provider Options -->
+          <div class="bg-[#121A2B] technical-border rounded p-6">
+            <h3 class="font-['JetBrains_Mono'] text-xs uppercase text-[#378ADD] font-bold mb-4">// PAYMENT METHOD</h3>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <!-- Razorpay Option (India) -->
+              <div
+                (click)="selectedProvider.set('RAZORPAY')"
+                [class.border-[#E8931A]]="selectedProvider() === 'RAZORPAY'"
+                [class.bg-[#E8931A]/5]="selectedProvider() === 'RAZORPAY'"
+                class="p-4 technical-border rounded cursor-pointer transition-all flex flex-col justify-between"
+              >
+                <div class="flex justify-between items-center mb-2">
+                  <span class="font-['Hanken_Grotesk'] text-sm font-bold text-white">Razorpay (India)</span>
+                  <span class="font-['JetBrains_Mono'] text-[10px] text-[#E8931A] font-bold">UPI / CARDS</span>
+                </div>
+                <p class="font-['Inter'] text-xs text-[#d9c3af]">UPI, GPay, PhonePe, Cards, Netbanking + RBI Autopay</p>
+              </div>
+
+              <!-- Lemon Squeezy Option (Global) -->
+              <div
+                (click)="selectedProvider.set('LEMON_SQUEEZY')"
+                [class.border-[#E8931A]]="selectedProvider() === 'LEMON_SQUEEZY'"
+                [class.bg-[#E8931A]/5]="selectedProvider() === 'LEMON_SQUEEZY'"
+                class="p-4 technical-border rounded cursor-pointer transition-all flex flex-col justify-between"
+              >
+                <div class="flex justify-between items-center mb-2">
+                  <span class="font-['Hanken_Grotesk'] text-sm font-bold text-white">Lemon Squeezy</span>
+                  <span class="font-['JetBrains_Mono'] text-[10px] text-[#378ADD] font-bold">GLOBAL / VAT</span>
+                </div>
+                <p class="font-['Inter'] text-xs text-[#d9c3af]">International Cards, Apple Pay, Merchant of Record</p>
+              </div>
+            </div>
+
+            <!-- RBI Compliance Note for Razorpay -->
+            @if (selectedProvider() === 'RAZORPAY') {
+              <div class="p-3 bg-[#040810] border border-[#1E293B] rounded text-[11px] font-['JetBrains_Mono'] text-[#d9c3af]">
+                🛡️ <span class="text-[#E8931A]">RBI Compliance:</span> Recurring subscriptions include pre-debit notices 24 hours prior to each billing cycle via SMS/Email.
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Order Summary Sidebar -->
+        <div class="bg-[#121A2B] technical-border rounded p-6 flex flex-col justify-between h-fit shadow-2xl">
+          <div>
+            <h3 class="font-['Hanken_Grotesk'] text-lg font-bold text-white mb-4">Payment Breakdown</h3>
+
+            <div class="flex flex-col gap-3 font-['JetBrains_Mono'] text-xs text-[#d9c3af] border-b border-[#1E293B] pb-4 mb-4">
+              <div class="flex justify-between">
+                <span>Subtotal:</span>
+                <span>₹{{ originalAmount().toLocaleString('en-IN') }}</span>
+              </div>
+
+              @if (couponResult() && couponResult()?.calculatedDiscount! > 0) {
+                <div class="flex justify-between text-[#378ADD]">
+                  <span>Discount ({{ couponResult()?.code }}):</span>
+                  <span>-₹{{ couponResult()?.calculatedDiscount?.toLocaleString('en-IN') }}</span>
+                </div>
+              }
+
+              <div class="flex justify-between text-[#a18d7b]">
+                <span>Taxes & GST (Included):</span>
+                <span>₹0</span>
+              </div>
+            </div>
+
+            <div class="flex justify-between items-baseline mb-6 font-['JetBrains_Mono']">
+              <span class="text-xs uppercase text-[#a18d7b]">Total Payable:</span>
+              <span class="text-2xl font-bold text-[#E8931A]">₹{{ finalAmount().toLocaleString('en-IN') }}</span>
+            </div>
+          </div>
+
+          <button
+            (click)="onProceedToPayment()"
+            [disabled]="isProcessing()"
+            class="w-full font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#E8931A] py-4 rounded font-bold hover:bg-[#E8931A]/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg"
+          >
+            @if (isProcessing()) {
+              <span class="material-symbols-outlined animate-spin text-sm">progress_activity</span> Processing Order...
+            } @else {
+              <span>Pay ₹{{ finalAmount().toLocaleString('en-IN') }}</span>
+              <span class="material-symbols-outlined text-sm">lock</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  `
+})
+export class CheckoutComponent implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private paymentsService = inject(PaymentsService);
+  private authService = inject(AuthService);
+
+  courseId = signal<string | null>(null);
+  planSlug = signal<string | null>(null);
+  itemTitle = signal<string>('Technyks Architecture Track');
+  originalAmount = signal<number>(4999);
+  selectedProvider = signal<'RAZORPAY' | 'LEMON_SQUEEZY'>('RAZORPAY');
+
+  couponCode = '';
+  couponResult = signal<CouponValidationResult | null>(null);
+  couponSuccess = signal(false);
+  couponError = signal('');
+  isApplyingCoupon = signal(false);
+  isProcessing = signal(false);
+
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['courseId']) {
+        this.courseId.set(params['courseId']);
+        this.itemTitle.set('Mastering Agentic AI & Autonomous Workflows');
+        this.originalAmount.set(4999);
+      } else if (params['planSlug']) {
+        this.planSlug.set(params['planSlug']);
+        if (params['planSlug'] === 'pro-monthly') {
+          this.itemTitle.set('Pro Monthly Membership');
+          this.originalAmount.set(1499);
+        } else {
+          this.itemTitle.set('All-Access Annual Membership');
+          this.originalAmount.set(11999);
+        }
+      }
+    });
+  }
+
+  finalAmount = () => {
+    const res = this.couponResult();
+    return res ? res.finalAmount : this.originalAmount();
+  };
+
+  applyCoupon() {
+    if (!this.couponCode) return;
+    this.isApplyingCoupon.set(true);
+    this.couponError.set('');
+    this.couponSuccess.set(false);
+
+    this.paymentsService.validateCoupon(this.couponCode, this.originalAmount()).subscribe({
+      next: (res) => {
+        this.isApplyingCoupon.set(false);
+        this.couponResult.set(res);
+        this.couponSuccess.set(true);
+      },
+      error: (err) => {
+        this.isApplyingCoupon.set(false);
+        this.couponError.set(err.error?.message || 'Invalid coupon code');
+        this.couponResult.set(null);
+      }
+    });
+  }
+
+  onProceedToPayment() {
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+
+    this.isProcessing.set(true);
+
+    const payload = {
+      courseId: this.courseId() || undefined,
+      planId: this.planSlug() || undefined,
+      couponCode: this.couponResult()?.code || undefined,
+      provider: this.selectedProvider(),
+    };
+
+    this.paymentsService.createOrder(payload).subscribe({
+      next: (order) => {
+        this.isProcessing.set(false);
+        if (order.provider === 'LEMON_SQUEEZY' && order.checkoutUrl) {
+          window.location.href = order.checkoutUrl;
+        } else {
+          // Razorpay trigger or mock completion
+          alert(`Razorpay Payment Order Created! Order ID: ${order.razorpayOrderId || order.razorpaySubscriptionId}\n\n${order.rbiComplianceNote || 'Proceeding with secure Indian payment gateway.'}`);
+          // Simulate instant payment verification for testing ease
+          this.paymentsService.verifyRazorpay({
+            paymentId: order.paymentId,
+            razorpayOrderId: order.razorpayOrderId || 'order_mock',
+            razorpayPaymentId: 'pay_mock_123',
+            razorpaySignature: 'signature_mock',
+          }).subscribe(() => {
+            this.router.navigate(['/dashboard']);
+          });
+        }
+      },
+      error: () => {
+        this.isProcessing.set(false);
+        alert('Order creation failed. Please try again.');
+      }
+    });
+  }
+}

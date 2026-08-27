@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  ADMIN
+}
+
+enum PlanInterval {
+  MONTHLY
+  ANNUAL
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  EXPIRED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum PaymentProvider {
+  RAZORPAY
+  LEMON_SQUEEZY
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  passwordHash  String?
+  googleId      String?        @unique
+  name          String
+  avatarUrl     String?
+  role          UserRole       @default(STUDENT)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  enrollments   Enrollment[]
+  subscriptions Subscription[]
+  certificates  Certificate[]
+  payments      Payment[]
+}
+
+model Course {
+  id           String        @id @default(uuid())
+  slug         String        @unique
+  title        String
+  subtitle     String
+  description  String        @db.Text
+  thumbnail    String?
+  price        Float
+  currency     String        @default("INR")
+  level        String        @default("Intermediate")
+  isPublished  Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  modules      Module[]
+  enrollments  Enrollment[]
+  certificates Certificate[]
+  payments     Payment[]
+}
+
+model Module {
+  id        String   @id @default(uuid())
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title     String
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lessons   Lesson[]
+}
+
+model Lesson {
+  id            String   @id @default(uuid())
+  moduleId      String
+  module        Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  title         String
+  description   String?  @db.Text
+  videoAssetRef String?
+  duration      Int      @default(0)
+  order         Int
+  isFreePreview Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Enrollment {
+  id                  String   @id @default(uuid())
+  userId              String
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId            String
+  course              Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progressPercent     Float    @default(0.0)
+  lastWatchedLessonId String?
+  completedLessonIds  String[]
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([userId, courseId])
+}
+
+model MembershipPlan {
+  id            String         @id @default(uuid())
+  name          String
+  slug          String         @unique
+  price         Float
+  currency      String         @default("INR")
+  interval      PlanInterval
+  isFree        Boolean        @default(false)
+  features      String[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id                         String             @id @default(uuid())
+  userId                     String
+  user                       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId                     String
+  plan                       MembershipPlan     @relation(fields: [planId], references: [id])
+  status                     SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart         DateTime
+  currentPeriodEnd           DateTime
+  razorpaySubscriptionId     String?
+  lemonSqueezySubscriptionId String?
+  cancelAtPeriodEnd          Boolean            @default(false)
+  createdAt                  DateTime           @default(now())
+  updatedAt                  DateTime           @updatedAt
+}
+
+model Coupon {
+  id              String    @id @default(uuid())
+  code            String    @unique
+  discountPercent Float?
+  discountAmount  Float?
+  currency        String    @default("INR")
+  expiryDate      DateTime?
+  usageLimit      Int?
+  timesUsed       Int       @default(0)
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Certificate {
+  id                String   @id @default(uuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId          String
+  course            Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  certificateNumber String   @unique
+  pdfUrl            String
+  issuedAt          DateTime @default(now())
+
+  @@unique([userId, courseId])
+}
+
+model Payment {
+  id              String          @id @default(uuid())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount          Float
+  currency        String
+  status          PaymentStatus   @default(PENDING)
+  provider        PaymentProvider
+  paymentIntentId String?         @unique
+  subscriptionId  String?
+  courseId        String?
+  course          Course?         @relation(fields: [courseId], references: [id])
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
