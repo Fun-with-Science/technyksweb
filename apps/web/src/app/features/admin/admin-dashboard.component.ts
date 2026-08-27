@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AdminService, RevenueMetrics, Student, Coupon } from '../../core/services/admin.service';
+import { CoursesService, Course } from '../../core/services/courses.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -66,6 +67,17 @@ import { AdminService, RevenueMetrics, Student, Coupon } from '../../core/servic
         </button>
 
         <button
+          (click)="activeTab.set('courses')"
+          [class.border-b-2]="activeTab() === 'courses'"
+          [class.border-[#E8931A]]="activeTab() === 'courses'"
+          [class.text-[#E8931A]]="activeTab() === 'courses'"
+          [class.text-[#d9c3af]]="activeTab() !== 'courses'"
+          class="pb-3 px-2 font-bold transition-colors"
+        >
+          Course Creator (Udemy-Style)
+        </button>
+
+        <button
           (click)="activeTab.set('students')"
           [class.border-b-2]="activeTab() === 'students'"
           [class.border-[#E8931A]]="activeTab() === 'students'"
@@ -114,7 +126,125 @@ import { AdminService, RevenueMetrics, Student, Coupon } from '../../core/servic
         </div>
       }
 
-      <!-- Tab 2: Student Search -->
+      <!-- Tab 2: Udemy-Style Course Creator -->
+      @if (activeTab() === 'courses') {
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Course Creator Form -->
+          <div class="bg-[#121A2B] technical-border rounded p-6 flex flex-col gap-4">
+            <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white flex items-center gap-2">
+              <span class="material-symbols-outlined text-[#E8931A]">add_box</span>
+              Create New Architecture Track
+            </h3>
+
+            <div>
+              <label class="block font-['JetBrains_Mono'] text-[11px] text-[#a18d7b] uppercase mb-1">Course Title</label>
+              <input
+                type="text"
+                [(ngModel)]="newCourseTitle"
+                placeholder="Advanced DeepSeek V3 Architecture"
+                class="w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['Inter']"
+              />
+            </div>
+
+            <div>
+              <label class="block font-['JetBrains_Mono'] text-[11px] text-[#a18d7b] uppercase mb-1">Subtitle</label>
+              <input
+                type="text"
+                [(ngModel)]="newCourseSubtitle"
+                placeholder="Build production AI pipelines..."
+                class="w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['Inter']"
+              />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block font-['JetBrains_Mono'] text-[11px] text-[#a18d7b] uppercase mb-1">Price (₹)</label>
+                <input
+                  type="number"
+                  [(ngModel)]="newCoursePrice"
+                  placeholder="4999"
+                  class="w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']"
+                />
+              </div>
+
+              <div>
+                <label class="block font-['JetBrains_Mono'] text-[11px] text-[#a18d7b] uppercase mb-1">Level</label>
+                <select
+                  [(ngModel)]="newCourseLevel"
+                  class="w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']"
+                >
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Advanced">Advanced</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-['JetBrains_Mono'] text-[11px] text-[#a18d7b] uppercase mb-1">Thumbnail Asset Path / URL</label>
+              <input
+                type="text"
+                [(ngModel)]="newCourseThumbnail"
+                placeholder="/assets/agentic-ai.jpg"
+                class="w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']"
+              />
+            </div>
+
+            <div class="border-t border-[#1E293B] pt-4 mt-2">
+              <span class="block font-['JetBrains_Mono'] text-[11px] text-[#378ADD] uppercase mb-2">// BUNNY STREAM VIDEO LESSON</span>
+              
+              <div class="flex flex-col gap-3">
+                <input
+                  type="text"
+                  [(ngModel)]="newLessonTitle"
+                  placeholder="Lesson 1: System Overview"
+                  class="w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['Inter']"
+                />
+
+                <input
+                  type="text"
+                  [(ngModel)]="newBunnyVideoId"
+                  placeholder="Bunny Stream Video ID (e.g. demo_video_1)"
+                  class="w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']"
+                />
+              </div>
+            </div>
+
+            <button
+              (click)="createNewCourse()"
+              class="w-full font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] bg-[#E8931A] py-3 rounded hover:bg-[#E8931A]/90 transition-colors mt-2 flex items-center justify-center gap-2"
+            >
+              <span class="material-symbols-outlined text-sm">publish</span>
+              Publish Course to Catalog
+            </button>
+          </div>
+
+          <!-- Existing Course Catalog Table -->
+          <div class="lg:col-span-2 bg-[#121A2B] technical-border rounded p-6">
+            <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white mb-4">Published Architecture Tracks</h3>
+
+            <div class="divide-y divide-[#1E293B]/40">
+              @for (course of publishedCourses(); track course.id) {
+                <div class="py-4 flex items-center justify-between">
+                  <div class="flex items-center gap-4">
+                    <img [src]="course.thumbnail || '/assets/agentic-ai.jpg'" class="w-16 h-10 object-cover rounded border border-[#1E293B]" />
+                    <div>
+                      <h4 class="font-['Hanken_Grotesk'] text-sm font-bold text-white">{{ course.title }}</h4>
+                      <span class="font-['JetBrains_Mono'] text-[11px] text-[#378ADD]">{{ course.level }} • {{ course.modules?.length || 1 }} Modules</span>
+                    </div>
+                  </div>
+
+                  <div class="font-['JetBrains_Mono'] text-sm font-bold text-[#E8931A]">
+                    ₹{{ course.price.toLocaleString('en-IN') }}
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Tab 3: Student Search -->
       @if (activeTab() === 'students') {
         <div class="bg-[#121A2B] technical-border rounded p-6 flex flex-col gap-6">
           <div class="flex gap-4">
@@ -160,7 +290,7 @@ import { AdminService, RevenueMetrics, Student, Coupon } from '../../core/servic
         </div>
       }
 
-      <!-- Tab 3: Coupon Management -->
+      <!-- Tab 4: Coupon Management -->
       @if (activeTab() === 'coupons') {
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <!-- Create Form -->
@@ -248,16 +378,27 @@ import { AdminService, RevenueMetrics, Student, Coupon } from '../../core/servic
 })
 export class AdminDashboardComponent implements OnInit {
   private adminService = inject(AdminService);
+  private coursesService = inject(CoursesService);
 
-  activeTab = signal<'revenue' | 'students' | 'coupons'>('revenue');
+  activeTab = signal<'revenue' | 'courses' | 'students' | 'coupons'>('revenue');
   metrics = signal<RevenueMetrics | null>(null);
   students = signal<Student[]>([]);
   coupons = signal<Coupon[]>([]);
+  publishedCourses = signal<Course[]>([]);
 
   searchQuery = '';
   newCouponCode = '';
   newDiscountPercent: number | null = null;
   newUsageLimit: number | null = null;
+
+  // New Course Form Fields
+  newCourseTitle = '';
+  newCourseSubtitle = '';
+  newCoursePrice: number | null = 4999;
+  newCourseLevel = 'Advanced';
+  newCourseThumbnail = '/assets/agentic-ai.jpg';
+  newLessonTitle = '';
+  newBunnyVideoId = '';
 
   ngOnInit() {
     this.adminService.getMetrics().subscribe({
@@ -265,6 +406,13 @@ export class AdminDashboardComponent implements OnInit {
     });
     this.loadStudents();
     this.loadCoupons();
+    this.loadPublishedCourses();
+  }
+
+  loadPublishedCourses() {
+    this.coursesService.getCourses().subscribe({
+      next: (data) => this.publishedCourses.set(data)
+    });
   }
 
   loadStudents() {
@@ -276,6 +424,26 @@ export class AdminDashboardComponent implements OnInit {
   loadCoupons() {
     this.adminService.getCoupons().subscribe({
       next: (data) => this.coupons.set(data)
+    });
+  }
+
+  createNewCourse() {
+    if (!this.newCourseTitle) return;
+
+    this.adminService.createCourse({
+      title: this.newCourseTitle,
+      subtitle: this.newCourseSubtitle || 'Master enterprise software architecture',
+      description: this.newCourseSubtitle || 'Comprehensive system design masterclass',
+      price: this.newCoursePrice || 4999,
+      level: this.newCourseLevel,
+      thumbnail: this.newCourseThumbnail,
+    }).subscribe({
+      next: () => {
+        this.newCourseTitle = '';
+        this.newCourseSubtitle = '';
+        this.loadPublishedCourses();
+        alert('Course created & published to catalog!');
+      }
     });
   }
 
