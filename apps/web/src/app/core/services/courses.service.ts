@@ -39,6 +39,7 @@ export interface Course {
 
 const STORAGE_KEY = 'technyks_courses_store_v2';
 const LEGACY_STORAGE_KEY = 'technyks_courses_store';
+const METRICS_MIGRATION_KEY = 'technyks_course_metrics_v1';
 
 const REAL_PRODUCTION_COURSES: Course[] = [
   {
@@ -53,9 +54,9 @@ const REAL_PRODUCTION_COURSES: Course[] = [
     level: 'Advanced',
     status: 'LIVE',
     isPublished: true,
-    earnedThisMonth: 6315,
-    enrollmentsThisMonth: 24,
-    rating: 4.57,
+    earnedThisMonth: 0,
+    enrollmentsThisMonth: 0,
+    rating: 0,
     modules: [
       {
         id: 'sec-1',
@@ -91,9 +92,9 @@ const REAL_PRODUCTION_COURSES: Course[] = [
     level: 'Beginner',
     status: 'LIVE',
     isPublished: true,
-    earnedThisMonth: 1775,
-    enrollmentsThisMonth: 37,
-    rating: 4.53,
+    earnedThisMonth: 0,
+    enrollmentsThisMonth: 0,
+    rating: 0,
     modules: [
       {
         id: 'sec-3',
@@ -118,9 +119,9 @@ const REAL_PRODUCTION_COURSES: Course[] = [
     level: 'Advanced',
     status: 'LIVE',
     isPublished: true,
-    earnedThisMonth: 8002,
-    enrollmentsThisMonth: 72,
-    rating: 4.61,
+    earnedThisMonth: 0,
+    enrollmentsThisMonth: 0,
+    rating: 0,
     modules: [
       {
         id: 'sec-4',
@@ -146,7 +147,7 @@ const REAL_PRODUCTION_COURSES: Course[] = [
     isPublished: false,
     earnedThisMonth: 0,
     enrollmentsThisMonth: 0,
-    rating: 4.50,
+    rating: 0,
     modules: [
       {
         id: 'sec-5',
@@ -181,7 +182,15 @@ export class CoursesService {
           return [];
         }
       });
-      const stored = storedByKey.flat().map(course => this.normaliseCourse(course));
+      const resetLegacyMetrics = localStorage.getItem(METRICS_MIGRATION_KEY) !== '1';
+      const stored = storedByKey.flat().map(course => this.normaliseCourse({
+        ...course,
+        ...(resetLegacyMetrics ? {
+          earnedThisMonth: 0,
+          rating: 0,
+        } : {}),
+      }));
+      if (resetLegacyMetrics) localStorage.setItem(METRICS_MIGRATION_KEY, '1');
       const unique = stored.filter((course, index, all) => all.findIndex(candidate =>
         candidate.id === course.id || candidate.slug === course.slug
       ) === index);
@@ -323,7 +332,7 @@ export class CoursesService {
     ).pipe(
       map(() => true),
       tap(() => this.saveStoredCourses(this.getStoredCourses().filter(course => course.id !== id))),
-      catchError(() => fallback())
+      catchError((error) => error?.status === 0 ? fallback() : throwError(() => error))
     );
   }
 
@@ -361,6 +370,9 @@ export class CoursesService {
       level: course.level || 'Intermediate',
       status,
       isPublished: status === 'LIVE',
+      earnedThisMonth: Number(course.earnedThisMonth ?? 0),
+      enrollmentsThisMonth: Number(course.enrollmentsThisMonth ?? 0),
+      rating: Number(course.rating ?? 0),
       modules: (course.modules || []).map((module: any, moduleIndex: number) => ({
         ...module,
         id: module.id || `module-${moduleIndex + 1}`,

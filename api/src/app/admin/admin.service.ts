@@ -113,24 +113,27 @@ export class AdminService {
   }
 
   async getAllCourses() {
+    let courses: any[];
     if (this.prisma.isDbConnected) {
       try {
-        return await this.prisma.course.findMany({ include: COURSE_INCLUDE, orderBy: { createdAt: 'desc' } });
+        courses = await this.prisma.course.findMany({ include: COURSE_INCLUDE, orderBy: { createdAt: 'desc' } });
+        return this.withCourseMetrics(courses);
       } catch {
         // Use the local adapter if the database becomes unavailable.
       }
     }
 
-    return [...this.prisma.inMemoryCourses].sort((a, b) => {
+    courses = [...this.prisma.inMemoryCourses].sort((a, b) => {
       return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
     });
+    return this.withCourseMetrics(courses);
   }
 
   async getCourseById(id: string) {
     if (this.prisma.isDbConnected) {
       try {
         const course = await this.prisma.course.findUnique({ where: { id }, include: COURSE_INCLUDE });
-        if (course) return course;
+        if (course) return (await this.withCourseMetrics([course]))[0];
       } catch {
         // Use the local adapter if the database becomes unavailable.
       }
@@ -138,7 +141,7 @@ export class AdminService {
 
     const course = this.prisma.inMemoryCourses.find(candidate => candidate.id === id);
     if (!course) throw new NotFoundException('Course not found.');
-    return course;
+    return (await this.withCourseMetrics([course]))[0];
   }
 
   async createCourse(dto: any) {
@@ -222,8 +225,9 @@ export class AdminService {
       try {
         await this.prisma.course.delete({ where: { id } });
         return { success: true };
-      } catch {
-        // Fall back to local persistence for development when PostgreSQL is unavailable.
+      } catch (error: any) {
+        if (error?.code === 'P2025') throw new NotFoundException('Course not found.');
+        throw new BadRequestException('Course could not be deleted.');
       }
     }
 
@@ -316,6 +320,81 @@ export class AdminService {
       isPublished: Boolean(dto.isPublished ?? (dto.status ? dto.status === 'LIVE' : current?.isPublished ?? false)),
       modules,
     };
+  }
+
+  private async withCourseMetrics(courses: any[]) {
+    if (!courses.length) return courses;
+
+    const courseIds = courses.map(course => course.id).filter(Boolean);
+    const monthStart = new Date();
+    monthStart.setHours(0, 0, 0, 0);
+    monthStart.setDate(1);
+
+    let payments: any[] = [];
+    let enrollments: any[] = [];
+
+    if (this.prisma.isDbConnected) {
+      try {
+        [payments, enrollments] = await Promise.all([
+          this.prisma.payment.findMany({
+            where: {
+              courseId: { in: courseIds },
+              status: 'SUCCESS',
+              createdAt: { gte: monthStart },
+            },
+            select: { courseId: true, amount: true, createdAt: true },
+          }),
+          this.prisma.enrollment.findMany({
+            where: {
+              courseId: { in: courseIds },
+              createdAt: { gte: monthStart },
+            },
+            select: { courseId: true, createdAt: true },
+          }),
+        ]);
+      } catch {
+        payments = this.prisma.inMemoryPayments;
+        enrollments = this.prisma.inMemoryEnrollments;
+      }
+    } else {
+      payments = this.prisma.inMemoryPayments;
+      enrollments = this.prisma.inMemoryEnrollments;
+    }
+
+    const revenueByCourse = new Map<string, number>();
+    for (const payment of payments) {
+      if (
+        payment.courseId &&
+        payment.status === 'SUCCESS' &&
+        new Date(payment.createdAt || 0).getTime() >= monthStart.getTime()
+      ) {
+        revenueByCourse.set(
+          payment.courseId,
+          (revenueByCourse.get(payment.courseId) || 0) + Number(payment.amount || 0),
+        );
+      }
+    }
+
+    const enrollmentsByCourse = new Map<string, number>();
+    for (const enrollment of enrollments) {
+      if (
+        enrollment.courseId &&
+        new Date(enrollment.createdAt || 0).getTime() >= monthStart.getTime()
+      ) {
+        enrollmentsByCourse.set(
+          enrollment.courseId,
+          (enrollmentsByCourse.get(enrollment.courseId) || 0) + 1,
+        );
+      }
+    }
+
+    return courses.map(course => ({
+      ...course,
+      // Ratings are intentionally zero until a real reviews data source exists.
+      rating: 0,
+      earnedThisMonth: Math.round(revenueByCourse.get(course.id) || 0),
+      enrollmentsThisMonth: enrollmentsByCourse.get(course.id) || 0,
+    }));
   }
 
   private normaliseModules(modules: any[]) {

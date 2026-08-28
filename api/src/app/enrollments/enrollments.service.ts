@@ -90,7 +90,7 @@ export class EnrollmentsService {
           where: { id: enrollment.id },
           data: updateData,
         });
-        updated = { ...saved, course };
+        updated = { ...enrollment, ...updateData, ...(saved || {}), course };
       } catch {
         // Keep the local representation if the database becomes unavailable.
       }

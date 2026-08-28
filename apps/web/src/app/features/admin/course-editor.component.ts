@@ -55,6 +55,14 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
             <span class="material-symbols-outlined text-sm">save</span>
             Save Changes
           </button>
+
+          <button
+            type="button"
+            (click)="deleteCurrentCourse()"
+            class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#ffb4ab] border border-[#ffb4ab]/40 hover:bg-[#ffb4ab]/10 px-4 py-2 rounded transition-all"
+          >
+            Delete Course
+          </button>
         </div>
       </div>
 
@@ -549,6 +557,19 @@ export class CourseEditorComponent implements OnInit {
       next: () => {
         alert('Course & Curriculum saved successfully!');
       }
+    });
+  }
+
+  deleteCurrentCourse() {
+    const current = this.course();
+    if (!current || typeof window === 'undefined' || !window.confirm('Are you sure you want to delete?')) return;
+
+    this.coursesService.deleteCourse(current.id).subscribe({
+      next: () => {
+        alert('Course deleted successfully.');
+        this.router.navigate(['/admin']);
+      },
+      error: () => alert('The course could not be deleted. Please try again.'),
     });
   }
 }

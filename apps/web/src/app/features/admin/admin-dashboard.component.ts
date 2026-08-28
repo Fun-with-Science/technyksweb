@@ -149,19 +149,28 @@ import { CoursesService, Course } from '../../core/services/courses.service';
 
                   <div class="flex flex-col text-right font-['JetBrains_Mono']">
                     <div class="flex items-center justify-end gap-1 text-[#E8931A] text-xs font-bold">
-                      <span>{{ course.rating || '—' }}</span>
+                      <span>{{ course.rating ?? 0 }}</span>
                       <span class="material-symbols-outlined text-sm text-[#E8931A]">star</span>
                     </div>
                     <span class="text-[10px] text-[#a18d7b]">Course rating</span>
                   </div>
 
-                  <!-- Edit / Manage Course Action Button -->
-                  <a
-                    [routerLink]="['/admin/courses', course.id, 'manage']"
-                    class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-4 py-2.5 rounded transition-all shadow shrink-0"
-                  >
-                    Edit / manage course
-                  </a>
+                  <div class="flex items-center gap-2 shrink-0">
+                    <!-- Edit / Manage Course Action Button -->
+                    <a
+                      [routerLink]="['/admin/courses', course.id, 'manage']"
+                      class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-4 py-2.5 rounded transition-all shadow"
+                    >
+                      Edit / manage course
+                    </a>
+                    <button
+                      type="button"
+                      (click)="deleteCourse(course)"
+                      class="font-['JetBrains_Mono'] text-xs font-bold text-[#ffb4ab] border border-[#ffb4ab]/40 hover:bg-[#ffb4ab]/10 px-3 py-2.5 rounded transition-all"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             }
@@ -309,7 +318,7 @@ export class AdminDashboardComponent implements OnInit {
       isPublished: false,
       earnedThisMonth: 0,
       enrollmentsThisMonth: 0,
-      rating: 5.0,
+      rating: 0,
       modules: []
     };
 
@@ -328,6 +337,18 @@ export class AdminDashboardComponent implements OnInit {
   deleteCoupon(id: string) {
     this.adminService.deleteCoupon(id).subscribe({
       next: () => this.coupons.update(coupons => coupons.filter(coupon => coupon.id !== id)),
+    });
+  }
+
+  deleteCourse(course: Course) {
+    if (typeof window === 'undefined' || !window.confirm('Are you sure you want to delete?')) return;
+
+    this.coursesService.deleteCourse(course.id).subscribe({
+      next: () => {
+        this.publishedCourses.update(courses => courses.filter(candidate => candidate.id !== course.id));
+        alert('Course deleted successfully.');
+      },
+      error: () => alert('The course could not be deleted. Please try again.'),
     });
   }
 }

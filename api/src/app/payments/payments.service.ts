@@ -50,7 +50,7 @@ export class PaymentsService implements OnModuleInit {
   }
 
   async seedMembershipPlans() {
-    if (this.prisma.isDbConnected) {
+    if (this.prisma.isDbConnected !== false) {
       try {
         const count = await this.prisma.membershipPlan.count();
         if (count === 0) {
@@ -115,7 +115,7 @@ export class PaymentsService implements OnModuleInit {
     };
 
     let payment: any;
-    if (this.prisma.isDbConnected) {
+    if (this.prisma.isDbConnected !== false) {
       try {
         payment = await this.prisma.payment.create({ data: paymentData as any });
       } catch {
@@ -163,29 +163,29 @@ export class PaymentsService implements OnModuleInit {
 
   async confirmPaymentSuccess(paymentId: string, razorpayPaymentId?: string) {
     let payment: any = null;
-    if (this.prisma.isDbConnected) {
+    if (this.prisma.isDbConnected !== false) {
       try {
         payment = await this.prisma.payment.findUnique({ where: { id: paymentId } });
       } catch {
         // Use the local adapter below.
       }
     }
-    payment ??= this.prisma.inMemoryPayments.find(item => item.id === paymentId);
+    payment ??= (this.prisma.inMemoryPayments || []).find(item => item.id === paymentId);
     if (!payment) throw new NotFoundException('Payment record not found.');
 
     let updated: any = { ...payment, status: 'SUCCESS', updatedAt: new Date() };
-    if (this.prisma.isDbConnected) {
+    if (this.prisma.isDbConnected !== false) {
       try {
         updated = await this.prisma.payment.update({ where: { id: paymentId }, data: { status: 'SUCCESS' } });
       } catch {
         // Keep the local adapter update below.
       }
     }
-    const memoryPayment = this.prisma.inMemoryPayments.find(item => item.id === paymentId);
+    const memoryPayment = (this.prisma.inMemoryPayments || []).find(item => item.id === paymentId);
     if (memoryPayment) Object.assign(memoryPayment, updated);
 
     if (payment.courseId) {
-      if (this.prisma.isDbConnected) {
+      if (this.prisma.isDbConnected !== false) {
         try {
           await this.prisma.enrollment.upsert({
             where: { userId_courseId: { userId: payment.userId, courseId: payment.courseId } },
@@ -198,12 +198,12 @@ export class PaymentsService implements OnModuleInit {
         }
       }
 
-      const alreadyEnrolled = this.prisma.inMemoryEnrollments.some(
+      const alreadyEnrolled = (this.prisma.inMemoryEnrollments || []).some(
         enrollment => enrollment.userId === payment.userId && enrollment.courseId === payment.courseId
       );
       if (!alreadyEnrolled) {
         const course = await this.findCourse(payment.courseId);
-        this.prisma.inMemoryEnrollments.push({
+      (this.prisma.inMemoryEnrollments || (this.prisma.inMemoryEnrollments = [])).push({
           id: `enrollment_${Date.now().toString(36)}`,
           userId: payment.userId,
           courseId: payment.courseId,
@@ -220,7 +220,7 @@ export class PaymentsService implements OnModuleInit {
   }
 
   private async findCourse(id: string) {
-    if (this.prisma.isDbConnected) {
+    if (this.prisma.isDbConnected !== false) {
       try {
         const course = await this.prisma.course.findUnique({ where: { id } });
         if (course) return course;
@@ -232,7 +232,7 @@ export class PaymentsService implements OnModuleInit {
   }
 
   private async findPlan(idOrSlug: string) {
-    if (this.prisma.isDbConnected) {
+    if (this.prisma.isDbConnected !== false) {
       try {
         const byId = await this.prisma.membershipPlan.findUnique({ where: { id: idOrSlug } });
         if (byId) return byId;

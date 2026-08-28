@@ -16,7 +16,7 @@ export class CouponsService implements OnModuleInit {
       { code: 'FLAT1000', discountAmount: 1000, currency: 'INR', usageLimit: 50, timesUsed: 0, isActive: true },
     ];
 
-    if (this.prisma.isDbConnected) {
+    if (this.prisma.isDbConnected !== false) {
       try {
         const count = await this.prisma.coupon.count();
         if (count === 0) await this.prisma.coupon.createMany({ data: initialCoupons as any });
@@ -42,7 +42,7 @@ export class CouponsService implements OnModuleInit {
     }
 
     let coupon: any = null;
-    if (this.prisma.isDbConnected) {
+    if (this.prisma.isDbConnected !== false) {
       try {
         coupon = await this.prisma.coupon.findUnique({ where: { code: code.toUpperCase() } });
       } catch {
@@ -50,7 +50,7 @@ export class CouponsService implements OnModuleInit {
       }
     }
     if (!coupon) {
-      coupon = this.prisma.inMemoryCoupons.find(item => item.code === code.toUpperCase());
+      coupon = (this.prisma.inMemoryCoupons || []).find(item => item.code === code.toUpperCase());
     }
 
     if (!coupon || !coupon.isActive) {
@@ -87,7 +87,7 @@ export class CouponsService implements OnModuleInit {
   }
 
   async incrementUsage(code: string) {
-    if (this.prisma.isDbConnected) {
+    if (this.prisma.isDbConnected !== false) {
       try {
         await this.prisma.coupon.update({
           where: { code: code.toUpperCase() },
@@ -99,7 +99,7 @@ export class CouponsService implements OnModuleInit {
       }
     }
 
-    const coupon = this.prisma.inMemoryCoupons.find(item => item.code === code.toUpperCase());
+    const coupon = (this.prisma.inMemoryCoupons || []).find(item => item.code === code.toUpperCase());
     if (coupon) coupon.timesUsed += 1;
   }
 }
