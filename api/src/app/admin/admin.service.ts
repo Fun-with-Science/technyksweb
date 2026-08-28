@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 const COURSE_INCLUDE = {
@@ -15,6 +15,8 @@ const DEFAULT_COUPONS = [
 
 @Injectable()
 export class AdminService {
+  private readonly logger = new Logger(AdminService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async getRevenueMetrics() {
@@ -232,22 +234,26 @@ export class AdminService {
           await transaction.enrollment.deleteMany({ where: { courseId: id } });
           await transaction.course.delete({ where: { id } });
         });
-        return { success: true };
+        return { success: true, deleted: true };
       } catch (error: any) {
-        if (error?.code === 'P2025') throw new NotFoundException('Course not found.');
+        if (error?.code === 'P2025') return { success: true, deleted: false };
+        this.logger.error(
+          `Course deletion failed for ${id}: ${error?.message || 'unknown database error'}`,
+          error?.stack,
+        );
         throw new BadRequestException('Course could not be deleted.');
       }
     }
 
     const before = this.prisma.inMemoryCourses.length;
     this.prisma.inMemoryCourses = this.prisma.inMemoryCourses.filter(course => course.id !== id);
-    if (before === this.prisma.inMemoryCourses.length) throw new NotFoundException('Course not found.');
+    if (before === this.prisma.inMemoryCourses.length) return { success: true, deleted: false };
     this.prisma.inMemoryEnrollments = this.prisma.inMemoryEnrollments.filter(enrollment => enrollment.courseId !== id);
     this.prisma.inMemoryCertificates = this.prisma.inMemoryCertificates.filter(certificate => certificate.courseId !== id);
     this.prisma.inMemoryPayments = this.prisma.inMemoryPayments.map(payment =>
       payment.courseId === id ? { ...payment, courseId: null } : payment
     );
-    return { success: true };
+    return { success: true, deleted: true };
   }
 
   async createCoupon(dto: any) {

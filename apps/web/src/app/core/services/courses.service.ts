@@ -334,7 +334,12 @@ export class CoursesService {
     ).pipe(
       map(() => true),
       tap(() => this.saveStoredCourses(this.getStoredCourses().filter(course => course.id !== id))),
-      catchError((error) => error?.status === 0 ? fallback() : throwError(() => error))
+      // A course can be present in the local admin roster while the API has
+      // no matching row (for example, a draft created during an API outage).
+      // Treat that already-absent server record as an idempotent delete.
+      catchError((error) => error?.status === 0 || error?.status === 404
+        ? fallback()
+        : throwError(() => error))
     );
   }
 

@@ -22,7 +22,7 @@ describe('AdminService - course deletion', () => {
   });
 
   it('detaches payments and removes course-owned records before deleting a database course', async () => {
-    await expect(service.deleteCourse('course_1')).resolves.toEqual({ success: true });
+    await expect(service.deleteCourse('course_1')).resolves.toEqual({ success: true, deleted: true });
 
     expect(prisma.payment.updateMany).toHaveBeenCalledWith({
       where: { courseId: 'course_1' },
@@ -40,11 +40,17 @@ describe('AdminService - course deletion', () => {
     prisma.inMemoryCertificates = [{ courseId: 'course_1' }];
     prisma.inMemoryPayments = [{ courseId: 'course_1', status: 'SUCCESS' }];
 
-    await expect(service.deleteCourse('course_1')).resolves.toEqual({ success: true });
+    await expect(service.deleteCourse('course_1')).resolves.toEqual({ success: true, deleted: true });
 
     expect(prisma.inMemoryCourses).toEqual([{ id: 'course_2' }]);
     expect(prisma.inMemoryEnrollments).toEqual([{ courseId: 'course_2' }]);
     expect(prisma.inMemoryCertificates).toEqual([]);
     expect(prisma.inMemoryPayments).toEqual([{ courseId: null, status: 'SUCCESS' }]);
+  });
+
+  it('treats a missing local course as an already-completed delete', async () => {
+    prisma.isDbConnected = false;
+
+    await expect(service.deleteCourse('missing_course')).resolves.toEqual({ success: true, deleted: false });
   });
 });
