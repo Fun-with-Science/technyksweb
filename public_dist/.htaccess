@@ -2,6 +2,10 @@
   RewriteEngine On
   RewriteBase /
   RewriteRule ^index\.html$ - [L]
+  # Keep API requests out of the SPA fallback. The NestJS API must answer
+  # these requests with JSON; returning index.html makes Angular report a
+  # misleading generic failure (especially for DELETE requests).
+  RewriteRule ^api(?:/|$) - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule . /index.html [L]

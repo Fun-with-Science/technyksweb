@@ -337,10 +337,20 @@ export class CoursesService {
       // A course can be present in the local admin roster while the API has
       // no matching row (for example, a draft created during an API outage).
       // Treat that already-absent server record as an idempotent delete.
-      catchError((error) => error?.status === 0 || error?.status === 404
+      catchError((error) => this.isApiUnavailable(error)
         ? fallback()
         : throwError(() => error))
     );
+  }
+
+  private isApiUnavailable(error: any): boolean {
+    // A static Hostinger deployment can return index.html with HTTP 200 for
+    // an /api URL when its SPA rewrite is active. Angular surfaces that as a
+    // JSON parsing error, so handle it like the other unavailable-API cases
+    // until the NestJS service is connected to the production host.
+    return error?.status === 0
+      || error?.status === 404
+      || (error?.status === 200 && /parse|json/i.test(String(error?.message || '')));
   }
 
   private cacheCourses(courses: Course[]) {
