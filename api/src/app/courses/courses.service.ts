@@ -19,9 +19,9 @@ const INITIAL_COURSES = [
         title: 'Module 1: Foundations of Agentic Systems',
         order: 1,
         lessons: [
-          { id: 'les_1', title: '1.1 Paradigm Shift: Chains vs Autonomous Agents', duration: 900, order: 1, isFreePreview: true, videoAssetRef: 'demo_video_1' },
-          { id: 'les_2', title: '1.2 ReAct Framework & Thought-Action Loops', duration: 1200, order: 2, isFreePreview: false, videoAssetRef: 'demo_video_2' },
-          { id: 'les_3', title: '1.3 Tool Calling Specs & Schema Enforcement', duration: 1500, order: 3, isFreePreview: false, videoAssetRef: 'demo_video_3' },
+          { id: 'les_1', title: '1.1 Paradigm Shift: Chains vs Autonomous Agents', duration: 900, order: 1, isFreePreview: true, videoAssetRef: null },
+          { id: 'les_2', title: '1.2 ReAct Framework & Thought-Action Loops', duration: 1200, order: 2, isFreePreview: false, videoAssetRef: null },
+          { id: 'les_3', title: '1.3 Tool Calling Specs & Schema Enforcement', duration: 1500, order: 3, isFreePreview: false, videoAssetRef: null },
         ]
       },
       {
@@ -29,8 +29,8 @@ const INITIAL_COURSES = [
         title: 'Module 2: Multi-Agent Orchestration & Memory',
         order: 2,
         lessons: [
-          { id: 'les_4', title: '2.1 Supervisor & Hierarchical Agent Topologies', duration: 1800, order: 1, isFreePreview: false, videoAssetRef: 'demo_video_4' },
-          { id: 'les_5', title: '2.2 Vector Databases, Semantic Search & Epistemic Memory', duration: 2100, order: 2, isFreePreview: false, videoAssetRef: 'demo_video_5' },
+          { id: 'les_4', title: '2.1 Supervisor & Hierarchical Agent Topologies', duration: 1800, order: 1, isFreePreview: false, videoAssetRef: null },
+          { id: 'les_5', title: '2.2 Vector Databases, Semantic Search & Epistemic Memory', duration: 2100, order: 2, isFreePreview: false, videoAssetRef: null },
         ]
       }
     ]
@@ -52,8 +52,8 @@ const INITIAL_COURSES = [
         title: 'Module 1: Domain-Driven Design in Monorepos',
         order: 1,
         lessons: [
-          { id: 'les_6', title: '1.1 Monorepo Strategy: Apps vs Scope-Based Libraries', duration: 1000, order: 1, isFreePreview: true, videoAssetRef: 'demo_video_6' },
-          { id: 'les_7', title: '1.2 Module Boundaries & Dependency Linting Rules', duration: 1400, order: 2, isFreePreview: false, videoAssetRef: 'demo_video_7' },
+          { id: 'les_6', title: '1.1 Monorepo Strategy: Apps vs Scope-Based Libraries', duration: 1000, order: 1, isFreePreview: true, videoAssetRef: null },
+          { id: 'les_7', title: '1.2 Module Boundaries & Dependency Linting Rules', duration: 1400, order: 2, isFreePreview: false, videoAssetRef: null },
         ]
       }
     ]
@@ -75,8 +75,8 @@ const INITIAL_COURSES = [
         title: 'Module 1: Payment Gateways & RBI Compliance',
         order: 1,
         lessons: [
-          { id: 'les_8', title: '1.1 Razorpay UPI Autopay & Pre-debit Notices', duration: 1600, order: 1, isFreePreview: true, videoAssetRef: 'demo_video_8' },
-          { id: 'les_9', title: '1.2 Lemon Squeezy MoR & Global Tax Calculation', duration: 1500, order: 2, isFreePreview: false, videoAssetRef: 'demo_video_9' },
+          { id: 'les_8', title: '1.1 Razorpay UPI Autopay & Pre-debit Notices', duration: 1600, order: 1, isFreePreview: true, videoAssetRef: null },
+          { id: 'les_9', title: '1.2 Lemon Squeezy MoR & Global Tax Calculation', duration: 1500, order: 2, isFreePreview: false, videoAssetRef: null },
         ]
       }
     ]
@@ -88,7 +88,56 @@ export class CoursesService implements OnModuleInit {
   constructor(private prisma: PrismaService) {}
 
   async onModuleInit() {
-    this.prisma.inMemoryCourses = [...INITIAL_COURSES];
+    if (this.prisma.inMemoryCourses.length === 0) {
+      this.prisma.inMemoryCourses = INITIAL_COURSES.map(course => ({
+        ...course,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }));
+    }
+
+    if (this.prisma.isDbConnected) {
+      try {
+        const courseCount = await this.prisma.course.count();
+        if (courseCount === 0) {
+          for (const course of INITIAL_COURSES) {
+            await this.prisma.course.create({
+              data: {
+                id: course.id,
+                slug: course.slug,
+                title: course.title,
+                subtitle: course.subtitle,
+                description: course.description,
+                thumbnail: course.thumbnail,
+                price: course.price,
+                currency: course.currency,
+                level: course.level,
+                isPublished: course.isPublished,
+                modules: {
+                  create: course.modules.map(module => ({
+                    id: module.id,
+                    title: module.title,
+                    order: module.order,
+                    lessons: {
+                      create: module.lessons.map(lesson => ({
+                        id: lesson.id,
+                        title: lesson.title,
+                        duration: lesson.duration,
+                        order: lesson.order,
+                        isFreePreview: lesson.isFreePreview,
+                        videoAssetRef: lesson.videoAssetRef,
+                      })),
+                    },
+                  })),
+                },
+              } as any,
+            });
+          }
+        }
+      } catch {
+        // Keep the application available through the local adapter during a transient DB failure.
+      }
+    }
   }
 
   async findAllPublished() {
@@ -109,17 +158,17 @@ export class CoursesService implements OnModuleInit {
           orderBy: { createdAt: 'desc' }
         });
       } catch (e) {
-        return this.prisma.inMemoryCourses;
+        return this.prisma.inMemoryCourses.filter(course => course.isPublished);
       }
     }
-    return this.prisma.inMemoryCourses;
+    return this.prisma.inMemoryCourses.filter(course => course.isPublished);
   }
 
   async findBySlug(slug: string) {
     if (this.prisma.isDbConnected) {
       try {
         const course = await this.prisma.course.findUnique({
-          where: { slug },
+          where: { slug, isPublished: true },
           include: {
             modules: {
               include: { lessons: { orderBy: { order: 'asc' } } },
@@ -133,7 +182,7 @@ export class CoursesService implements OnModuleInit {
       }
     }
 
-    const found = this.prisma.inMemoryCourses.find(c => c.slug === slug);
+    const found = this.prisma.inMemoryCourses.find(c => c.slug === slug && c.isPublished);
     if (!found) {
       throw new NotFoundException(`Course with slug "${slug}" not found.`);
     }

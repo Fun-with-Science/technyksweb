@@ -128,7 +128,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                       >
                         {{ course.status || 'LIVE' }}
                       </span>
-                      <span class="text-[#a18d7b]">Public</span>
+                      <span class="text-[#a18d7b]">{{ course.isPublished ? 'Public' : 'Private' }}</span>
                       <span class="text-[#1E293B]">|</span>
                       <span class="text-[#378ADD]">₹{{ course.price.toLocaleString('en-IN') }}</span>
                     </div>
@@ -138,18 +138,18 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                 <!-- Right: Stats & Action Button (Screenshot 1 Metrics) -->
                 <div class="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-[#1E293B] pt-4 md:pt-0">
                   <div class="flex flex-col text-right font-['JetBrains_Mono']">
-                    <span class="text-sm font-bold text-[#E8931A]">₹{{ (course.earnedThisMonth || 149970).toLocaleString('en-IN') }}</span>
+                    <span class="text-sm font-bold text-[#E8931A]">₹{{ (course.earnedThisMonth || 0).toLocaleString('en-IN') }}</span>
                     <span class="text-[10px] text-[#a18d7b]">Earned this month</span>
                   </div>
 
                   <div class="flex flex-col text-right font-['JetBrains_Mono']">
-                    <span class="text-sm font-bold text-white">{{ course.enrollmentsThisMonth || 30 }}</span>
+                    <span class="text-sm font-bold text-white">{{ course.enrollmentsThisMonth || 0 }}</span>
                     <span class="text-[10px] text-[#a18d7b]">Enrollments this month</span>
                   </div>
 
                   <div class="flex flex-col text-right font-['JetBrains_Mono']">
                     <div class="flex items-center justify-end gap-1 text-[#E8931A] text-xs font-bold">
-                      <span>{{ course.rating || 4.85 }}</span>
+                      <span>{{ course.rating || '—' }}</span>
                       <span class="material-symbols-outlined text-sm text-[#E8931A]">star</span>
                     </div>
                     <span class="text-[10px] text-[#a18d7b]">Course rating</span>
@@ -238,6 +238,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                 <th class="p-3">Code</th>
                 <th class="p-3">Discount</th>
                 <th class="p-3">Times Used</th>
+                <th class="p-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-[#1E293B]/40">
@@ -246,6 +247,9 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                   <td class="p-3 font-['JetBrains_Mono'] font-bold text-[#E8931A]">{{ coupon.code }}</td>
                   <td class="p-3 font-['JetBrains_Mono'] text-white">₹{{ coupon.discountAmount || 500 }}</td>
                   <td class="p-3 font-['JetBrains_Mono'] text-[#378ADD]">{{ coupon.timesUsed }} / Unlimited</td>
+                  <td class="p-3 text-right">
+                    <button (click)="deleteCoupon(coupon.id)" class="font-['JetBrains_Mono'] text-[11px] text-[#ffb4ab] hover:underline">Delete</button>
+                  </td>
                 </tr>
               }
             </tbody>
@@ -277,12 +281,17 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   loadCourses() {
-    this.coursesService.getCourses().subscribe(data => this.publishedCourses.set(data));
+    this.coursesService.getAllCoursesAdmin().subscribe(data => this.publishedCourses.set(data));
   }
 
   filteredCourses(): Course[] {
     const q = this.searchCourseQuery.toLowerCase();
-    return this.publishedCourses().filter(c => c.title.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q));
+    const filtered = this.publishedCourses().filter(c => c.title.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q));
+    return [...filtered].sort((a, b) => {
+      if (this.sortBy === 'Oldest') return this.createdTime(a) - this.createdTime(b);
+      if (this.sortBy === 'Popular') return (b.enrollmentsThisMonth || 0) - (a.enrollmentsThisMonth || 0);
+      return this.createdTime(b) - this.createdTime(a);
+    });
   }
 
   createNewCourse() {
@@ -297,26 +306,28 @@ export class AdminDashboardComponent implements OnInit {
       currency: 'INR',
       level: 'Advanced',
       status: 'DRAFT',
-      isPublished: true,
+      isPublished: false,
       earnedThisMonth: 0,
       enrollmentsThisMonth: 0,
       rating: 5.0,
-      modules: [
-        {
-          id: 'mod-1',
-          title: 'Section 1: Course Overview & Setup',
-          order: 1,
-          lessons: [
-            { id: 'les-1', title: 'Lecture 1: Welcome to the Course', duration: 600, order: 1, isFreePreview: true, videoAssetRef: 'demo_video_1' }
-          ]
-        }
-      ]
+      modules: []
     };
 
-    this.coursesService.saveCourse(newCourse).subscribe({
+    this.coursesService.createCourse(newCourse).subscribe({
       next: (created) => {
         this.router.navigate(['/admin/courses', created.id, 'manage']);
       }
+    });
+  }
+
+  private createdTime(course: Course): number {
+    const createdAt = (course as Course & { createdAt?: string | Date }).createdAt;
+    return createdAt ? new Date(createdAt).getTime() : 0;
+  }
+
+  deleteCoupon(id: string) {
+    this.adminService.deleteCoupon(id).subscribe({
+      next: () => this.coupons.update(coupons => coupons.filter(coupon => coupon.id !== id)),
     });
   }
 }

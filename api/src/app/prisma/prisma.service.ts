@@ -14,6 +14,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   public inMemoryCoupons: any[] = [];
   public inMemoryCertificates: any[] = [];
   public inMemoryPayments: any[] = [];
+  public inMemoryMembershipPlans: any[] = [];
 
   async onModuleInit() {
     try {
@@ -22,6 +23,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       this.logger.log(' Connected successfully to PostgreSQL database via Prisma');
     } catch (error: any) {
       this.isDbConnected = false;
+      const allowFallback = process.env.NODE_ENV !== 'production' && process.env.ALLOW_IN_MEMORY_FALLBACK !== 'false';
+      if (!allowFallback) {
+        throw error;
+      }
       this.logger.warn(
         ` Local PostgreSQL database not reachable (${error?.message || 'Connection failed'}). ` +
         `Switching seamlessly to high-performance in-memory persistence layer.`

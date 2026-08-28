@@ -19,9 +19,10 @@ export interface PlaybackTokenResponse {
   lessonId: string;
   title: string;
   isFreePreview: boolean;
-  embedUrl: string;
+  videoAvailable: boolean;
+  embedUrl: string | null;
   expires: number;
-  token: string;
+  token: string | null;
 }
 
 @Injectable({

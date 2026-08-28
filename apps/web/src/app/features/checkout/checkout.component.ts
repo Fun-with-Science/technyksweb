@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { PaymentsService, CouponValidationResult } from '../../core/services/payments.service';
 import { AuthService } from '../../core/services/auth.service';
+import { CoursesService } from '../../core/services/courses.service';
 
 declare var Razorpay: any;
 
@@ -164,6 +165,7 @@ export class CheckoutComponent implements OnInit {
   private router = inject(Router);
   private paymentsService = inject(PaymentsService);
   private authService = inject(AuthService);
+  private coursesService = inject(CoursesService);
 
   courseId = signal<string | null>(null);
   planSlug = signal<string | null>(null);
@@ -182,11 +184,18 @@ export class CheckoutComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       if (params['courseId']) {
         this.courseId.set(params['courseId']);
-        this.itemTitle.set('Mastering Agentic AI & Autonomous Workflows');
-        this.originalAmount.set(4999);
-      } else if (params['planSlug']) {
-        this.planSlug.set(params['planSlug']);
-        if (params['planSlug'] === 'pro-monthly') {
+        if (params['slug']) {
+          this.coursesService.getCourseBySlug(params['slug']).subscribe({
+            next: course => {
+              this.itemTitle.set(course.title);
+              this.originalAmount.set(course.price);
+            },
+          });
+        }
+      } else if (params['planSlug'] || params['plan']) {
+        const planSlug = params['planSlug'] || params['plan'];
+        this.planSlug.set(planSlug === 'annual-vip' ? 'all-access-annual' : planSlug);
+        if (this.planSlug() === 'pro-monthly') {
           this.itemTitle.set('Pro Monthly Membership');
           this.originalAmount.set(1499);
         } else {

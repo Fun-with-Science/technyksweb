@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, of, map, BehaviorSubject } from 'rxjs';
+import { Observable, catchError, of, map, BehaviorSubject, tap, defer, throwError } from 'rxjs';
 
 export interface Lesson {
   id: string;
@@ -38,6 +38,7 @@ export interface Course {
 }
 
 const STORAGE_KEY = 'technyks_courses_store_v2';
+const LEGACY_STORAGE_KEY = 'technyks_courses_store';
 
 const REAL_PRODUCTION_COURSES: Course[] = [
   {
@@ -61,10 +62,10 @@ const REAL_PRODUCTION_COURSES: Course[] = [
         title: 'Section 1: Course Overview & What You Will Build',
         order: 1,
         lessons: [
-          { id: 'les-1', title: 'Lecture 1: Welcome to the Course', duration: 900, order: 1, isFreePreview: true, videoAssetRef: 'demo_video_1' },
-          { id: 'les-2', title: 'Lecture 2: Course Overview & System Schematics', duration: 1200, order: 2, isFreePreview: true, videoAssetRef: 'demo_video_2' },
-          { id: 'les-3', title: 'Lecture 3: Join our Discord and Youtube Community', duration: 600, order: 3, isFreePreview: false, videoAssetRef: 'demo_video_3' },
-          { id: 'les-4', title: 'Lecture 4: Explore More Premium Courses', duration: 800, order: 4, isFreePreview: true, videoAssetRef: 'demo_video_4' }
+          { id: 'les-1', title: 'Lecture 1: Welcome to the Course', duration: 900, order: 1, isFreePreview: true },
+          { id: 'les-2', title: 'Lecture 2: Course Overview & System Schematics', duration: 1200, order: 2, isFreePreview: true },
+          { id: 'les-3', title: 'Lecture 3: Join our Discord and Youtube Community', duration: 600, order: 3, isFreePreview: false },
+          { id: 'les-4', title: 'Lecture 4: Explore More Premium Courses', duration: 800, order: 4, isFreePreview: true }
         ]
       },
       {
@@ -72,8 +73,8 @@ const REAL_PRODUCTION_COURSES: Course[] = [
         title: 'Section 2: Automation Foundations',
         order: 2,
         lessons: [
-          { id: 'les-5', title: 'Lecture 5: What is N8N and Why It Wins', duration: 1400, order: 1, isFreePreview: true, videoAssetRef: 'demo_video_5' },
-          { id: 'les-6', title: 'Lecture 6: Understanding Automation vs Manual Work', duration: 1600, order: 2, isFreePreview: true, videoAssetRef: 'demo_video_6' }
+          { id: 'les-5', title: 'Lecture 5: What is N8N and Why It Wins', duration: 1400, order: 1, isFreePreview: true },
+          { id: 'les-6', title: 'Lecture 6: Understanding Automation vs Manual Work', duration: 1600, order: 2, isFreePreview: true }
         ]
       }
     ]
@@ -99,8 +100,8 @@ const REAL_PRODUCTION_COURSES: Course[] = [
         title: 'Section 1: AI Prompting & Spec-Driven Development',
         order: 1,
         lessons: [
-          { id: 'les-7', title: 'Lecture 1: Introduction to Vibe Coding', duration: 900, order: 1, isFreePreview: true, videoAssetRef: 'demo_video_7' },
-          { id: 'les-8', title: 'Lecture 2: Spec-Driven Prompts for Full-Stack Apps', duration: 1100, order: 2, isFreePreview: true, videoAssetRef: 'demo_video_8' }
+          { id: 'les-7', title: 'Lecture 1: Introduction to Vibe Coding', duration: 900, order: 1, isFreePreview: true },
+          { id: 'les-8', title: 'Lecture 2: Spec-Driven Prompts for Full-Stack Apps', duration: 1100, order: 2, isFreePreview: true }
         ]
       }
     ]
@@ -126,7 +127,7 @@ const REAL_PRODUCTION_COURSES: Course[] = [
         title: 'Section 1: Multi-Agent Orchestration & ReAct Loops',
         order: 1,
         lessons: [
-          { id: 'les-9', title: 'Lecture 1: ReAct Framework & Thought-Action Loops', duration: 1500, order: 1, isFreePreview: true, videoAssetRef: 'demo_video_9' }
+          { id: 'les-9', title: 'Lecture 1: ReAct Framework & Thought-Action Loops', duration: 1500, order: 1, isFreePreview: true }
         ]
       }
     ]
@@ -152,7 +153,7 @@ const REAL_PRODUCTION_COURSES: Course[] = [
         title: 'Section 1: MERN Stack Architecture Overview',
         order: 1,
         lessons: [
-          { id: 'les-10', title: 'Lecture 1: MERN Architecture in 2026', duration: 1000, order: 1, isFreePreview: true, videoAssetRef: 'demo_video_10' }
+          { id: 'les-10', title: 'Lecture 1: MERN Architecture in 2026', duration: 1000, order: 1, isFreePreview: true }
         ]
       }
     ]
@@ -170,17 +171,31 @@ export class CoursesService {
 
   private getStoredCourses(): Course[] {
     if (typeof localStorage !== 'undefined') {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
+      const storedByKey = [STORAGE_KEY, LEGACY_STORAGE_KEY].map(key => {
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
         try {
-          return JSON.parse(raw);
+          const stored = JSON.parse(raw);
+          return Array.isArray(stored) ? stored : [];
         } catch {
-          // fallback
+          return [];
         }
+      });
+      const stored = storedByKey.flat().map(course => this.normaliseCourse(course));
+      const unique = stored.filter((course, index, all) => all.findIndex(candidate =>
+        candidate.id === course.id || candidate.slug === course.slug
+      ) === index);
+      if (unique.length) {
+        // Migrate older browser sessions so drafts created by the previous
+        // admin panel are not lost when the new roster is loaded.
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(unique));
+        return unique;
       }
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(REAL_PRODUCTION_COURSES));
+      const seeded = REAL_PRODUCTION_COURSES.map(course => this.normaliseCourse(course));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
+      return seeded;
     }
-    return REAL_PRODUCTION_COURSES;
+    return REAL_PRODUCTION_COURSES.map(course => this.normaliseCourse(course));
   }
 
   private saveStoredCourses(courses: Course[]) {
@@ -191,48 +206,185 @@ export class CoursesService {
   }
 
   getCourses(includeDrafts = false): Observable<Course[]> {
-    return of(this.getStoredCourses()).pipe(
-      map(courses => includeDrafts ? courses : courses.filter(c => c.status === 'LIVE' || c.isPublished))
+    const fallback = () => {
+      const courses = this.getStoredCourses();
+      return includeDrafts ? courses : courses.filter(course => course.status === 'LIVE' || course.isPublished);
+    };
+    const request$ = includeDrafts
+      ? this.http.get<any[]>('/api/admin/courses')
+      : this.http.get<any[]>('/api/courses');
+
+    return defer(() => typeof window === 'undefined' ? of(fallback()) : request$).pipe(
+      map(courses => {
+        const normalised = courses.map(course => this.normaliseCourse(course));
+        return includeDrafts ? this.mergeAdminDrafts(normalised) : normalised;
+      }),
+      tap(courses => this.cacheCourses(courses)),
+      catchError(() => of(fallback()))
     );
   }
 
   getAllCoursesAdmin(): Observable<Course[]> {
-    return of(this.getStoredCourses());
+    return this.getCourses(true);
   }
 
   getCourseBySlug(slug: string): Observable<Course> {
-    const courses = this.getStoredCourses();
-    const found = courses.find(c => c.slug === slug) || courses[0];
-    return of(found);
+    const fallback = () => {
+      const found = this.getStoredCourses().find(course => course.slug === slug && (course.isPublished || course.status === 'LIVE'));
+      return found ? of(found) : throwError(() => new Error('Course not found'));
+    };
+
+    return defer(() => typeof window === 'undefined'
+      ? fallback()
+      : this.http.get<any>(`/api/courses/${encodeURIComponent(slug)}`)
+    ).pipe(
+      map(course => this.normaliseCourse(course)),
+      tap(course => this.cacheCourses([course])),
+      catchError(() => fallback())
+    );
   }
 
   getCourseById(id: string): Observable<Course> {
-    const courses = this.getStoredCourses();
-    const found = courses.find(c => c.id === id) || courses[0];
-    return of(found);
+    const fallback = () => {
+      const found = this.getStoredCourses().find(course => course.id === id);
+      return found ? of(found) : throwError(() => new Error('Course not found'));
+    };
+
+    return defer(() => typeof window === 'undefined'
+      ? fallback()
+      : this.http.get<any>(`/api/admin/courses/${encodeURIComponent(id)}`)
+    ).pipe(
+      map(course => this.normaliseCourse(course)),
+      tap(course => this.cacheCourses([course])),
+      catchError(() => fallback())
+    );
   }
 
   saveCourse(course: Course): Observable<Course> {
-    const courses = this.getStoredCourses();
-    // Ensure slug is clean
-    if (!course.slug) {
-      course.slug = course.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    }
-    course.isPublished = course.status === 'LIVE';
+    const prepared = this.normaliseCourse({
+      ...course,
+      status: course.status || (course.isPublished ? 'LIVE' : 'DRAFT'),
+    });
+    const fallback = () => {
+      const courses = this.getStoredCourses();
+      const idx = courses.findIndex(candidate => candidate.id === prepared.id);
+      if (idx !== -1) courses[idx] = prepared;
+      else courses.unshift(prepared);
+      this.saveStoredCourses(courses);
+      return of(prepared);
+    };
 
-    const idx = courses.findIndex(c => c.id === course.id);
-    if (idx !== -1) {
-      courses[idx] = { ...course };
-    } else {
-      courses.unshift(course);
-    }
-    this.saveStoredCourses(courses);
-    return of(course);
+    return defer(() => typeof window === 'undefined'
+      ? fallback()
+      : this.http.patch<any>(`/api/admin/courses/${encodeURIComponent(prepared.id)}`, prepared)
+    ).pipe(
+      map(saved => this.normaliseCourse(saved)),
+      tap(saved => this.cacheCourses([saved])),
+      catchError(() => fallback())
+    );
+  }
+
+  createCourse(payload: Partial<Course>): Observable<Course> {
+    const localCourse = this.normaliseCourse({
+      ...payload,
+      id: payload.id || `course-${Date.now()}`,
+      status: payload.status || 'DRAFT',
+      isPublished: payload.status === 'LIVE',
+      createdAt: (payload as Course & { createdAt?: string }).createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    const fallback = () => {
+      const courses = this.getStoredCourses().filter(course => course.id !== localCourse.id);
+      courses.unshift(localCourse);
+      this.saveStoredCourses(courses);
+      return of(localCourse);
+    };
+
+    return defer(() => typeof window === 'undefined'
+      ? fallback()
+      : this.http.post<any>('/api/admin/courses', payload)
+    ).pipe(
+      map(created => this.normaliseCourse(created)),
+      tap(created => this.cacheCourses([created])),
+      catchError(() => fallback())
+    );
   }
 
   deleteCourse(id: string): Observable<boolean> {
-    const courses = this.getStoredCourses().filter(c => c.id !== id);
-    this.saveStoredCourses(courses);
-    return of(true);
+    const fallback = () => {
+      const courses = this.getStoredCourses().filter(course => course.id !== id);
+      this.saveStoredCourses(courses);
+      return of(true);
+    };
+
+    return defer(() => typeof window === 'undefined'
+      ? fallback()
+      : this.http.delete(`/api/admin/courses/${encodeURIComponent(id)}`)
+    ).pipe(
+      map(() => true),
+      tap(() => this.saveStoredCourses(this.getStoredCourses().filter(course => course.id !== id))),
+      catchError(() => fallback())
+    );
+  }
+
+  private cacheCourses(courses: Course[]) {
+    if (!courses.length) return;
+    const current = this.getStoredCourses();
+    for (const course of courses) {
+      const index = current.findIndex(candidate => candidate.id === course.id);
+      if (index === -1) current.unshift(course);
+      else current[index] = course;
+    }
+    this.saveStoredCourses(current);
+  }
+
+  private mergeAdminDrafts(serverCourses: Course[]): Course[] {
+    const serverIds = new Set(serverCourses.map(course => course.id));
+    const localDrafts = this.getStoredCourses().filter(course => !course.isPublished && course.status === 'DRAFT');
+    return [
+      ...localDrafts.filter(course => !serverIds.has(course.id)),
+      ...serverCourses,
+    ];
+  }
+
+  private normaliseCourse(course: any): Course {
+    const status = course.status || (course.isPublished ? 'LIVE' : 'DRAFT');
+    return {
+      ...course,
+      id: course.id,
+      slug: course.slug || this.slugify(course.title || 'new-course'),
+      title: course.title || 'Untitled Course',
+      subtitle: course.subtitle || '',
+      description: course.description || '',
+      price: Number(course.price || 0),
+      currency: course.currency || 'INR',
+      level: course.level || 'Intermediate',
+      status,
+      isPublished: status === 'LIVE',
+      modules: (course.modules || []).map((module: any, moduleIndex: number) => ({
+        ...module,
+        id: module.id || `module-${moduleIndex + 1}`,
+        title: module.title || `Section ${moduleIndex + 1}`,
+        order: moduleIndex + 1,
+        lessons: (module.lessons || []).map((lesson: any, lessonIndex: number) => ({
+          ...lesson,
+          id: lesson.id || `lesson-${moduleIndex + 1}-${lessonIndex + 1}`,
+          title: lesson.title || `Lecture ${lessonIndex + 1}`,
+          videoAssetRef: this.cleanVideoAssetRef(lesson.videoAssetRef),
+          duration: Number(lesson.duration || 0),
+          order: lessonIndex + 1,
+          isFreePreview: Boolean(lesson.isFreePreview),
+        })),
+      })),
+    };
+  }
+
+  private slugify(value: string) {
+    return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  }
+
+  private cleanVideoAssetRef(value: unknown): string | undefined {
+    const ref = String(value || '').trim();
+    return ref && !/^demo(?:[_-]|$)/i.test(ref) ? ref : undefined;
   }
 }

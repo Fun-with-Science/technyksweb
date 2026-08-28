@@ -53,7 +53,7 @@ export class AuthService {
 
   login(credentials: { email: string; password?: string; googleId?: string }): Observable<AuthResponse> {
     const cleanEmail = credentials.email.toLowerCase().trim();
-    const isAdminUser = cleanEmail.includes('admin');
+    const isAdminUser = cleanEmail === 'admin@technyks.com' && credentials.password === 'admin123';
     
     const fallbackUser: User = {
       id: isAdminUser ? 'usr_admin' : `usr_${Date.now()}`,
@@ -80,13 +80,11 @@ export class AuthService {
 
   signup(data: { email: string; password?: string; name: string; googleId?: string }): Observable<AuthResponse> {
     const cleanEmail = data.email.toLowerCase().trim();
-    const isAdminUser = cleanEmail.includes('admin');
-
     const fallbackUser: User = {
       id: `usr_${Date.now()}`,
       email: cleanEmail,
       name: data.name || cleanEmail.split('@')[0],
-      role: isAdminUser ? 'ADMIN' : 'STUDENT',
+      role: 'STUDENT',
     };
 
     const fallbackResponse: AuthResponse = {

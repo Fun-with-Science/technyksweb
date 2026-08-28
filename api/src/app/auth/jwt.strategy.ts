@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -11,18 +12,31 @@ export interface JwtPayload {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private prisma: PrismaService) {
+  constructor(private prisma: PrismaService, config: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'technyks_jwt_secret_key_2026_super_secure',
+      secretOrKey: config.get<string>('JWT_SECRET') || 'technyks_super_secret_jwt_key_2026',
     });
   }
 
   async validate(payload: JwtPayload) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: payload.sub },
-    });
+    let user: any = null;
+
+    if (this.prisma.isDbConnected) {
+      try {
+        user = await this.prisma.user.findUnique({
+          where: { id: payload.sub },
+        });
+      } catch {
+        // Fall through to the local persistence adapter when the database
+        // becomes unavailable after the application has started.
+      }
+    }
+
+    if (!user) {
+      user = this.prisma.inMemoryUsers.find(candidate => candidate.id === payload.sub);
+    }
 
     if (!user) {
       throw new UnauthorizedException('Invalid authentication token');

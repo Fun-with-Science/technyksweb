@@ -16,7 +16,6 @@ export const appRoutes: Routes = [
   },
   {
     path: 'courses/:slug/watch/:lessonId',
-    canActivate: [authGuard],
     loadComponent: () => import('./features/watch/watch.component').then(m => m.WatchComponent),
   },
   {

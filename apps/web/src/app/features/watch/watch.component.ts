@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { EnrollmentsService, PlaybackTokenResponse } from '../../core/services/enrollments.service';
 import { CoursesService, Course } from '../../core/services/courses.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-watch',
@@ -18,7 +19,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
             <span class="material-symbols-outlined animate-spin text-4xl text-[#E8931A] mb-2">progress_activity</span>
             <span class="font-['JetBrains_Mono'] text-xs text-[#378ADD]">Verifying Tokenized Bunny Stream Embed...</span>
           </div>
-        } @else if (playbackData()) {
+        } @else if (playbackData()?.videoAvailable && safeEmbedUrl()) {
           <div class="w-full aspect-video bg-black rounded overflow-hidden shadow-2xl relative border border-[#1E293B]">
             <iframe
               [src]="safeEmbedUrl()"
@@ -50,6 +51,14 @@ import { CoursesService, Course } from '../../core/services/courses.service';
               </span>
               {{ isCurrentCompleted() ? 'Lesson Completed' : 'Mark as Completed' }}
             </button>
+          </div>
+        } @else if (playbackData()) {
+          <div class="w-full aspect-video bg-[#121A2B] technical-border rounded flex flex-col items-center justify-center p-8 text-center">
+            <span class="material-symbols-outlined text-4xl text-[#E8931A] mb-2">video_settings</span>
+            <h3 class="font-['Hanken_Grotesk'] text-lg font-bold text-white mb-2">Video not connected yet</h3>
+            <p class="font-['Inter'] text-sm text-[#d9c3af] max-w-md">
+              This lesson is ready for Bunny Stream. Add its real Bunny Stream Video ID in the course curriculum when your Bunny account is connected.
+            </p>
           </div>
         } @else {
           <div class="w-full aspect-video bg-[#121A2B] technical-border rounded flex flex-col items-center justify-center p-8 text-center">
@@ -110,6 +119,7 @@ export class WatchComponent implements OnInit, OnDestroy {
   private enrollmentsService = inject(EnrollmentsService);
   private coursesService = inject(CoursesService);
   private sanitizer = inject(DomSanitizer);
+  private authService = inject(AuthService);
 
   course = signal<Course | null>(null);
   playbackData = signal<PlaybackTokenResponse | null>(null);
@@ -162,7 +172,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.enrollmentsService.getVideoToken(lessonId).subscribe({
       next: (data) => {
         this.playbackData.set(data);
-        this.safeEmbedUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(data.embedUrl));
+        this.safeEmbedUrl.set(data.embedUrl ? this.sanitizer.bypassSecurityTrustResourceUrl(data.embedUrl) : null);
         this.isLoading.set(false);
         this.saveProgressInterval();
       },
@@ -174,7 +184,7 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   saveProgressInterval() {
-    if (this.courseId() && this.currentLessonId()) {
+    if (this.authService.isAuthenticated() && this.courseId() && this.currentLessonId()) {
       this.enrollmentsService.updateProgress({
         courseId: this.courseId(),
         lessonId: this.currentLessonId(),

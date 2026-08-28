@@ -71,7 +71,9 @@ export class AuthService implements OnModuleInit {
       passwordHash = await bcrypt.hash(dto.password, 10);
     }
 
-    const role = cleanEmail.includes('admin') ? 'ADMIN' : 'STUDENT';
+    // New accounts are always students. Admin access is provisioned separately
+    // through the seeded account or an explicit database role change.
+    const role = 'STUDENT';
     const newUser = {
       id: `usr_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 6)}`,
       email: cleanEmail,
@@ -83,15 +85,19 @@ export class AuthService implements OnModuleInit {
       updatedAt: new Date(),
     };
 
+    let persistedInDatabase = false;
     if (this.prisma.isDbConnected) {
       try {
         await this.prisma.user.create({ data: newUser as any });
+        persistedInDatabase = true;
       } catch (e) {
-        this.prisma.inMemoryUsers.push(newUser);
+        // Use the local adapter only when the database write fails.
       }
     }
 
-    this.prisma.inMemoryUsers.push(newUser);
+    if (!persistedInDatabase) {
+      this.prisma.inMemoryUsers.push(newUser);
+    }
 
     const token = this.generateToken(newUser.id, newUser.email, newUser.role);
 

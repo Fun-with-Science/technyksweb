@@ -10,34 +10,29 @@ export class CouponsService implements OnModuleInit {
   }
 
   async seedInitialCoupons() {
-    const count = await this.prisma.coupon.count();
-    if (count === 0) {
-      await this.prisma.coupon.createMany({
-        data: [
-          {
-            code: 'TECHNYKS50',
-            discountPercent: 50,
-            usageLimit: 100,
-            timesUsed: 0,
-            isActive: true,
-          },
-          {
-            code: 'ARCH20',
-            discountPercent: 20,
-            usageLimit: 500,
-            timesUsed: 0,
-            isActive: true,
-          },
-          {
-            code: 'FLAT1000',
-            discountAmount: 1000,
-            currency: 'INR',
-            usageLimit: 50,
-            timesUsed: 0,
-            isActive: true,
-          }
-        ]
-      });
+    const initialCoupons = [
+      { code: 'TECHNYKS50', discountPercent: 50, usageLimit: 100, timesUsed: 0, isActive: true },
+      { code: 'ARCH20', discountPercent: 20, usageLimit: 500, timesUsed: 0, isActive: true },
+      { code: 'FLAT1000', discountAmount: 1000, currency: 'INR', usageLimit: 50, timesUsed: 0, isActive: true },
+    ];
+
+    if (this.prisma.isDbConnected) {
+      try {
+        const count = await this.prisma.coupon.count();
+        if (count === 0) await this.prisma.coupon.createMany({ data: initialCoupons as any });
+        return;
+      } catch {
+        // Use the local adapter below.
+      }
+    }
+
+    if (this.prisma.inMemoryCoupons.length === 0) {
+      this.prisma.inMemoryCoupons = initialCoupons.map((coupon, index) => ({
+        id: `coupon_${index + 1}`,
+        ...coupon,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }));
     }
   }
 
@@ -46,9 +41,17 @@ export class CouponsService implements OnModuleInit {
       throw new BadRequestException('Coupon code is required.');
     }
 
-    const coupon = await this.prisma.coupon.findUnique({
-      where: { code: code.toUpperCase() },
-    });
+    let coupon: any = null;
+    if (this.prisma.isDbConnected) {
+      try {
+        coupon = await this.prisma.coupon.findUnique({ where: { code: code.toUpperCase() } });
+      } catch {
+        // Use the local adapter below.
+      }
+    }
+    if (!coupon) {
+      coupon = this.prisma.inMemoryCoupons.find(item => item.code === code.toUpperCase());
+    }
 
     if (!coupon || !coupon.isActive) {
       throw new BadRequestException('Invalid or expired coupon code.');
@@ -84,9 +87,19 @@ export class CouponsService implements OnModuleInit {
   }
 
   async incrementUsage(code: string) {
-    await this.prisma.coupon.update({
-      where: { code: code.toUpperCase() },
-      data: { timesUsed: { increment: 1 } },
-    });
+    if (this.prisma.isDbConnected) {
+      try {
+        await this.prisma.coupon.update({
+          where: { code: code.toUpperCase() },
+          data: { timesUsed: { increment: 1 } },
+        });
+        return;
+      } catch {
+        // Use the local adapter below.
+      }
+    }
+
+    const coupon = this.prisma.inMemoryCoupons.find(item => item.code === code.toUpperCase());
+    if (coupon) coupon.timesUsed += 1;
   }
 }

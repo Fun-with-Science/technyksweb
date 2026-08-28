@@ -134,7 +134,7 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                 <div>
                   <h2 class="font-['Hanken_Grotesk'] text-2xl font-bold text-white">Curriculum</h2>
                   <p class="font-['Inter'] text-xs text-[#d9c3af] mt-1">
-                    Create your course in sections, each focused on a single learning objective. Add video lectures, preview toggles, and Bunny Stream IDs.
+                    Create your course in sections, each focused on a single learning objective. Add video lectures and preview toggles, then attach Bunny Stream IDs when your Bunny account is ready.
                   </p>
                 </div>
                 <button (click)="addSection()" class="font-['JetBrains_Mono'] text-xs text-[#378ADD] border border-[#378ADD]/40 hover:bg-[#378ADD]/10 px-4 py-2 rounded flex items-center gap-1">
@@ -175,12 +175,20 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                                 class="bg-[#040810] border border-[#1E293B] rounded px-2.5 py-1 text-xs text-white font-['Inter'] font-semibold"
                               />
                               <div class="flex items-center gap-2 mt-1">
-                                <span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b]">Bunny Video ID:</span>
+                                <span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b]">Bunny Stream Video ID (optional):</span>
                                 <input
                                   type="text"
                                   [(ngModel)]="lesson.videoAssetRef"
-                                  placeholder="e.g. demo_video_1"
+                                  placeholder="Paste the Bunny video ID when available"
                                   class="bg-[#040810] border border-[#1E293B] rounded px-2 py-0.5 text-[10px] text-[#378ADD] font-['JetBrains_Mono']"
+                                />
+                                <span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b] ml-1">Minutes:</span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  [ngModel]="Math.round(lesson.duration / 60)"
+                                  (ngModelChange)="updateLessonDuration(sIdx, lIdx, $event)"
+                                  class="w-16 bg-[#040810] border border-[#1E293B] rounded px-2 py-0.5 text-[10px] text-white font-['JetBrains_Mono']"
                                 />
                               </div>
                             </div>
@@ -303,7 +311,7 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                     <div class="flex gap-2">
                       <input
                         type="text"
-                        placeholder="Bunny Stream Promo Video ID (e.g. promo_1)"
+                        placeholder="Paste Bunny Stream promo video ID when available"
                         class="flex-grow bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']"
                       />
                       <button (click)="saveAllChanges()" class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-4 py-2 rounded shrink-0">
@@ -417,6 +425,7 @@ export class CourseEditorComponent implements OnInit {
 
   newCouponCode = '';
   newCouponDiscount: number | null = 479;
+  Math = Math;
 
   ngOnInit() {
     const courseId = this.route.snapshot.paramMap.get('id');
@@ -464,16 +473,7 @@ export class CourseEditorComponent implements OnInit {
       id: 'mod-' + Date.now(),
       title: `Section ${current.length + 1}: New Curriculum Section`,
       order: current.length + 1,
-      lessons: [
-        {
-          id: 'les-' + Date.now(),
-          title: 'Lecture 1: Welcome & Overview',
-          duration: 900,
-          order: 1,
-          isFreePreview: true,
-          videoAssetRef: 'demo_video_1'
-        }
-      ]
+      lessons: []
     };
     this.modules.set([...current, newMod]);
   }
@@ -493,7 +493,7 @@ export class CourseEditorComponent implements OnInit {
       duration: 600,
       order: target.lessons.length + 1,
       isFreePreview: false,
-      videoAssetRef: 'demo_video_new'
+      videoAssetRef: ''
     };
     target.lessons.push(newLesson);
     this.modules.set([...current]);
@@ -502,6 +502,14 @@ export class CourseEditorComponent implements OnInit {
   deleteLesson(sIdx: number, lIdx: number) {
     const current = this.modules();
     current[sIdx].lessons.splice(lIdx, 1);
+    this.modules.set([...current]);
+  }
+
+  updateLessonDuration(sIdx: number, lIdx: number, minutes: number) {
+    const current = this.modules();
+    const lesson = current[sIdx]?.lessons[lIdx];
+    if (!lesson) return;
+    lesson.duration = Math.max(0, Math.round(Number(minutes) || 0) * 60);
     this.modules.set([...current]);
   }
 
