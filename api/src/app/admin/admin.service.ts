@@ -223,7 +223,15 @@ export class AdminService {
   async deleteCourse(id: string) {
     if (this.prisma.isDbConnected) {
       try {
-        await this.prisma.course.delete({ where: { id } });
+        // Payments intentionally keep their audit history, but the optional
+        // course relation must be detached before deleting the course. The
+        // other course-owned records can be removed with the course.
+        await this.prisma.$transaction(async (transaction) => {
+          await transaction.payment.updateMany({ where: { courseId: id }, data: { courseId: null } });
+          await transaction.certificate.deleteMany({ where: { courseId: id } });
+          await transaction.enrollment.deleteMany({ where: { courseId: id } });
+          await transaction.course.delete({ where: { id } });
+        });
         return { success: true };
       } catch (error: any) {
         if (error?.code === 'P2025') throw new NotFoundException('Course not found.');
@@ -234,6 +242,11 @@ export class AdminService {
     const before = this.prisma.inMemoryCourses.length;
     this.prisma.inMemoryCourses = this.prisma.inMemoryCourses.filter(course => course.id !== id);
     if (before === this.prisma.inMemoryCourses.length) throw new NotFoundException('Course not found.');
+    this.prisma.inMemoryEnrollments = this.prisma.inMemoryEnrollments.filter(enrollment => enrollment.courseId !== id);
+    this.prisma.inMemoryCertificates = this.prisma.inMemoryCertificates.filter(certificate => certificate.courseId !== id);
+    this.prisma.inMemoryPayments = this.prisma.inMemoryPayments.map(payment =>
+      payment.courseId === id ? { ...payment, courseId: null } : payment
+    );
     return { success: true };
   }
 

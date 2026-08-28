@@ -310,7 +310,7 @@ export class AdminDashboardComponent implements OnInit {
       title: 'New Architecture Course (Draft)',
       subtitle: 'Build high-performance software systems.',
       description: 'Comprehensive hands-on architectural masterclass.',
-      thumbnail: '/assets/agentic-ai.jpg',
+      thumbnail: '/assets/course-agentic-ai.png',
       price: 4999,
       currency: 'INR',
       level: 'Advanced',

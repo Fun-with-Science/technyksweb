@@ -48,7 +48,7 @@ const REAL_PRODUCTION_COURSES: Course[] = [
     title: 'AI Automation Engineer — Zero to Industry-Ready with n8n',
     subtitle: 'Build AI Agents, RAG Pipelines & MCP Systems in n8n — 11 Real Projects, Production Security & Industry-Grade Skills',
     description: 'Most n8n courses teach you to build workflows. This one teaches you to build systems that work when you are not watching. The AI automation market is exploding in 2026. Engineers who understand Agents, RAG, and MCP are landing high-paying clients and charging rates that traditional developers cannot compete with. In 9 sections and 70 plus lectures, you go from complete beginner to deploying AI systems that real businesses run on.',
-    thumbnail: '/assets/agentic-ai.jpg',
+    thumbnail: '/assets/course-n8n-ai-automation.png',
     price: 4999,
     currency: 'INR',
     level: 'Advanced',
@@ -86,7 +86,7 @@ const REAL_PRODUCTION_COURSES: Course[] = [
     title: 'Vibe Coding Foundation: Build Production SaaS Apps with AI',
     subtitle: 'Learn Next-Gen AI-Assisted Engineering, Spec-Driven Development & Rapid Prototyping',
     description: 'Supercharge your developer velocity using modern AI coding assistants, prompt-driven architecture, and automated test generators to ship production SaaS products 10x faster.',
-    thumbnail: '/assets/saas-blueprint.jpg',
+    thumbnail: '/assets/course-vibe-coding.png',
     price: 7900,
     currency: 'INR',
     level: 'Beginner',
@@ -113,7 +113,7 @@ const REAL_PRODUCTION_COURSES: Course[] = [
     title: 'Agentic AI Full-Stack Masterclass: RAG, MCP & AI Agents',
     subtitle: 'Build Production SaaS Apps with AI, Multi-Agent Systems, LangChain, NestJS & Angular 19',
     description: 'Master the architecture of autonomous LLM agents, tool-calling pipelines, vector database RAG search (Pinecone & Qdrant), and Model Context Protocol (MCP). Built for senior full-stack developers looking to lead AI engineering teams.',
-    thumbnail: '/assets/agentic-ai.jpg',
+    thumbnail: '/assets/course-agentic-ai.png',
     price: 7900,
     currency: 'INR',
     level: 'Advanced',
@@ -139,7 +139,7 @@ const REAL_PRODUCTION_COURSES: Course[] = [
     title: 'AI Engineering: RAG, MCP & Full Stack Apps with MERN',
     subtitle: 'Full-Stack MERN + RAG Vector Search & MCP Tool Integration',
     description: 'Build scalable full-stack applications with MongoDB, Express, React, Node.js, combined with modern RAG vector embeddings and MCP tools.',
-    thumbnail: '/assets/architectural-intelligence.jpg',
+    thumbnail: '/assets/course-mern-rag.png',
     price: 3999,
     currency: 'INR',
     level: 'Intermediate',
@@ -360,13 +360,15 @@ export class CoursesService {
 
   private normaliseCourse(course: any): Course {
     const status = course.status || (course.isPublished ? 'LIVE' : 'DRAFT');
+    const slug = course.slug || this.slugify(course.title || 'new-course');
     return {
       ...course,
       id: course.id,
-      slug: course.slug || this.slugify(course.title || 'new-course'),
+      slug,
       title: course.title || 'Untitled Course',
       subtitle: course.subtitle || '',
       description: course.description || '',
+      thumbnail: this.normaliseThumbnail(slug, course.thumbnail),
       price: Number(course.price || 0),
       currency: course.currency || 'INR',
       level: course.level || 'Intermediate',
@@ -395,6 +397,27 @@ export class CoursesService {
 
   private slugify(value: string) {
     return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  }
+
+  private normaliseThumbnail(slug: string, thumbnail?: string): string | undefined {
+    const demoThumbnails: Record<string, string> = {
+      'ai-automation-engineer-n8n': '/assets/course-n8n-ai-automation.png',
+      'vibe-coding-foundation': '/assets/course-vibe-coding.png',
+      'agentic-ai-full-stack-masterclass': '/assets/course-agentic-ai.png',
+      'ai-engineering-rag-mcp-mern': '/assets/course-mern-rag.png',
+      'mastering-agentic-ai': '/assets/course-agentic-ai.png',
+      'architectural-intelligence': '/assets/course-mern-rag.png',
+      'full-stack-saas-blueprint': '/assets/course-vibe-coding.png',
+    };
+    const current = String(thumbnail || '').trim();
+    const legacyDemoAssets = new Set([
+      '/assets/agentic-ai.jpg',
+      '/assets/architectural-intelligence.jpg',
+      '/assets/saas-blueprint.jpg',
+    ]);
+    return demoThumbnails[slug] && (!current || legacyDemoAssets.has(current))
+      ? demoThumbnails[slug]
+      : current || undefined;
   }
 
   private cleanVideoAssetRef(value: unknown): string | undefined {

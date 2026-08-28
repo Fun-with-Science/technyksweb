@@ -12,7 +12,7 @@ const INITIAL_COURSES = [
     currency: 'INR',
     level: 'Advanced',
     isPublished: true,
-    thumbnail: '/assets/agentic-ai.jpg',
+    thumbnail: '/assets/course-agentic-ai.png',
     modules: [
       {
         id: 'mod_1',
@@ -45,7 +45,7 @@ const INITIAL_COURSES = [
     currency: 'INR',
     level: 'Intermediate',
     isPublished: true,
-    thumbnail: '/assets/architectural-intelligence.jpg',
+    thumbnail: '/assets/course-mern-rag.png',
     modules: [
       {
         id: 'mod_3',
@@ -68,7 +68,7 @@ const INITIAL_COURSES = [
     currency: 'INR',
     level: 'Advanced',
     isPublished: true,
-    thumbnail: '/assets/saas-blueprint.jpg',
+    thumbnail: '/assets/course-vibe-coding.png',
     modules: [
       {
         id: 'mod_4',
