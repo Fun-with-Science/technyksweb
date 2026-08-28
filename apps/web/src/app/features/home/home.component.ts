@@ -1,11 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { Course, CoursesService } from '../../core/services/courses.service';
+import { CourseCardComponent } from '../../core/components/course-card/course-card.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, CourseCardComponent],
   template: `
     <div class="flex flex-col gap-24 pb-20 pt-16">
       <!-- Hero Section -->
@@ -95,67 +97,30 @@ import { RouterModule } from '@angular/router';
           </a>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div class="bg-[#121A2B] technical-border rounded flex flex-col justify-between overflow-hidden group hover:border-[#378ADD] transition-all shadow-xl">
-            <div class="relative w-full h-44 overflow-hidden border-b border-[#1E293B]">
-              <img src="/assets/agentic-ai.jpg" alt="Mastering Agentic AI" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-              <div class="absolute inset-0 bg-gradient-to-t from-[#121A2B] via-transparent to-transparent opacity-80"></div>
-              <span class="absolute top-3 left-3 font-['JetBrains_Mono'] text-[10px] text-[#378ADD] bg-[#040810]/90 backdrop-blur-md px-2.5 py-1 border border-[#378ADD]/40 rounded">v2.1.0</span>
-              <span class="absolute top-3 right-3 font-['JetBrains_Mono'] text-[10px] text-[#E8931A] bg-[#040810]/90 backdrop-blur-md border border-[#E8931A]/40 px-2.5 py-1 rounded font-semibold uppercase">ALL-ACCESS</span>
-            </div>
-
-            <div class="p-6">
-              <h3 class="font-['Hanken_Grotesk'] text-xl font-bold text-white mb-2 group-hover:text-[#E8931A] transition-colors">Mastering Agentic AI</h3>
-              <p class="font-['Inter'] text-sm text-[#d9c3af] mb-6">Build autonomous LLM agents, tool-calling pipelines, and multi-agent systems with NestJS and Python.</p>
-            </div>
-            
-            <div class="p-6 pt-0 mt-auto flex items-center justify-between border-t border-[#1E293B]/40 bg-[#0b0f10]/40">
-              <a routerLink="/courses/mastering-agentic-ai" class="font-['JetBrains_Mono'] text-xs font-bold text-[#378ADD] flex items-center gap-1 group-hover:gap-2 transition-all">
-                Explore Track <span class="material-symbols-outlined text-sm">arrow_forward</span>
-              </a>
-            </div>
+        @if (isLoading()) {
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            @for (placeholder of [1, 2, 3]; track placeholder) {
+              <div class="bg-[#121A2B] border border-[#1E293B] rounded-lg overflow-hidden animate-pulse">
+                <div class="aspect-video bg-[#1E293B]"></div>
+                <div class="p-5">
+                  <div class="h-5 bg-[#1E293B] rounded w-4/5 mb-4"></div>
+                  <div class="h-12 bg-[#1E293B] rounded w-full mb-5"></div>
+                  <div class="h-4 bg-[#1E293B] rounded w-2/5"></div>
+                </div>
+              </div>
+            }
           </div>
-
-          <div class="bg-[#121A2B] technical-border rounded flex flex-col justify-between overflow-hidden group hover:border-[#378ADD] transition-all shadow-xl">
-            <div class="relative w-full h-44 overflow-hidden border-b border-[#1E293B]">
-              <img src="/assets/architectural-intelligence.jpg" alt="Architectural Intelligence" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-              <div class="absolute inset-0 bg-gradient-to-t from-[#121A2B] via-transparent to-transparent opacity-80"></div>
-              <span class="absolute top-3 left-3 font-['JetBrains_Mono'] text-[10px] text-[#378ADD] bg-[#040810]/90 backdrop-blur-md px-2.5 py-1 border border-[#378ADD]/40 rounded">v1.8.4</span>
-              <span class="absolute top-3 right-3 font-['JetBrains_Mono'] text-[10px] text-[#E8931A] bg-[#040810]/90 backdrop-blur-md border border-[#E8931A]/40 px-2.5 py-1 rounded font-semibold uppercase">PRO TRACK</span>
-            </div>
-
-            <div class="p-6">
-              <h3 class="font-['Hanken_Grotesk'] text-xl font-bold text-white mb-2 group-hover:text-[#E8931A] transition-colors">Architectural Intelligence</h3>
-              <p class="font-['Inter'] text-sm text-[#d9c3af] mb-6">Master Nx monorepos, domain-driven design (DDD), micro-frontends, and Angular state signals.</p>
-            </div>
-            
-            <div class="p-6 pt-0 mt-auto flex items-center justify-between border-t border-[#1E293B]/40 bg-[#0b0f10]/40">
-              <a routerLink="/courses/architectural-intelligence" class="font-['JetBrains_Mono'] text-xs font-bold text-[#378ADD] flex items-center gap-1 group-hover:gap-2 transition-all">
-                Explore Track <span class="material-symbols-outlined text-sm">arrow_forward</span>
-              </a>
-            </div>
+        } @else if (featuredCourses().length) {
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            @for (course of featuredCourses(); track course.id) {
+              <app-course-card [course]="course" />
+            }
           </div>
-
-          <div class="bg-[#121A2B] technical-border rounded flex flex-col justify-between overflow-hidden group hover:border-[#378ADD] transition-all shadow-xl">
-            <div class="relative w-full h-44 overflow-hidden border-b border-[#1E293B]">
-              <img src="/assets/saas-blueprint.jpg" alt="Full-Stack SaaS Blueprint" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-              <div class="absolute inset-0 bg-gradient-to-t from-[#121A2B] via-transparent to-transparent opacity-80"></div>
-              <span class="absolute top-3 left-3 font-['JetBrains_Mono'] text-[10px] text-[#378ADD] bg-[#040810]/90 backdrop-blur-md px-2.5 py-1 border border-[#378ADD]/40 rounded">v3.0.0</span>
-              <span class="absolute top-3 right-3 font-['JetBrains_Mono'] text-[10px] text-[#E8931A] bg-[#040810]/90 backdrop-blur-md border border-[#E8931A]/40 px-2.5 py-1 rounded font-semibold uppercase">MEMBERSHIP</span>
-            </div>
-
-            <div class="p-6">
-              <h3 class="font-['Hanken_Grotesk'] text-xl font-bold text-white mb-2 group-hover:text-[#E8931A] transition-colors">Full-Stack SaaS Blueprint</h3>
-              <p class="font-['Inter'] text-sm text-[#d9c3af] mb-6">End-to-end LMS, Razorpay/Lemon Squeezy integration, video tokenization, and PostgreSQL schemas.</p>
-            </div>
-            
-            <div class="p-6 pt-0 mt-auto flex items-center justify-between border-t border-[#1E293B]/40 bg-[#0b0f10]/40">
-              <a routerLink="/membership" class="font-['JetBrains_Mono'] text-xs font-bold text-[#378ADD] flex items-center gap-1 group-hover:gap-2 transition-all">
-                Join Membership <span class="material-symbols-outlined text-sm">arrow_forward</span>
-              </a>
-            </div>
+        } @else {
+          <div class="border border-[#1E293B] rounded-lg p-8 text-center font-['JetBrains_Mono'] text-sm text-[#a18d7b]">
+            Courses will appear here once they are published from the admin panel.
           </div>
-        </div>
+        }
       </section>
 
       <!-- Detailed Membership & Pricing Section -->
@@ -252,7 +217,22 @@ import { RouterModule } from '@angular/router';
     </div>
   `
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
+  private coursesService = inject(CoursesService);
+
+  featuredCourses = signal<Course[]>([]);
+  isLoading = signal(true);
+
+  ngOnInit() {
+    this.coursesService.getCourses().subscribe({
+      next: courses => {
+        this.featuredCourses.set(courses.slice(0, 3));
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false),
+    });
+  }
+
   techList = [
     { name: 'OpenAI GPT-4o', category: 'AI Model', icon: 'smart_toy' },
     { name: 'Claude 3.5 Sonnet', category: 'LLM Engine', icon: 'memory' },
