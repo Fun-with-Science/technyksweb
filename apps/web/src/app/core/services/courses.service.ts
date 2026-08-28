@@ -198,6 +198,7 @@ export class CoursesService {
         // Migrate older browser sessions so drafts created by the previous
         // admin panel are not lost when the new roster is loaded.
         localStorage.setItem(STORAGE_KEY, JSON.stringify(unique));
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
         return unique;
       }
       const seeded = REAL_PRODUCTION_COURSES.map(course => this.normaliseCourse(course));
@@ -210,6 +211,7 @@ export class CoursesService {
   private saveStoredCourses(courses: Course[]) {
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(courses));
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
     }
     this.coursesSubject.next(courses);
   }
