@@ -56,6 +56,17 @@ export class PrismaService
       await this.$executeRawUnsafe(
         'CREATE INDEX IF NOT EXISTS "Review_courseId_createdAt_idx" ON "Review"("courseId", "createdAt")',
       );
+      // The bundled JavaScript course shipped before preview flags were
+      // enabled. Backfill only its public introduction lesson so existing
+      // deployments receive the same preview behavior as new imports.
+      await this.$executeRawUnsafe(`
+        UPDATE "Lesson" AS lesson
+        SET "isFreePreview" = TRUE
+        FROM "Module" AS module
+        WHERE lesson."moduleId" = module."id"
+          AND module."courseId" = 'course-javascript-2026'
+          AND lesson."id" = 'javascript-lesson-01'
+      `);
       this.isDbConnected = true;
       this.logger.log(
         ' Connected successfully to PostgreSQL database via Prisma',
