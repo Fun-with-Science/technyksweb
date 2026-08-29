@@ -1,6 +1,7 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { PaymentsService, CouponValidationResult } from '../../core/services/payments.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -163,6 +164,7 @@ declare var Razorpay: any;
 export class CheckoutComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private http = inject(HttpClient);
   private paymentsService = inject(PaymentsService);
   private authService = inject(AuthService);
   private coursesService = inject(CoursesService);
@@ -195,15 +197,30 @@ export class CheckoutComponent implements OnInit {
       } else if (params['planSlug'] || params['plan']) {
         const planSlug = params['planSlug'] || params['plan'];
         this.planSlug.set(planSlug === 'annual-vip' ? 'all-access-annual' : planSlug);
-        if (this.planSlug() === 'pro-monthly') {
-          this.itemTitle.set('Pro Monthly Membership');
-          this.originalAmount.set(1499);
-        } else {
-          this.itemTitle.set('All-Access Annual Membership');
-          this.originalAmount.set(11999);
-        }
+        this.http.get<any[]>('/api/payments/plans').subscribe({
+          next: (plans) => {
+            const plan = plans.find((candidate) => candidate.slug === this.planSlug());
+            if (plan) {
+              this.itemTitle.set(plan.name);
+              this.originalAmount.set(Number(plan.price) || 0);
+            } else {
+              this.setFallbackMembershipSummary();
+            }
+          },
+          error: () => this.setFallbackMembershipSummary(),
+        });
       }
     });
+  }
+
+  private setFallbackMembershipSummary() {
+    if (this.planSlug() === 'pro-monthly') {
+      this.itemTitle.set('Pro Monthly Membership');
+      this.originalAmount.set(1499);
+    } else {
+      this.itemTitle.set('All-Access Annual Membership');
+      this.originalAmount.set(11999);
+    }
   }
 
   finalAmount = () => {
@@ -217,7 +234,13 @@ export class CheckoutComponent implements OnInit {
     this.couponError.set('');
     this.couponSuccess.set(false);
 
-    this.paymentsService.validateCoupon(this.couponCode, this.originalAmount()).subscribe({
+    this.paymentsService.validateCoupon(
+      this.couponCode,
+      this.originalAmount(),
+      this.courseId()
+        ? { type: 'COURSE', courseId: this.courseId() || undefined }
+        : { type: 'MEMBERSHIP', planId: this.planSlug() || undefined },
+    ).subscribe({
       next: (res) => {
         this.isApplyingCoupon.set(false);
         this.couponResult.set(res);

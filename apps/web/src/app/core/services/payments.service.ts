@@ -11,6 +11,21 @@ export interface CouponValidationResult {
   finalAmount: number;
 }
 
+export interface MembershipPlan {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  price: number;
+  currency: string;
+  interval: 'MONTHLY' | 'ANNUAL';
+  isFree: boolean;
+  isActive: boolean;
+  accessAllCourses: boolean;
+  features: string[];
+  courseAccess?: { courseId: string }[];
+}
+
 export interface OrderResponse {
   provider: 'RAZORPAY' | 'LEMON_SQUEEZY';
   paymentId: string;
@@ -31,8 +46,8 @@ export interface OrderResponse {
 export class PaymentsService {
   private http = inject(HttpClient);
 
-  validateCoupon(code: string, originalAmount: number): Observable<CouponValidationResult> {
-    return this.http.post<CouponValidationResult>('/api/payments/coupon/validate', { code, originalAmount });
+  validateCoupon(code: string, originalAmount: number, context: { type: 'COURSE' | 'MEMBERSHIP'; courseId?: string; planId?: string }): Observable<CouponValidationResult> {
+    return this.http.post<CouponValidationResult>('/api/payments/coupon/validate', { code, originalAmount, ...context });
   }
 
   createOrder(payload: { courseId?: string; planId?: string; couponCode?: string; provider?: string }): Observable<OrderResponse> {

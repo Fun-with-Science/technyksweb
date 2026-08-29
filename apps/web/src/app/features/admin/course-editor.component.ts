@@ -2,6 +2,7 @@ import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import {
   CoursesService,
   Course,
@@ -316,6 +317,8 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                     <div class="flex-grow flex items-center justify-center">
                       @if (course()?.promoVideoUrl?.startsWith('data:video/')) {
                         <video [src]="course()?.promoVideoUrl" controls class="w-full h-full object-contain rounded"></video>
+                      } @else if (promoEmbedUrl()) {
+                        <iframe [src]="promoEmbedUrl()" title="Course promotional video preview" class="w-full h-full rounded" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
                       } @else {
                         <span class="material-symbols-outlined text-4xl text-white opacity-80">play_circle</span>
                       }
@@ -485,11 +488,13 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
 export class CourseEditorComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private sanitizer = inject(DomSanitizer);
   private coursesService = inject(CoursesService);
   private adminService = inject(AdminService);
 
   course = signal<Course | null>(null);
   modules = signal<Module[]>([]);
+  promoEmbedUrl = signal<SafeResourceUrl | null>(null);
   coupons = signal<Coupon[]>([]);
   activeTab = signal<
     'curriculum' | 'landing' | 'intended' | 'pricing' | 'promotions'
@@ -510,6 +515,7 @@ export class CourseEditorComponent implements OnInit {
         next: (c) => {
           this.course.set(c);
           this.modules.set(c.modules || []);
+          this.promoEmbedUrl.set(this.toPromoEmbedUrl(c.promoVideoUrl));
           this.referralUrl = `https://technyks.com/courses/${c.slug}?referralCode=3BDC`;
         },
       });
@@ -543,6 +549,9 @@ export class CourseEditorComponent implements OnInit {
     const current = this.course();
     if (!current) return;
     this.course.set({ ...current, [field]: value });
+    if (field === 'promoVideoUrl') {
+      this.promoEmbedUrl.set(this.toPromoEmbedUrl(String(value || '')));
+    }
   }
 
   toggleFreeCourse(event: Event) {
@@ -590,6 +599,34 @@ export class CourseEditorComponent implements OnInit {
       reader.onerror = () => reject(reader.error);
       reader.readAsDataURL(file);
     });
+  }
+
+  private toPromoEmbedUrl(value?: string): SafeResourceUrl | null {
+    if (!value || value.startsWith('data:video/')) return null;
+    try {
+      const url = new URL(value);
+      if (url.hostname === 'youtu.be') {
+        const id = url.pathname.split('/').filter(Boolean)[0];
+        return id
+          ? this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube-nocookie.com/embed/${id}`)
+          : null;
+      }
+      if (url.hostname === 'youtube.com' || url.hostname.endsWith('.youtube.com')) {
+        const id = url.searchParams.get('v') || url.pathname.match(/^\/(?:embed|shorts)\/([A-Za-z0-9_-]{11})/)?.[1];
+        return id
+          ? this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube-nocookie.com/embed/${id}`)
+          : null;
+      }
+      if (url.hostname === 'vimeo.com' || url.hostname.endsWith('.vimeo.com')) {
+        const id = url.pathname.split('/').filter(Boolean).find((part) => /^\d+$/.test(part));
+        return id
+          ? this.sanitizer.bypassSecurityTrustResourceUrl(`https://player.vimeo.com/video/${id}`)
+          : null;
+      }
+    } catch {
+      return null;
+    }
+    return null;
   }
 
   addSection() {
@@ -652,6 +689,8 @@ export class CourseEditorComponent implements OnInit {
       .createCoupon({
         code: this.newCouponCode,
         discountAmount: this.newCouponDiscount || 479,
+        scope: 'COURSE',
+        courseId: this.course()?.id,
       })
       .subscribe({
         next: () => {

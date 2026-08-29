@@ -41,6 +41,16 @@ export class AdminController {
     return this.adminService.getCourseById(id);
   }
 
+  @Get('membership/plans')
+  async getMembershipPlans() {
+    return this.adminService.getMembershipPlans();
+  }
+
+  @Patch('membership/plans/:id')
+  async updateMembershipPlan(@Param('id') id: string, @Body() dto: any) {
+    return this.adminService.updateMembershipPlan(id, dto);
+  }
+
   @Post('courses')
   async createCourse(@Body() dto: any) {
     return this.adminService.createCourse(dto);

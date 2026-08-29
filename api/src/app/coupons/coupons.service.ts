@@ -10,16 +10,17 @@ export class CouponsService implements OnModuleInit {
   }
 
   async seedInitialCoupons() {
-    const initialCoupons = [
-      { code: 'TECHNYKS50', discountPercent: 50, usageLimit: 100, timesUsed: 0, isActive: true },
-      { code: 'ARCH20', discountPercent: 20, usageLimit: 500, timesUsed: 0, isActive: true },
-      { code: 'FLAT1000', discountAmount: 1000, currency: 'INR', usageLimit: 50, timesUsed: 0, isActive: true },
-    ];
+    // Coupons are intentionally created from the admin panel with an explicit
+    // course or membership scope. Never seed a global coupon: a global code
+    // could accidentally discount a different course or a membership plan.
+    const initialCoupons: any[] = [];
 
     if (this.prisma.isDbConnected !== false) {
       try {
         const count = await this.prisma.coupon.count();
-        if (count === 0) await this.prisma.coupon.createMany({ data: initialCoupons as any });
+        if (count === 0 && initialCoupons.length > 0) {
+          await this.prisma.coupon.createMany({ data: initialCoupons as any });
+        }
         return;
       } catch {
         // Use the local adapter below.
@@ -36,7 +37,13 @@ export class CouponsService implements OnModuleInit {
     }
   }
 
-  async validateCoupon(code: string, originalAmount: number) {
+  async validateCoupon(
+    code: string,
+    originalAmount: number,
+    context: { type: 'COURSE' | 'MEMBERSHIP'; courseId?: string; planId?: string } = {
+      type: 'COURSE',
+    },
+  ) {
     if (!code) {
       throw new BadRequestException('Coupon code is required.');
     }
@@ -55,6 +62,22 @@ export class CouponsService implements OnModuleInit {
 
     if (!coupon || !coupon.isActive) {
       throw new BadRequestException('Invalid or expired coupon code.');
+    }
+
+    const scope = String(coupon.scope || 'COURSE').toUpperCase();
+    const isAllowedScope =
+      scope === context.type &&
+      (scope !== 'COURSE' && scope !== 'MEMBERSHIP'
+        ? false
+        : scope === 'MEMBERSHIP'
+          ? context.type === 'MEMBERSHIP'
+          : Boolean(context.courseId) && coupon.courseId === context.courseId);
+    if (!isAllowedScope) {
+      throw new BadRequestException(
+        context.type === 'MEMBERSHIP'
+          ? 'This coupon is locked to a course.'
+          : 'This coupon is locked to the membership program or another course.',
+      );
     }
 
     if (coupon.expiryDate && new Date() > coupon.expiryDate) {

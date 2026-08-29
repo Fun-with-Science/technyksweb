@@ -326,7 +326,8 @@ export const JAVASCRIPT_COURSE = {
   isFree: false,
   currency: 'INR',
   level: 'Beginner to Advanced',
-  isPublished: true,
+  // New imports begin as drafts. Publishing remains an explicit admin action.
+  isPublished: false,
   modules: SECTION_DEFINITIONS.map((section) => ({
     id: section.id,
     title: section.title,

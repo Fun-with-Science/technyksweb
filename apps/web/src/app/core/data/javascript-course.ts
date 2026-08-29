@@ -213,7 +213,8 @@ export const JAVASCRIPT_COURSE: Course = {
   currency: 'INR',
   level: 'Beginner to Advanced',
   status: 'LIVE',
-  isPublished: true,
+  // New imports begin as drafts. Publishing remains an explicit admin action.
+  isPublished: false,
   earnedThisMonth: 0,
   enrollmentsThisMonth: 0,
   rating: 0,

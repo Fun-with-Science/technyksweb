@@ -54,24 +54,28 @@ model User {
 }
 
 model Course {
-  id           String        @id @default(uuid())
-  slug         String        @unique
-  title        String
-  subtitle     String
-  description  String        @db.Text
-  thumbnail    String?
-  promoVideoUrl String?       @db.Text
-  price        Float
-  currency     String        @default("INR")
-  level        String        @default("Intermediate")
-  isPublished  Boolean       @default(false)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  modules      Module[]
-  enrollments  Enrollment[]
-  certificates Certificate[]
-  payments     Payment[]
-  reviews      Review[]
+  id               String                   @id @default(uuid())
+  slug             String                   @unique
+  title            String
+  subtitle         String
+  description      String                   @db.Text
+  thumbnail        String?
+  promoVideoUrl    String?                  @db.Text
+  price            Float
+  isFree           Boolean                  @default(false)
+  currency         String                   @default("INR")
+  level            String                   @default("Intermediate")
+  isPublished      Boolean                  @default(false)
+  isArchived       Boolean                  @default(false)
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  modules          Module[]
+  enrollments      Enrollment[]
+  certificates     Certificate[]
+  payments         Payment[]
+  reviews          Review[]
+  coupons          Coupon[]
+  membershipAccess MembershipCourseAccess[]
 }
 
 model Module {
@@ -130,17 +134,32 @@ model Review {
 }
 
 model MembershipPlan {
-  id            String         @id @default(uuid())
-  name          String
-  slug          String         @unique
-  price         Float
-  currency      String         @default("INR")
-  interval      PlanInterval
-  isFree        Boolean        @default(false)
-  features      String[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  subscriptions Subscription[]
+  id               String                   @id @default(uuid())
+  name             String
+  slug             String                   @unique
+  description      String?                  @db.Text
+  price            Float
+  currency         String                   @default("INR")
+  interval         PlanInterval
+  isFree           Boolean                  @default(false)
+  isActive         Boolean                  @default(true)
+  accessAllCourses Boolean                  @default(true)
+  features         String[]
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  subscriptions    Subscription[]
+  courseAccess     MembershipCourseAccess[]
+}
+
+model MembershipCourseAccess {
+  planId    String
+  courseId  String
+  plan      MembershipPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  course    Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime       @default(now())
+
+  @@id([planId, courseId])
+  @@index([courseId])
 }
 
 model Subscription {
@@ -165,6 +184,9 @@ model Coupon {
   discountPercent Float?
   discountAmount  Float?
   currency        String    @default("INR")
+  scope           String    @default("COURSE")
+  courseId        String?
+  course          Course?   @relation(fields: [courseId], references: [id], onDelete: SetNull)
   expiryDate      DateTime?
   usageLimit      Int?
   timesUsed       Int       @default(0)
@@ -196,7 +218,9 @@ model Payment {
   provider        PaymentProvider
   paymentIntentId String?         @unique
   subscriptionId  String?
+  planId          String?
   courseId        String?
+  couponCode      String?
   course          Course?         @relation(fields: [courseId], references: [id], onDelete: SetNull)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt

@@ -24,10 +24,27 @@ export interface Coupon {
   code: string;
   discountPercent?: number;
   discountAmount?: number;
+  scope: 'COURSE' | 'MEMBERSHIP';
+  courseId?: string | null;
   usageLimit?: number;
   timesUsed: number;
   isActive: boolean;
   createdAt: string;
+}
+
+export interface MembershipPlan {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  price: number;
+  currency: string;
+  interval: 'MONTHLY' | 'ANNUAL';
+  isFree: boolean;
+  isActive: boolean;
+  accessAllCourses: boolean;
+  features: string[];
+  courseAccess: { courseId: string }[];
 }
 
 @Injectable({
@@ -50,6 +67,14 @@ export class AdminService {
 
   getCoupons(): Observable<Coupon[]> {
     return this.http.get<Coupon[]>('/api/admin/coupons');
+  }
+
+  getMembershipPlans(): Observable<MembershipPlan[]> {
+    return this.http.get<MembershipPlan[]>('/api/admin/membership/plans');
+  }
+
+  updateMembershipPlan(id: string, payload: Partial<MembershipPlan> & { featuresText?: string; courseIds?: string[] }): Observable<MembershipPlan> {
+    return this.http.patch<MembershipPlan>(`/api/admin/membership/plans/${encodeURIComponent(id)}`, payload);
   }
 
   createCoupon(payload: any): Observable<Coupon> {

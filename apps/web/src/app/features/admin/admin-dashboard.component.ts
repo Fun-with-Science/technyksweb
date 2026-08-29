@@ -7,6 +7,7 @@ import {
   RevenueMetrics,
   Student,
   Coupon,
+  MembershipPlan,
 } from '../../core/services/admin.service';
 import { CoursesService, Course } from '../../core/services/courses.service';
 
@@ -28,14 +29,6 @@ import { CoursesService, Course } from '../../core/services/courses.service';
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            (click)="importJavaScriptCourse()"
-            class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] bg-[#E8931A] hover:bg-[#f6a52a] px-5 py-3 rounded-lg shadow-lg flex items-center gap-2 w-fit"
-          >
-            <span class="material-symbols-outlined text-sm">code</span>
-            Add JavaScript Course
-          </button>
           <button (click)="createNewCourse()" class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 w-fit">
             <span class="material-symbols-outlined text-sm">add</span>
             New Course
@@ -87,6 +80,17 @@ import { CoursesService, Course } from '../../core/services/courses.service';
           class="pb-3 px-1 font-bold transition-colors"
         >
           Coupons
+        </button>
+
+        <button
+          (click)="activeTab.set('membership')"
+          [class.border-b-2]="activeTab() === 'membership'"
+          [class.border-[#E8931A]]="activeTab() === 'membership'"
+          [class.text-[#E8931A]]="activeTab() === 'membership'"
+          [class.text-[#d9c3af]]="activeTab() !== 'membership'"
+          class="pb-3 px-1 font-bold transition-colors"
+        >
+          Membership Program
         </button>
       </div>
 
@@ -281,7 +285,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
               @for (coupon of coupons(); track coupon.id) {
                 <tr>
                   <td class="p-3 font-['JetBrains_Mono'] font-bold text-[#E8931A]">{{ coupon.code }}</td>
-                  <td class="p-3 font-['JetBrains_Mono'] text-white">₹{{ coupon.discountAmount || 500 }}</td>
+                  <td class="p-3 font-['JetBrains_Mono'] text-white">{{ coupon.scope || 'COURSE' }} · ₹{{ coupon.discountAmount || 0 }}</td>
                   <td class="p-3 font-['JetBrains_Mono'] text-[#378ADD]">{{ coupon.timesUsed }} / Unlimited</td>
                   <td class="p-3 text-right">
                     <button (click)="deleteCoupon(coupon.id)" class="font-['JetBrains_Mono'] text-[11px] text-[#ffb4ab] hover:underline">Delete</button>
@@ -292,6 +296,89 @@ import { CoursesService, Course } from '../../core/services/courses.service';
           </table>
         </div>
       }
+
+      <!-- TAB 5: MEMBERSHIP PROGRAM -->
+      @if (activeTab() === 'membership') {
+        <div class="flex flex-col gap-6">
+          <div class="border-b border-[#1E293B] pb-4">
+            <h2 class="font-['Hanken_Grotesk'] text-2xl font-bold text-white">Membership Program</h2>
+            <p class="font-['Inter'] text-xs text-[#d9c3af] mt-1">
+              Edit the membership copy, price, features, and which courses each plan unlocks. Changes are stored in the database and used by the public membership page.
+            </p>
+          </div>
+
+          <div class="border border-[#1E293B] bg-[#040810]/60 rounded-lg p-5 flex flex-col gap-3">
+            <div>
+              <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white">Membership coupon</h3>
+              <p class="font-['Inter'] text-xs text-[#a18d7b] mt-1">Membership coupons are locked to membership checkout and cannot be used on a course.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <input type="text" [(ngModel)]="newMembershipCouponCode" placeholder="MEMBERSHIP CODE" class="bg-[#121A2B] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono'] uppercase" />
+              <input type="number" min="0" [(ngModel)]="newMembershipCouponDiscount" placeholder="Discount (₹)" class="bg-[#121A2B] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']" />
+              <button type="button" (click)="createMembershipCoupon()" class="font-['JetBrains_Mono'] text-xs font-bold text-[#040810] bg-[#E8931A] py-2 rounded">Save membership coupon</button>
+            </div>
+          </div>
+
+          @if (membershipPlans().length) {
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              @for (plan of membershipPlans(); track plan.id) {
+                <article class="border border-[#1E293B] bg-[#040810]/60 rounded-lg p-6 flex flex-col gap-4">
+                  <div class="flex items-start justify-between gap-4">
+                    <div>
+                      <span class="font-['JetBrains_Mono'] text-[10px] uppercase text-[#E8931A]">{{ plan.interval }} · {{ plan.slug }}</span>
+                      <h3 class="font-['Hanken_Grotesk'] text-xl font-bold text-white mt-1">{{ plan.name }}</h3>
+                    </div>
+                    <label class="inline-flex items-center gap-2 font-['JetBrains_Mono'] text-[10px] uppercase text-[#d9c3af]">
+                      <input type="checkbox" [checked]="plan.isActive" (change)="updateMembershipPlanField(plan.id, 'isActive', $any($event.target).checked)" class="rounded bg-[#040810] border-[#1E293B] text-[#E8931A] focus:ring-0" />
+                      Active
+                    </label>
+                  </div>
+
+                  <label class="font-['Inter'] text-xs text-[#a18d7b]">Display name
+                    <input type="text" [ngModel]="plan.name" (ngModelChange)="updateMembershipPlanField(plan.id, 'name', $event)" class="mt-1 w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-sm text-white" />
+                  </label>
+
+                  <label class="font-['Inter'] text-xs text-[#a18d7b]">Membership description
+                    <textarea rows="3" [ngModel]="plan.description || ''" (ngModelChange)="updateMembershipPlanField(plan.id, 'description', $event)" class="mt-1 w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-sm text-white"></textarea>
+                  </label>
+
+                  <div class="grid grid-cols-2 gap-3">
+                    <label class="font-['Inter'] text-xs text-[#a18d7b]">Price (₹)
+                      <input type="number" min="0" [ngModel]="plan.price" (ngModelChange)="updateMembershipPlanField(plan.id, 'price', $event)" class="mt-1 w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-sm text-[#E8931A]" />
+                    </label>
+                    <label class="font-['Inter'] text-xs text-[#a18d7b]">Features (one per line)
+                      <textarea rows="3" [ngModel]="featuresText(plan)" (ngModelChange)="updateMembershipPlanField(plan.id, 'featuresText', $event)" class="mt-1 w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-sm text-white"></textarea>
+                    </label>
+                  </div>
+
+                  <label class="inline-flex items-center gap-2 font-['Inter'] text-xs text-[#d9c3af]">
+                    <input type="checkbox" [checked]="plan.accessAllCourses" (change)="updateMembershipPlanField(plan.id, 'accessAllCourses', $any($event.target).checked)" class="rounded bg-[#040810] border-[#1E293B] text-[#E8931A] focus:ring-0" />
+                    Unlock all published courses
+                  </label>
+
+                  @if (!plan.accessAllCourses) {
+                    <div class="border border-[#1E293B] rounded p-3 flex flex-col gap-2">
+                      <span class="font-['JetBrains_Mono'] text-[10px] uppercase text-[#a18d7b]">Selected course access</span>
+                      @for (course of publishedCourses(); track course.id) {
+                        <label class="inline-flex items-center gap-2 font-['Inter'] text-xs text-[#d9c3af]">
+                          <input type="checkbox" [checked]="hasPlanCourse(plan, course.id)" (change)="toggleMembershipCourse(plan.id, course.id, $any($event.target).checked)" class="rounded bg-[#040810] border-[#1E293B] text-[#378ADD] focus:ring-0" />
+                          {{ course.title }}
+                        </label>
+                      }
+                    </div>
+                  }
+
+                  <button type="button" (click)="saveMembershipPlan(plan)" [disabled]="savingMembershipPlanId() === plan.id" class="self-start font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] bg-[#E8931A] hover:bg-[#f6a52a] disabled:opacity-60 px-5 py-2.5 rounded">
+                    {{ savingMembershipPlanId() === plan.id ? 'Saving...' : 'Save membership plan' }}
+                  </button>
+                </article>
+              }
+            </div>
+          } @else {
+            <div class="border border-dashed border-[#378ADD]/50 rounded-lg px-6 py-14 text-center font-['Inter'] text-sm text-[#a18d7b]">Membership plans are not available yet.</div>
+          }
+        </div>
+      }
     </div>
   `,
 })
@@ -300,14 +387,18 @@ export class AdminDashboardComponent implements OnInit {
   private coursesService = inject(CoursesService);
   private router = inject(Router);
 
-  activeTab = signal<'courses' | 'revenue' | 'students' | 'coupons'>('courses');
+  activeTab = signal<'courses' | 'revenue' | 'students' | 'coupons' | 'membership'>('courses');
   metrics = signal<RevenueMetrics | null>(null);
   students = signal<Student[]>([]);
   coupons = signal<Coupon[]>([]);
+  membershipPlans = signal<MembershipPlan[]>([]);
+  savingMembershipPlanId = signal<string | null>(null);
   publishedCourses = signal<Course[]>([]);
 
   searchCourseQuery = '';
   sortBy = 'Newest';
+  newMembershipCouponCode = '';
+  newMembershipCouponDiscount: number | null = 1000;
 
   ngOnInit() {
     this.loadCourses();
@@ -316,6 +407,7 @@ export class AdminDashboardComponent implements OnInit {
       .searchStudents('')
       .subscribe((data) => this.students.set(data));
     this.adminService.getCoupons().subscribe((data) => this.coupons.set(data));
+    this.adminService.getMembershipPlans().subscribe((data) => this.membershipPlans.set(data));
   }
 
   loadCourses() {
@@ -366,14 +458,67 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
-  importJavaScriptCourse() {
-    this.coursesService.importJavaScriptCourse().subscribe({
-      next: (course) => {
-        this.loadCourses();
-        this.router.navigate(['/admin/courses', course.id, 'manage']);
+  featuresText(plan: MembershipPlan): string {
+    return (plan.features || []).join('\n');
+  }
+
+  updateMembershipPlanField(planId: string, field: string, value: any) {
+    this.membershipPlans.update((plans) =>
+      plans.map((plan) => (plan.id === planId ? { ...plan, [field]: value } : plan)),
+    );
+  }
+
+  hasPlanCourse(plan: MembershipPlan, courseId: string): boolean {
+    return (plan.courseAccess || []).some((access) => access.courseId === courseId);
+  }
+
+  toggleMembershipCourse(planId: string, courseId: string, selected: boolean) {
+    this.membershipPlans.update((plans) =>
+      plans.map((plan) => {
+        if (plan.id !== planId) return plan;
+        const current = new Set((plan.courseAccess || []).map((access) => access.courseId));
+        if (selected) current.add(courseId);
+        else current.delete(courseId);
+        return { ...plan, courseAccess: [...current].map((id) => ({ courseId: id })) };
+      }),
+    );
+  }
+
+  saveMembershipPlan(plan: MembershipPlan) {
+    this.savingMembershipPlanId.set(plan.id);
+    this.adminService.updateMembershipPlan(plan.id, {
+      name: plan.name,
+      description: plan.description || '',
+      price: Number(plan.price) || 0,
+      isActive: plan.isActive,
+      accessAllCourses: plan.accessAllCourses,
+      featuresText: this.featuresText(plan),
+      courseIds: (plan.courseAccess || []).map((access) => access.courseId),
+    }).subscribe({
+      next: (saved) => {
+        this.membershipPlans.update((plans) => plans.map((candidate) => candidate.id === saved.id ? saved : candidate));
+        this.savingMembershipPlanId.set(null);
       },
-      error: () =>
-        alert('The JavaScript course could not be created. Please try again.'),
+      error: () => {
+        this.savingMembershipPlanId.set(null);
+        alert('The membership plan could not be saved. Please try again.');
+      },
+    });
+  }
+
+  createMembershipCoupon() {
+    const code = this.newMembershipCouponCode.trim();
+    if (!code) return;
+    this.adminService.createCoupon({
+      code,
+      discountAmount: Number(this.newMembershipCouponDiscount) || 0,
+      scope: 'MEMBERSHIP',
+    }).subscribe({
+      next: (coupon) => {
+        this.coupons.update((coupons) => [coupon, ...coupons]);
+        this.newMembershipCouponCode = '';
+      },
+      error: (error) => alert(error?.error?.message || 'The membership coupon could not be created.'),
     });
   }
 

@@ -168,97 +168,64 @@ export class CoursesService implements OnModuleInit {
   constructor(private prisma: PrismaService) {}
 
   async onModuleInit() {
-    // The catalog is authoritative data. Demo courses are opt-in for local
-    // demos only, so deleting every course cannot be undone by a restart.
-    if (
-      process.env.NODE_ENV === 'production' ||
-      process.env.SEED_DEMO_COURSES !== 'true'
-    )
-      return;
-
-    if (this.prisma.inMemoryCourses.length === 0) {
-      this.prisma.inMemoryCourses = INITIAL_COURSES.map((course) => ({
-        ...course,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }));
-    } else {
-      const javascriptCourse = INITIAL_COURSES.find(
-        (course) => course.id === 'course-javascript-2026',
-      );
-      if (
-        javascriptCourse &&
-        !this.prisma.inMemoryCourses.some(
-          (course) => course.id === javascriptCourse.id,
-        )
-      ) {
-        this.prisma.inMemoryCourses.unshift({
-          ...javascriptCourse,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-      }
-    }
+    // The JavaScript course is the only built-in course. Create it once as a
+    // draft and repair only an empty legacy curriculum. All other catalog
+    // records are administrator-owned and are never reseeded automatically.
+    const javascriptCourse = JAVASCRIPT_COURSE;
 
     if (this.prisma.isDbConnected) {
       try {
-        const courseCount = await this.prisma.course.count();
-        const coursesToSeed =
-          courseCount === 0
-            ? INITIAL_COURSES
-            : INITIAL_COURSES.filter(
-                (course) => course.id === 'course-javascript-2026',
-              );
-        for (const course of coursesToSeed) {
-          const existing = await this.prisma.course.findUnique({
-            where: { id: course.id },
-            select: { id: true },
-          });
-          if (existing) continue;
+        const existing = await this.prisma.course.findUnique({
+          where: { id: javascriptCourse.id },
+          include: { modules: { include: { lessons: true } } },
+        });
+
+        if (!existing) {
           await this.prisma.course.create({
+            data: this.toPrismaCourseCreateData(javascriptCourse, true) as any,
+          });
+        } else if (!existing.isArchived && !this.hasCurriculum(existing)) {
+          // Preserve the title, thumbnail, visibility, enrollments, and any
+          // other administrator edits while repairing missing curriculum.
+          await this.prisma.course.update({
+            where: { id: javascriptCourse.id },
             data: {
-              id: course.id,
-              slug: course.slug,
-              title: course.title,
-              subtitle: course.subtitle,
-              description: course.description,
-              thumbnail: course.thumbnail,
-              price: course.price,
-              isFree: Boolean((course as any).isFree ?? Number(course.price || 0) === 0),
-              currency: course.currency,
-              level: course.level,
-              isPublished: course.isPublished,
-              modules: {
-                create: course.modules.map((module) => ({
-                  id: module.id,
-                  title: module.title,
-                  order: module.order,
-                  lessons: {
-                    create: module.lessons.map((lesson) => ({
-                      id: lesson.id,
-                      title: lesson.title,
-                      duration: lesson.duration,
-                      order: lesson.order,
-                      isFreePreview: lesson.isFreePreview,
-                      videoAssetRef: lesson.videoAssetRef,
-                    })),
-                  },
-                })),
-              },
+              modules: { create: this.toPrismaModules(javascriptCourse.modules) },
             } as any,
           });
         }
+        return;
       } catch {
-        // Keep the application available through the local adapter during a transient DB failure.
+        // Keep the application available through the local adapter during a
+        // transient database failure.
       }
     }
+
+    const existing = this.prisma.inMemoryCourses.find(
+      (course) => course.id === javascriptCourse.id,
+    );
+    if (existing) {
+      if (!existing.isArchived && !this.hasCurriculum(existing)) {
+        existing.modules = javascriptCourse.modules;
+        existing.updatedAt = new Date();
+      }
+      return;
+    }
+
+    this.prisma.inMemoryCourses.unshift({
+      ...javascriptCourse,
+      isPublished: false,
+      isArchived: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
   }
 
   async findAllPublished() {
     if (this.prisma.isDbConnected) {
       try {
         const courses = await this.prisma.course.findMany({
-          where: { isPublished: true },
+          where: { isPublished: true, isArchived: false },
           include: {
             modules: {
               include: {
@@ -284,20 +251,20 @@ export class CoursesService implements OnModuleInit {
         return courses.map((course) => this.toPublicCourse(course));
       } catch (e) {
         return this.prisma.inMemoryCourses
-          .filter((course) => course.isPublished)
+          .filter((course) => course.isPublished && !course.isArchived)
           .map((course) => this.toPublicCourse(course));
       }
     }
     return this.prisma.inMemoryCourses
-      .filter((course) => course.isPublished)
+      .filter((course) => course.isPublished && !course.isArchived)
       .map((course) => this.toPublicCourse(course));
   }
 
   async findBySlug(slug: string) {
     if (this.prisma.isDbConnected) {
       try {
-        const course = await this.prisma.course.findUnique({
-          where: { slug, isPublished: true },
+        const course = await this.prisma.course.findFirst({
+          where: { slug, isPublished: true, isArchived: false },
           include: {
             modules: {
               include: {
@@ -329,7 +296,7 @@ export class CoursesService implements OnModuleInit {
     }
 
     const found = this.prisma.inMemoryCourses.find(
-      (c) => c.slug === slug && c.isPublished,
+      (c) => c.slug === slug && c.isPublished && !c.isArchived,
     );
     if (!found) {
       throw new NotFoundException(`Course with slug "${slug}" not found.`);
@@ -397,5 +364,49 @@ export class CoursesService implements OnModuleInit {
       createdAt: review.createdAt,
       updatedAt: review.updatedAt,
     };
+  }
+
+  private hasCurriculum(course: any): boolean {
+    return (course.modules || []).some(
+      (module: any) => (module.lessons || []).length > 0,
+    );
+  }
+
+  private toPrismaCourseCreateData(course: any, draft = false) {
+    return {
+      id: course.id,
+      slug: course.slug,
+      title: course.title,
+      subtitle: course.subtitle,
+      description: course.description,
+      thumbnail: course.thumbnail,
+      promoVideoUrl: course.promoVideoUrl ?? null,
+      price: course.price,
+      isFree: Boolean(course.isFree ?? Number(course.price || 0) === 0),
+      currency: course.currency,
+      level: course.level,
+      isPublished: draft ? false : Boolean(course.isPublished),
+      isArchived: false,
+      modules: { create: this.toPrismaModules(course.modules) },
+    };
+  }
+
+  private toPrismaModules(modules: any[]) {
+    return (modules || []).map((module: any, moduleIndex: number) => ({
+      id: module.id,
+      title: module.title,
+      order: module.order || moduleIndex + 1,
+      lessons: {
+        create: (module.lessons || []).map((lesson: any, lessonIndex: number) => ({
+          id: lesson.id,
+          title: lesson.title,
+          description: lesson.description ?? null,
+          duration: lesson.duration || 0,
+          order: lesson.order || lessonIndex + 1,
+          isFreePreview: Boolean(lesson.isFreePreview),
+          videoAssetRef: lesson.videoAssetRef ?? null,
+        })),
+      },
+    }));
   }
 }

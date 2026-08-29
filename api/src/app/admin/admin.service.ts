@@ -26,6 +26,8 @@ const DEFAULT_COUPONS = [
     usageLimit: 100,
     timesUsed: 0,
     isActive: true,
+    scope: 'COURSE',
+    courseId: null,
   },
   {
     id: 'c2',
@@ -34,6 +36,8 @@ const DEFAULT_COUPONS = [
     usageLimit: 500,
     timesUsed: 0,
     isActive: true,
+    scope: 'COURSE',
+    courseId: null,
   },
 ];
 
@@ -186,6 +190,7 @@ export class AdminService {
     if (this.prisma.isDbConnected) {
       try {
         courses = await this.prisma.course.findMany({
+          where: { isArchived: false },
           include: COURSE_INCLUDE,
           orderBy: { createdAt: 'desc' },
         });
@@ -195,20 +200,22 @@ export class AdminService {
       }
     }
 
-    courses = [...this.prisma.inMemoryCourses].sort((a, b) => {
+    courses = this.prisma.inMemoryCourses
+      .filter((course) => !course.isArchived)
+      .sort((a, b) => {
       return (
         new Date(b.createdAt || 0).getTime() -
         new Date(a.createdAt || 0).getTime()
       );
-    });
+      });
     return this.withCourseMetrics(courses);
   }
 
   async getCourseById(id: string) {
     if (this.prisma.isDbConnected) {
       try {
-        const course = await this.prisma.course.findUnique({
-          where: { id },
+        const course = await this.prisma.course.findFirst({
+          where: { id, isArchived: false },
           include: COURSE_INCLUDE,
         });
         if (course) return (await this.withCourseMetrics([course]))[0];
@@ -220,10 +227,81 @@ export class AdminService {
     }
 
     const course = this.prisma.inMemoryCourses.find(
-      (candidate) => candidate.id === id,
+      (candidate) => candidate.id === id && !candidate.isArchived,
     );
     if (!course) throw new NotFoundException('Course not found.');
     return (await this.withCourseMetrics([course]))[0];
+  }
+
+  async getMembershipPlans() {
+    if (this.prisma.isDbConnected) {
+      try {
+        return await this.prisma.membershipPlan.findMany({
+          include: { courseAccess: { select: { courseId: true } } },
+          orderBy: { price: 'asc' },
+        });
+      } catch {
+        // Use the local adapter below.
+      }
+    }
+    return [...(this.prisma.inMemoryMembershipPlans || [])].sort(
+      (a, b) => Number(a.price || 0) - Number(b.price || 0),
+    );
+  }
+
+  async updateMembershipPlan(id: string, dto: any) {
+    const name = String(dto.name || '').trim();
+    if (!name) throw new BadRequestException('Membership plan name is required.');
+
+    const features = Array.isArray(dto.features)
+      ? dto.features.map((feature: any) => String(feature).trim()).filter(Boolean)
+      : String(dto.featuresText || '')
+          .split('\n')
+          .map((feature) => feature.trim())
+          .filter(Boolean);
+    const accessAllCourses = dto.accessAllCourses !== false;
+    const courseIds = Array.isArray(dto.courseIds)
+      ? [...new Set(dto.courseIds.map((courseId: any) => String(courseId).trim()).filter(Boolean))]
+      : [];
+
+    const data = {
+      name,
+      description: String(dto.description || '').trim() || null,
+      price: Math.max(0, Number(dto.price) || 0),
+      features,
+      isActive: dto.isActive !== false,
+      accessAllCourses,
+    };
+
+    if (this.prisma.isDbConnected) {
+      try {
+        return await this.prisma.$transaction(async (transaction: any) => {
+          await transaction.membershipCourseAccess.deleteMany({ where: { planId: id } });
+          if (!accessAllCourses && courseIds.length) {
+            await transaction.membershipCourseAccess.createMany({
+              data: courseIds.map((courseId) => ({ planId: id, courseId })),
+              skipDuplicates: true,
+            });
+          }
+          return transaction.membershipPlan.update({
+            where: { id },
+            data,
+            include: { courseAccess: { select: { courseId: true } } },
+          });
+        });
+      } catch (error: any) {
+        if (error?.code === 'P2025') throw new NotFoundException('Membership plan not found.');
+        // Use the local adapter below when PostgreSQL is unavailable.
+      }
+    }
+
+    const plan = this.prisma.inMemoryMembershipPlans.find((candidate) => candidate.id === id);
+    if (!plan) throw new NotFoundException('Membership plan not found.');
+    Object.assign(plan, data, {
+      courseAccess: accessAllCourses ? [] : courseIds.map((courseId) => ({ courseId })),
+      updatedAt: new Date(),
+    });
+    return plan;
   }
 
   async createCourse(dto: any) {
@@ -244,6 +322,7 @@ export class AdminService {
             currency: fields.currency,
             level: fields.level,
             isPublished: fields.isPublished,
+            isArchived: false,
             modules: { create: this.toPrismaModules(fields.modules) },
           } as any,
           include: COURSE_INCLUDE,
@@ -393,17 +472,12 @@ export class AdminService {
   async deleteCourse(id: string) {
     if (this.prisma.isDbConnected) {
       try {
-        // Payments intentionally keep their audit history, but the optional
-        // course relation must be detached before deleting the course. The
-        // other course-owned records can be removed with the course.
-        await this.prisma.$transaction(async (transaction) => {
-          await transaction.payment.updateMany({
-            where: { courseId: id },
-            data: { courseId: null },
-          });
-          await transaction.certificate.deleteMany({ where: { courseId: id } });
-          await transaction.enrollment.deleteMany({ where: { courseId: id } });
-          await transaction.course.delete({ where: { id } });
+        // Course deletion is an archive operation. The catalog hides it
+        // immediately, while enrollment progress, certificates, reviews, and
+        // payment history remain available for reporting and support.
+        await this.prisma.course.update({
+          where: { id },
+          data: { isArchived: true, isPublished: false },
         });
         this.removeInMemoryCourse(id);
         return { success: true, deleted: true };
@@ -416,26 +490,18 @@ export class AdminService {
           `Course deletion failed for ${id}: ${error?.message || 'unknown database error'}`,
           error?.stack,
         );
-        throw new BadRequestException('Course could not be deleted.');
+        throw new BadRequestException('Course could not be archived.');
       }
     }
 
-    const before = this.prisma.inMemoryCourses.length;
-    this.prisma.inMemoryCourses = this.prisma.inMemoryCourses.filter(
-      (course) => course.id !== id,
+    const course = this.prisma.inMemoryCourses.find(
+      (candidate) => candidate.id === id,
     );
-    if (before === this.prisma.inMemoryCourses.length)
+    if (!course || course.isArchived)
       return { success: true, deleted: false };
-    this.prisma.inMemoryEnrollments = this.prisma.inMemoryEnrollments.filter(
-      (enrollment) => enrollment.courseId !== id,
-    );
-    this.prisma.inMemoryCertificates = this.prisma.inMemoryCertificates.filter(
-      (certificate) => certificate.courseId !== id,
-    );
-    this.prisma.inMemoryPayments = this.prisma.inMemoryPayments.map(
-      (payment) =>
-        payment.courseId === id ? { ...payment, courseId: null } : payment,
-    );
+    course.isArchived = true;
+    course.isPublished = false;
+    course.updatedAt = new Date();
     return { success: true, deleted: true };
   }
 
@@ -449,10 +515,19 @@ export class AdminService {
       code,
       discountPercent: dto.discountPercent ? Number(dto.discountPercent) : null,
       discountAmount: dto.discountAmount ? Number(dto.discountAmount) : null,
+      scope: String(dto.scope || 'COURSE').toUpperCase() === 'MEMBERSHIP' ? 'MEMBERSHIP' : 'COURSE',
+      courseId: dto.courseId || null,
       usageLimit: dto.usageLimit ? Number(dto.usageLimit) : null,
       timesUsed: 0,
       isActive: true,
     };
+
+    if (data.scope === 'COURSE' && !data.courseId) {
+      throw new BadRequestException('Course coupons must be locked to a course.');
+    }
+    if (data.scope === 'MEMBERSHIP' && data.courseId) {
+      throw new BadRequestException('Membership coupons cannot be attached to a course.');
+    }
 
     if (this.prisma.isDbConnected) {
       try {
@@ -767,8 +842,13 @@ export class AdminService {
   }
 
   private removeInMemoryCourse(id: string) {
-    this.prisma.inMemoryCourses = this.prisma.inMemoryCourses.filter(
-      (course) => course.id !== id,
+    const course = this.prisma.inMemoryCourses.find(
+      (candidate) => candidate.id === id,
     );
+    if (course) {
+      course.isArchived = true;
+      course.isPublished = false;
+      course.updatedAt = new Date();
+    }
   }
 }

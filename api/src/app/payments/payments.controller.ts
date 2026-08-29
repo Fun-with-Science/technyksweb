@@ -10,9 +10,24 @@ export class PaymentsController {
     private couponsService: CouponsService
   ) {}
 
+  @Get('plans')
+  async getPlans() {
+    return this.paymentsService.getMembershipPlans();
+  }
+
   @Post('coupon/validate')
-  async validateCoupon(@Body() dto: { code: string; originalAmount: number }) {
-    return this.couponsService.validateCoupon(dto.code, dto.originalAmount);
+  async validateCoupon(@Body() dto: {
+    code: string;
+    originalAmount: number;
+    type?: 'COURSE' | 'MEMBERSHIP';
+    courseId?: string;
+    planId?: string;
+  }) {
+    return this.couponsService.validateCoupon(dto.code, dto.originalAmount, {
+      type: dto.type || (dto.courseId ? 'COURSE' : 'MEMBERSHIP'),
+      courseId: dto.courseId,
+      planId: dto.planId,
+    });
   }
 
   @UseGuards(JwtAuthGuard)

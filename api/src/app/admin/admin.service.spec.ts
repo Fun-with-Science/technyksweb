@@ -8,10 +8,7 @@ describe('AdminService - course deletion', () => {
   beforeEach(() => {
     prisma = {
       isDbConnected: true,
-      course: { delete: vi.fn().mockResolvedValue({ id: 'course_1' }) },
-      payment: { updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
-      certificate: { deleteMany: vi.fn().mockResolvedValue({ count: 1 }) },
-      enrollment: { deleteMany: vi.fn().mockResolvedValue({ count: 1 }) },
+      course: { update: vi.fn().mockResolvedValue({ id: 'course_1', isArchived: true }) },
       $transaction: vi.fn(
         async (callback: (transaction: any) => Promise<unknown>) =>
           callback(prisma),
@@ -24,28 +21,19 @@ describe('AdminService - course deletion', () => {
     service = new AdminService(prisma);
   });
 
-  it('detaches payments and removes course-owned records before deleting a database course', async () => {
+  it('archives a database course without destroying enrollment history', async () => {
     await expect(service.deleteCourse('course_1')).resolves.toEqual({
       success: true,
       deleted: true,
     });
 
-    expect(prisma.payment.updateMany).toHaveBeenCalledWith({
-      where: { courseId: 'course_1' },
-      data: { courseId: null },
-    });
-    expect(prisma.certificate.deleteMany).toHaveBeenCalledWith({
-      where: { courseId: 'course_1' },
-    });
-    expect(prisma.enrollment.deleteMany).toHaveBeenCalledWith({
-      where: { courseId: 'course_1' },
-    });
-    expect(prisma.course.delete).toHaveBeenCalledWith({
+    expect(prisma.course.update).toHaveBeenCalledWith({
       where: { id: 'course_1' },
+      data: { isArchived: true, isPublished: false },
     });
   });
 
-  it('removes the course and cleans related records in the local adapter', async () => {
+  it('archives the course while retaining local enrollment and payment records', async () => {
     prisma.isDbConnected = false;
     prisma.inMemoryCourses = [{ id: 'course_1' }, { id: 'course_2' }];
     prisma.inMemoryEnrollments = [
@@ -60,12 +48,10 @@ describe('AdminService - course deletion', () => {
       deleted: true,
     });
 
-    expect(prisma.inMemoryCourses).toEqual([{ id: 'course_2' }]);
-    expect(prisma.inMemoryEnrollments).toEqual([{ courseId: 'course_2' }]);
-    expect(prisma.inMemoryCertificates).toEqual([]);
-    expect(prisma.inMemoryPayments).toEqual([
-      { courseId: null, status: 'SUCCESS' },
-    ]);
+    expect(prisma.inMemoryCourses[0]).toMatchObject({ id: 'course_1', isArchived: true, isPublished: false });
+    expect(prisma.inMemoryEnrollments).toHaveLength(2);
+    expect(prisma.inMemoryCertificates).toEqual([{ courseId: 'course_1' }]);
+    expect(prisma.inMemoryPayments).toEqual([{ courseId: 'course_1', status: 'SUCCESS' }]);
   });
 
   it('treats a missing local course as an already-completed delete', async () => {

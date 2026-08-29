@@ -69,6 +69,7 @@ export class VideoService {
           });
           activeSub = await this.prisma.subscription.findFirst({
             where: { userId, status: 'ACTIVE' },
+            include: { plan: { include: { courseAccess: true } } },
           });
         } catch {
           // Use the local adapter below.
@@ -87,9 +88,14 @@ export class VideoService {
         );
       }
 
-      if (!enrollment && !activeSub) {
+      const membershipHasAccess = this.hasMembershipCourseAccess(
+        activeSub,
+        lesson.module.courseId,
+      );
+
+      if (!enrollment && !membershipHasAccess) {
         throw new ForbiddenException(
-          'You must enroll in this track or join Membership to stream this lesson.',
+          'You must enroll in this course or join a membership plan that includes it.',
         );
       }
     }
@@ -197,5 +203,16 @@ export class VideoService {
     }
 
     return null;
+  }
+
+  private hasMembershipCourseAccess(subscription: any, courseId: string): boolean {
+    if (!subscription || subscription.status !== 'ACTIVE') return false;
+    const plan = subscription.plan || this.prisma.inMemoryMembershipPlans.find(
+      (candidate) => candidate.id === subscription.planId,
+    );
+    if (!plan || plan.accessAllCourses !== false) return true;
+    return (plan.courseAccess || []).some(
+      (access: any) => (access.courseId || access) === courseId,
+    );
   }
 }

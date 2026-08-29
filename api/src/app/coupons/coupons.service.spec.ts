@@ -13,6 +13,7 @@ describe('CouponsService', () => {
         count: vi.fn().mockResolvedValue(0),
         createMany: vi.fn(),
       },
+      inMemoryCoupons: [],
     };
     service = new CouponsService(mockPrisma);
   });
@@ -21,12 +22,16 @@ describe('CouponsService', () => {
     mockPrisma.coupon.findUnique.mockResolvedValue({
       code: 'TECHNYKS50',
       discountPercent: 50,
+      courseId: 'course_1',
       isActive: true,
       timesUsed: 0,
       usageLimit: 100,
     });
 
-    const result = await service.validateCoupon('TECHNYKS50', 4000);
+    const result = await service.validateCoupon('TECHNYKS50', 4000, {
+      type: 'COURSE',
+      courseId: 'course_1',
+    });
     expect(result.calculatedDiscount).toBe(2000);
     expect(result.finalAmount).toBe(2000);
   });
@@ -35,12 +40,16 @@ describe('CouponsService', () => {
     mockPrisma.coupon.findUnique.mockResolvedValue({
       code: 'FLAT1000',
       discountAmount: 1000,
+      courseId: 'course_1',
       isActive: true,
       timesUsed: 0,
       usageLimit: 100,
     });
 
-    const result = await service.validateCoupon('FLAT1000', 4000);
+    const result = await service.validateCoupon('FLAT1000', 4000, {
+      type: 'COURSE',
+      courseId: 'course_1',
+    });
     expect(result.calculatedDiscount).toBe(1000);
     expect(result.finalAmount).toBe(3000);
   });
@@ -49,13 +58,33 @@ describe('CouponsService', () => {
     mockPrisma.coupon.findUnique.mockResolvedValue({
       code: 'EXPIRED',
       discountPercent: 20,
+      courseId: 'course_1',
       isActive: true,
       timesUsed: 50,
       usageLimit: 50,
     });
 
-    await expect(service.validateCoupon('EXPIRED', 4000)).rejects.toThrow(
+    await expect(service.validateCoupon('EXPIRED', 4000, {
+      type: 'COURSE',
+      courseId: 'course_1',
+    })).rejects.toThrow(
       'This coupon usage limit has been reached.'
     );
+  });
+
+  it('does not allow a membership coupon to be used on a course', async () => {
+    mockPrisma.coupon.findUnique.mockResolvedValue({
+      code: 'MEMBER100',
+      discountAmount: 100,
+      scope: 'MEMBERSHIP',
+      isActive: true,
+      timesUsed: 0,
+      usageLimit: 10,
+    });
+
+    await expect(service.validateCoupon('MEMBER100', 1499, {
+      type: 'COURSE',
+      courseId: 'course_1',
+    })).rejects.toThrow('This coupon is locked to the membership program or another course.');
   });
 });

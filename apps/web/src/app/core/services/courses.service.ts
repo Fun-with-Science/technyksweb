@@ -55,6 +55,7 @@ export interface Course {
   level: string;
   status?: 'LIVE' | 'DRAFT' | 'BANNED';
   isPublished: boolean;
+  isArchived?: boolean;
   earnedThisMonth?: number;
   enrollmentsThisMonth?: number;
   rating?: number;
@@ -439,6 +440,7 @@ export class CoursesService {
       level: course.level || 'Intermediate',
       status,
       isPublished: status === 'LIVE',
+      isArchived: Boolean(course.isArchived),
       earnedThisMonth: Number(course.earnedThisMonth ?? 0),
       enrollmentsThisMonth: Number(course.enrollmentsThisMonth ?? 0),
       rating: Number(course.rating ?? 0),

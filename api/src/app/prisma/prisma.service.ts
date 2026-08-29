@@ -37,6 +37,43 @@ export class PrismaService
       await this.$executeRawUnsafe(
         'ALTER TABLE "Course" ADD COLUMN IF NOT EXISTS "isFree" BOOLEAN NOT NULL DEFAULT FALSE',
       );
+      await this.$executeRawUnsafe(
+        'ALTER TABLE "Course" ADD COLUMN IF NOT EXISTS "isArchived" BOOLEAN NOT NULL DEFAULT FALSE',
+      );
+      await this.$executeRawUnsafe(
+        'ALTER TABLE "MembershipPlan" ADD COLUMN IF NOT EXISTS "description" TEXT',
+      );
+      await this.$executeRawUnsafe(
+        'ALTER TABLE "MembershipPlan" ADD COLUMN IF NOT EXISTS "isActive" BOOLEAN NOT NULL DEFAULT TRUE',
+      );
+      await this.$executeRawUnsafe(
+        'ALTER TABLE "MembershipPlan" ADD COLUMN IF NOT EXISTS "accessAllCourses" BOOLEAN NOT NULL DEFAULT TRUE',
+      );
+      await this.$executeRawUnsafe(
+        'ALTER TABLE "Coupon" ADD COLUMN IF NOT EXISTS "scope" TEXT NOT NULL DEFAULT \'COURSE\'',
+      );
+      await this.$executeRawUnsafe(
+        'ALTER TABLE "Coupon" ADD COLUMN IF NOT EXISTS "courseId" TEXT',
+      );
+      await this.$executeRawUnsafe(
+        'ALTER TABLE "Payment" ADD COLUMN IF NOT EXISTS "couponCode" TEXT',
+      );
+      await this.$executeRawUnsafe(
+        'ALTER TABLE "Payment" ADD COLUMN IF NOT EXISTS "planId" TEXT',
+      );
+      await this.$executeRawUnsafe(`
+        CREATE TABLE IF NOT EXISTS "MembershipCourseAccess" (
+          "planId" TEXT NOT NULL,
+          "courseId" TEXT NOT NULL,
+          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          CONSTRAINT "MembershipCourseAccess_pkey" PRIMARY KEY ("planId", "courseId"),
+          CONSTRAINT "MembershipCourseAccess_planId_fkey" FOREIGN KEY ("planId") REFERENCES "MembershipPlan"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+          CONSTRAINT "MembershipCourseAccess_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "Course"("id") ON DELETE CASCADE ON UPDATE CASCADE
+        )
+      `);
+      await this.$executeRawUnsafe(
+        'CREATE INDEX IF NOT EXISTS "MembershipCourseAccess_courseId_idx" ON "MembershipCourseAccess"("courseId")',
+      );
       await this.$executeRawUnsafe(`
         CREATE TABLE IF NOT EXISTS "Review" (
           "id" TEXT NOT NULL,

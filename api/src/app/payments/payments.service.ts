@@ -9,30 +9,39 @@ const INITIAL_PLANS = [
     id: 'plan_free',
     name: 'Free Tier',
     slug: 'free',
+    description: 'Start learning with previews, community access, and academy updates.',
     price: 0,
     currency: 'INR',
     interval: 'MONTHLY',
     isFree: true,
+    isActive: true,
+    accessAllCourses: false,
     features: ['Free preview lessons', 'Community access', 'Newsletter updates'],
   },
   {
     id: 'plan_pro_monthly',
     name: 'Pro Monthly',
     slug: 'pro-monthly',
+    description: 'A focused membership for engineers building production systems.',
     price: 1499,
     currency: 'INR',
     interval: 'MONTHLY',
     isFree: false,
+    isActive: true,
+    accessAllCourses: true,
     features: ['All Architecture Tracks', 'Source code downloads', 'Q&A forum priority', 'Discord role'],
   },
   {
     id: 'plan_all_access_annual',
     name: 'All-Access Annual',
     slug: 'all-access-annual',
+    description: 'The complete Technyks learning program with every current and future course.',
     price: 11999,
     currency: 'INR',
     interval: 'ANNUAL',
     isFree: false,
+    isActive: true,
+    accessAllCourses: true,
     features: ['All Architecture Tracks + future tracks', '1-on-1 Architecture review', 'Auto-generated Certificates', 'RBI UPI Autopay e-mandate'],
   },
 ];
@@ -63,8 +72,29 @@ export class PaymentsService implements OnModuleInit {
     }
 
     if (this.prisma.inMemoryMembershipPlans.length === 0) {
-      this.prisma.inMemoryMembershipPlans = INITIAL_PLANS.map(plan => ({ ...plan }));
+      this.prisma.inMemoryMembershipPlans = INITIAL_PLANS.map(plan => ({
+        ...plan,
+        courseAccess: [],
+      }));
     }
+  }
+
+  async getMembershipPlans(includeInactive = false) {
+    if (this.prisma.isDbConnected !== false) {
+      try {
+        return await this.prisma.membershipPlan.findMany({
+          where: includeInactive ? undefined : { isActive: true },
+          include: { courseAccess: { select: { courseId: true } } },
+          orderBy: { price: 'asc' },
+        });
+      } catch {
+        // Use the local adapter below.
+      }
+    }
+
+    return this.prisma.inMemoryMembershipPlans
+      .filter((plan) => includeInactive || plan.isActive !== false)
+      .sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
   }
 
   async createCheckoutOrder(dto: {
@@ -103,7 +133,13 @@ export class PaymentsService implements OnModuleInit {
 
     let finalAmount = originalPrice;
     if (dto.couponCode) {
-      const couponResult = await this.couponsService.validateCoupon(dto.couponCode, originalPrice);
+      const couponResult = await this.couponsService.validateCoupon(
+        dto.couponCode,
+        originalPrice,
+        dto.courseId
+          ? { type: 'COURSE', courseId: dto.courseId }
+          : { type: 'MEMBERSHIP', planId: dto.planId },
+      );
       finalAmount = couponResult.finalAmount;
     }
 
@@ -117,6 +153,8 @@ export class PaymentsService implements OnModuleInit {
       provider,
       paymentIntentId: orderId,
       courseId: dto.courseId || null,
+      planId: dto.planId || null,
+      couponCode: dto.couponCode?.trim().toUpperCase() || null,
     };
 
     let payment: any;
@@ -178,6 +216,7 @@ export class PaymentsService implements OnModuleInit {
     payment ??= (this.prisma.inMemoryPayments || []).find(item => item.id === paymentId);
     if (!payment) throw new NotFoundException('Payment record not found.');
 
+    const wasAlreadySuccessful = payment.status === 'SUCCESS';
     let updated: any = { ...payment, status: 'SUCCESS', updatedAt: new Date() };
     if (this.prisma.isDbConnected !== false) {
       try {
@@ -188,6 +227,10 @@ export class PaymentsService implements OnModuleInit {
     }
     const memoryPayment = (this.prisma.inMemoryPayments || []).find(item => item.id === paymentId);
     if (memoryPayment) Object.assign(memoryPayment, updated);
+
+    if (!wasAlreadySuccessful && payment.couponCode) {
+      await this.couponsService.incrementUsage(payment.couponCode);
+    }
 
     if (payment.courseId) {
       if (this.prisma.isDbConnected !== false) {
@@ -221,31 +264,105 @@ export class PaymentsService implements OnModuleInit {
       }
     }
 
+    if (!wasAlreadySuccessful && payment.planId) {
+      const plan = await this.findPlan(payment.planId);
+      if (plan) {
+        const start = new Date();
+        const end = new Date(start);
+        if (plan.interval === 'ANNUAL') end.setFullYear(end.getFullYear() + 1);
+        else end.setMonth(end.getMonth() + 1);
+
+        if (this.prisma.isDbConnected !== false) {
+          try {
+            const existingSubscription = await this.prisma.subscription.findFirst({
+              where: { userId: payment.userId, planId: plan.id, status: 'ACTIVE' },
+            });
+            if (existingSubscription) {
+              await this.prisma.subscription.update({
+                where: { id: existingSubscription.id },
+                data: { currentPeriodStart: start, currentPeriodEnd: end },
+              });
+            } else {
+              await this.prisma.subscription.create({
+                data: {
+                  userId: payment.userId,
+                  planId: plan.id,
+                  status: 'ACTIVE',
+                  currentPeriodStart: start,
+                  currentPeriodEnd: end,
+                },
+              });
+            }
+            return updated;
+          } catch {
+            // Use the local adapter below.
+          }
+        }
+
+        const existingSubscription = this.prisma.inMemorySubscriptions.find(
+          (subscription) =>
+            subscription.userId === payment.userId &&
+            subscription.planId === plan.id &&
+            subscription.status === 'ACTIVE',
+        );
+        if (existingSubscription) {
+          existingSubscription.currentPeriodStart = start;
+          existingSubscription.currentPeriodEnd = end;
+        } else {
+          this.prisma.inMemorySubscriptions.push({
+            id: `subscription_${Date.now().toString(36)}`,
+            userId: payment.userId,
+            planId: plan.id,
+            status: 'ACTIVE',
+            currentPeriodStart: start,
+            currentPeriodEnd: end,
+            plan,
+            createdAt: start,
+            updatedAt: start,
+          });
+        }
+      }
+    }
+
     return updated;
   }
 
   private async findCourse(id: string) {
     if (this.prisma.isDbConnected !== false) {
       try {
-        const course = await this.prisma.course.findUnique({ where: { id } });
+        const course = await this.prisma.course.findFirst({
+          where: { id, isArchived: false },
+        });
         if (course) return course;
       } catch {
         // Use the local adapter below.
       }
     }
-    return this.prisma.inMemoryCourses.find(course => course.id === id);
+    return this.prisma.inMemoryCourses.find(
+      course => course.id === id && !course.isArchived,
+    );
   }
 
   private async findPlan(idOrSlug: string) {
     if (this.prisma.isDbConnected !== false) {
       try {
-        const byId = await this.prisma.membershipPlan.findUnique({ where: { id: idOrSlug } });
+        const byId = await this.prisma.membershipPlan.findFirst({
+          where: { id: idOrSlug, isActive: true },
+          include: { courseAccess: true },
+        });
         if (byId) return byId;
-        return this.prisma.membershipPlan.findUnique({ where: { slug: idOrSlug } });
+        return this.prisma.membershipPlan.findFirst({
+          where: { slug: idOrSlug, isActive: true },
+          include: { courseAccess: true },
+        });
       } catch {
         // Use the local adapter below.
       }
     }
-    return this.prisma.inMemoryMembershipPlans.find(plan => plan.id === idOrSlug || plan.slug === idOrSlug);
+    return this.prisma.inMemoryMembershipPlans.find(
+      plan =>
+        plan.isActive !== false &&
+        (plan.id === idOrSlug || plan.slug === idOrSlug),
+    );
   }
 }
