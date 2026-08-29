@@ -73,9 +73,11 @@ import { AuthService } from '../../core/services/auth.service';
         } @else {
           <div class="w-full aspect-video bg-[#121A2B] technical-border rounded flex flex-col items-center justify-center p-8 text-center">
             <span class="material-symbols-outlined text-4xl text-[#ffb4ab] mb-2">lock_person</span>
-            <h3 class="font-['Hanken_Grotesk'] text-lg font-bold text-white mb-2">Streaming Unauthorized</h3>
+            <h3 class="font-['Hanken_Grotesk'] text-lg font-bold text-white mb-2">
+              {{ playbackError() ? 'This lesson is locked' : 'Streaming Unauthorized' }}
+            </h3>
             <p class="font-['Inter'] text-sm text-[#d9c3af] max-w-md mb-6">
-              This is paid token-gated content. Please enroll in this track or join Membership to stream this lesson.
+              {{ playbackError() || 'This is paid token-gated content. Please enroll in this track or join Membership to stream this lesson.' }}
             </p>
             <a routerLink="/courses" class="font-['JetBrains_Mono'] text-xs uppercase text-[#040810] bg-[#E8931A] px-6 py-3 rounded font-bold">
               Enroll in Track
@@ -85,42 +87,76 @@ import { AuthService } from '../../core/services/auth.service';
       </div>
 
       <!-- Right Drawer Curriculum Navigation Sidebar -->
-      <div class="w-full lg:w-96 bg-[#121A2B] border-l border-[#1E293B] p-6 flex flex-col gap-6">
-        <div>
+      <aside class="w-full lg:w-96 bg-[#121A2B] border-l border-[#1E293B] p-6 flex flex-col gap-6 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)]">
+        <div class="shrink-0">
           <span class="font-['JetBrains_Mono'] text-xs uppercase text-[#378ADD] font-bold">// TRACK CURRICULUM</span>
           <h2 class="font-['Hanken_Grotesk'] text-lg font-bold text-white mt-1">{{ course()?.title }}</h2>
+          <div class="flex items-center justify-between gap-3 mt-4">
+            <span class="font-['JetBrains_Mono'] text-[11px] uppercase text-[#a18d7b]">
+              {{ course()?.modules?.length || 0 }} sections
+            </span>
+            <button
+              type="button"
+              (click)="toggleAllModules()"
+              class="font-['JetBrains_Mono'] text-[11px] uppercase text-[#378ADD] hover:text-[#E8931A] transition-colors"
+            >
+              {{ allModulesExpanded() ? 'Collapse all' : 'Expand all' }}
+            </button>
+          </div>
         </div>
 
-        <div class="flex flex-col gap-4 overflow-y-auto max-h-[75vh]">
+        <div class="flex-1 flex flex-col gap-3 overflow-y-auto pr-1" role="list" aria-label="Course curriculum">
           @for (module of course()?.modules; track module.id) {
-            <div class="border border-[#1E293B] rounded overflow-hidden">
-              <div class="p-3.5 bg-[#040810] font-['Hanken_Grotesk'] text-xs font-bold text-white border-b border-[#1E293B]">
-                {{ module.title }}
-              </div>
-              <div class="divide-y divide-[#1E293B]/40">
-                @for (lesson of module.lessons; track lesson.id) {
-                  <a
-                    [routerLink]="['/courses', course()?.slug, 'watch', lesson.id]"
-                    [class.bg-[#378ADD]/15]="lesson.id === currentLessonId()"
-                    class="p-3.5 flex items-center justify-between text-xs font-['Inter'] hover:bg-[#040810]/60 transition-colors"
-                  >
-                    <div class="flex items-center gap-2.5">
-                      <span class="material-symbols-outlined text-sm text-[#378ADD]">
-                        {{ lesson.id === currentLessonId() ? 'play_circle' : 'ondemand_video' }}
-                      </span>
-                      <span class="text-[#e0e3e5] line-clamp-1">{{ lesson.title }}</span>
-                    </div>
+            <section class="border border-[#1E293B] rounded overflow-hidden" role="listitem">
+              <button
+                type="button"
+                (click)="toggleModule(module.id)"
+                [attr.aria-expanded]="isModuleExpanded(module.id)"
+                class="w-full p-3.5 bg-[#040810] flex items-center justify-between gap-3 text-left border-b border-[#1E293B] hover:bg-[#0a1220] transition-colors"
+              >
+                <span class="flex items-center gap-2 min-w-0">
+                  <span class="material-symbols-outlined text-base text-[#E8931A]">
+                    {{ isModuleExpanded(module.id) ? 'expand_less' : 'expand_more' }}
+                  </span>
+                  <span class="font-['Hanken_Grotesk'] text-xs font-bold text-white truncate">{{ module.title }}</span>
+                </span>
+                <span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b] whitespace-nowrap">
+                  {{ module.lessons.length }} lectures
+                </span>
+              </button>
 
-                    <span class="font-['JetBrains_Mono'] text-[11px] text-[#a18d7b]">
-                      {{ Math.round(lesson.duration / 60) }}m
-                    </span>
-                  </a>
-                }
-              </div>
-            </div>
+              @if (isModuleExpanded(module.id)) {
+                <div class="divide-y divide-[#1E293B]/40">
+                  @for (lesson of module.lessons; track lesson.id) {
+                    <a
+                      [routerLink]="['/courses', course()?.slug, 'watch', lesson.id]"
+                      [class.bg-[#378ADD]/15]="lesson.id === currentLessonId()"
+                      [attr.aria-current]="lesson.id === currentLessonId() ? 'page' : null"
+                      class="p-3.5 flex items-center justify-between gap-3 text-xs font-['Inter'] hover:bg-[#040810]/60 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#E8931A]"
+                    >
+                      <span class="flex items-center gap-2.5 min-w-0">
+                        <span class="material-symbols-outlined text-sm text-[#378ADD]">
+                          {{ lesson.id === currentLessonId() ? 'play_circle' : (lesson.isFreePreview ? 'lock_open' : 'ondemand_video') }}
+                        </span>
+                        <span class="text-[#e0e3e5] line-clamp-2">{{ lesson.title }}</span>
+                      </span>
+
+                      <span class="flex items-center gap-2 shrink-0">
+                        @if (lesson.isFreePreview) {
+                          <span class="font-['JetBrains_Mono'] text-[10px] uppercase text-[#E8931A]">Preview</span>
+                        }
+                        <span class="font-['JetBrains_Mono'] text-[11px] text-[#a18d7b]">
+                          {{ Math.max(1, Math.round(lesson.duration / 60)) }}m
+                        </span>
+                      </span>
+                    </a>
+                  }
+                </div>
+              }
+            </section>
           }
         </div>
-      </div>
+      </aside>
     </div>
   `,
 })
@@ -134,10 +170,12 @@ export class WatchComponent implements OnInit, OnDestroy {
   course = signal<Course | null>(null);
   playbackData = signal<PlaybackTokenResponse | null>(null);
   safeEmbedUrl = signal<SafeResourceUrl | null>(null);
+  playbackError = signal('');
   currentLessonId = signal<string>('');
   courseId = signal<string>('');
   isLoading = signal(true);
   isCurrentCompleted = signal(false);
+  expandedModules = signal<Set<string>>(new Set());
 
   private progressInterval: any;
   Math = Math;
@@ -147,13 +185,31 @@ export class WatchComponent implements OnInit, OnDestroy {
       const slug = params['slug'];
       const lessonId = params['lessonId'];
       this.currentLessonId.set(lessonId);
+      this.isLoading.set(true);
+      this.playbackData.set(null);
+      this.safeEmbedUrl.set(null);
+      this.playbackError.set('');
+      this.isCurrentCompleted.set(false);
 
       if (slug) {
         this.coursesService.getCourseBySlug(slug).subscribe({
           next: (c) => {
             this.course.set(c);
             this.courseId.set(c.id);
+            const activeModule = (c.modules || []).find((module) =>
+              (module.lessons || []).some((lesson) => lesson.id === lessonId),
+            );
+            this.expandedModules.set(
+              new Set([
+                ...(c.modules || []).slice(0, 1).map((module) => module.id),
+                ...(activeModule ? [activeModule.id] : []),
+              ]),
+            );
             this.loadVideoToken(lessonId);
+          },
+          error: (error) => {
+            this.isLoading.set(false);
+            this.playbackError.set(error?.error?.message || 'Course content could not be loaded.');
           },
         });
       }
@@ -182,6 +238,7 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.enrollmentsService.getVideoToken(lessonId).subscribe({
       next: (data) => {
         this.playbackData.set(data);
+        this.playbackError.set('');
         this.safeEmbedUrl.set(
           data.embedUrl
             ? this.sanitizer.bypassSecurityTrustResourceUrl(data.embedUrl)
@@ -190,11 +247,40 @@ export class WatchComponent implements OnInit, OnDestroy {
         this.isLoading.set(false);
         this.saveProgressInterval();
       },
-      error: () => {
+      error: (error) => {
         this.isLoading.set(false);
         this.playbackData.set(null);
+        this.safeEmbedUrl.set(null);
+        this.playbackError.set(
+          error?.error?.message || 'This lesson could not be opened. Please enroll or check the preview settings.',
+        );
       },
     });
+  }
+
+  isModuleExpanded(moduleId: string): boolean {
+    return this.expandedModules().has(moduleId);
+  }
+
+  toggleModule(moduleId: string) {
+    const expanded = new Set(this.expandedModules());
+    if (expanded.has(moduleId)) expanded.delete(moduleId);
+    else expanded.add(moduleId);
+    this.expandedModules.set(expanded);
+  }
+
+  allModulesExpanded(): boolean {
+    const modules = this.course()?.modules || [];
+    return modules.length > 0 && modules.every((module) => this.expandedModules().has(module.id));
+  }
+
+  toggleAllModules() {
+    const modules = this.course()?.modules || [];
+    this.expandedModules.set(
+      this.allModulesExpanded()
+        ? new Set()
+        : new Set(modules.map((module) => module.id)),
+    );
   }
 
   saveProgressInterval() {

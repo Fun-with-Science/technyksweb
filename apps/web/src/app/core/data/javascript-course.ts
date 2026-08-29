@@ -229,7 +229,7 @@ export const JAVASCRIPT_COURSE: Course = {
           title: `${order}. ${lecture.title}`,
           duration: lecture.duration,
           order,
-          isFreePreview: false,
+          isFreePreview: order === 1,
         };
       },
     ),

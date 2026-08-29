@@ -289,13 +289,14 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                   @if (isModuleExpanded(module.id)) {
                     <div class="divide-y divide-[#1E293B]/40">
                       @for (lesson of module.lessons; track lesson.id) {
-                        <div
+                        <a
+                          [routerLink]="['/courses', course()?.slug, 'watch', lesson.id]"
                           class="p-4 flex items-center justify-between gap-4 hover:bg-[#040810]/40 transition-colors"
                         >
                           <div class="flex items-center gap-3 min-w-0">
                             <span
                               class="material-symbols-outlined text-[#378ADD] text-sm"
-                              >play_circle</span
+                              >{{ lesson.isFreePreview ? 'play_circle' : 'lock' }}</span
                             >
                             <span
                               class="font-['Inter'] text-sm text-[#e0e3e5] truncate"
@@ -308,7 +309,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                               <span
                                 class="font-['JetBrains_Mono'] text-[10px] text-[#E8931A] border border-[#E8931A]/40 px-2 py-0.5 rounded uppercase font-semibold"
                               >
-                                FREE PREVIEW
+                                WATCH PREVIEW
                               </span>
                             }
                             <span
@@ -317,7 +318,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                               {{ Math.round(lesson.duration / 60) }}m
                             </span>
                           </div>
-                        </div>
+                        </a>
                       }
                     </div>
                   }

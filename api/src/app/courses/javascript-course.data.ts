@@ -339,7 +339,7 @@ export const JAVASCRIPT_COURSE = {
           title: `${order}. ${lecture.title}`,
           duration: lecture.duration,
           order,
-          isFreePreview: false,
+          isFreePreview: order === 1,
           videoAssetRef: `youtube:${lecture.videoId}`,
         };
       },
