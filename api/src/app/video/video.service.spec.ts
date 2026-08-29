@@ -1,0 +1,44 @@
+import { describe, expect, it, vi } from 'vitest';
+import { VideoService } from './video.service';
+
+describe('VideoService - YouTube Membership playback', () => {
+  it('returns a protected YouTube embed for an authorized free-preview lesson', async () => {
+    const service = new VideoService(
+      {
+        isDbConnected: false,
+        inMemoryCourses: [
+          {
+            id: 'course-javascript-2026',
+            modules: [
+              {
+                lessons: [
+                  {
+                    id: 'javascript-lesson-01',
+                    title: 'Course Introduction',
+                    isFreePreview: true,
+                    videoAssetRef: 'youtube:qz3dH9RdvoM',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        inMemoryEnrollments: [],
+        inMemorySubscriptions: [],
+      } as any,
+      { get: vi.fn() } as any,
+    );
+
+    const result = await service.generateSignedPlaybackToken(
+      null,
+      'javascript-lesson-01',
+    );
+
+    expect(result.provider).toBe('YOUTUBE');
+    expect(result.videoAvailable).toBe(true);
+    expect(result.embedUrl).toBe(
+      'https://www.youtube-nocookie.com/embed/qz3dH9RdvoM?rel=0&modestbranding=1&playsinline=1',
+    );
+    expect(result.embedUrl).not.toContain('playlist');
+  });
+});

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, of, map, BehaviorSubject, tap, defer, throwError } from 'rxjs';
+import { JAVASCRIPT_COURSE } from '../data/javascript-course';
 
 export interface Lesson {
   id: string;
@@ -42,6 +43,7 @@ const LEGACY_STORAGE_KEY = 'technyks_courses_store';
 const METRICS_MIGRATION_KEY = 'technyks_course_metrics_v1';
 
 const REAL_PRODUCTION_COURSES: Course[] = [
+  JAVASCRIPT_COURSE,
   {
     id: 'course-n8n-1',
     slug: 'ai-automation-engineer-n8n',

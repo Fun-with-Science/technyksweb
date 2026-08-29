@@ -1,8 +1,18 @@
-import { Component, signal, inject, OnInit, OnDestroy, HostListener } from '@angular/core';
+import {
+  Component,
+  signal,
+  inject,
+  OnInit,
+  OnDestroy,
+  HostListener,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { EnrollmentsService, PlaybackTokenResponse } from '../../core/services/enrollments.service';
+import {
+  EnrollmentsService,
+  PlaybackTokenResponse,
+} from '../../core/services/enrollments.service';
 import { CoursesService, Course } from '../../core/services/courses.service';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -17,7 +27,7 @@ import { AuthService } from '../../core/services/auth.service';
         @if (isLoading()) {
           <div class="w-full aspect-video bg-[#121A2B] technical-border rounded flex flex-col items-center justify-center">
             <span class="material-symbols-outlined animate-spin text-4xl text-[#E8931A] mb-2">progress_activity</span>
-            <span class="font-['JetBrains_Mono'] text-xs text-[#378ADD]">Verifying Tokenized Bunny Stream Embed...</span>
+            <span class="font-['JetBrains_Mono'] text-xs text-[#378ADD]">Verifying protected lesson playback...</span>
           </div>
         } @else if (playbackData()?.videoAvailable && safeEmbedUrl()) {
           <div class="w-full aspect-video bg-black rounded overflow-hidden shadow-2xl relative border border-[#1E293B]">
@@ -33,7 +43,7 @@ import { AuthService } from '../../core/services/auth.service';
             <div>
               <div class="inline-flex items-center gap-2 font-['JetBrains_Mono'] text-[11px] text-[#E8931A] mb-1">
                 <span class="material-symbols-outlined text-sm">lock</span>
-                TOKEN AUTHENTICATED STREAM (EXPIRES IN 4H)
+                {{ playbackData()?.provider === 'YOUTUBE' ? 'YOUTUBE MEMBERSHIP VIDEO' : 'TOKEN AUTHENTICATED BUNNY STREAM (EXPIRES IN 4H)' }}
               </div>
               <h1 class="font-['Hanken_Grotesk'] text-xl font-bold text-white">
                 {{ playbackData()?.title }}
@@ -57,7 +67,7 @@ import { AuthService } from '../../core/services/auth.service';
             <span class="material-symbols-outlined text-4xl text-[#E8931A] mb-2">video_settings</span>
             <h3 class="font-['Hanken_Grotesk'] text-lg font-bold text-white mb-2">Video not connected yet</h3>
             <p class="font-['Inter'] text-sm text-[#d9c3af] max-w-md">
-              This lesson is ready for Bunny Stream. Add its real Bunny Stream Video ID in the course curriculum when your Bunny account is connected.
+              This lesson does not have a playable video source yet. Add a Bunny Stream video ID or a YouTube Membership video reference in the curriculum.
             </p>
           </div>
         } @else {
@@ -112,7 +122,7 @@ import { AuthService } from '../../core/services/auth.service';
         </div>
       </div>
     </div>
-  `
+  `,
 })
 export class WatchComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
@@ -133,7 +143,7 @@ export class WatchComponent implements OnInit, OnDestroy {
   Math = Math;
 
   ngOnInit() {
-    this.route.params.subscribe(params => {
+    this.route.params.subscribe((params) => {
       const slug = params['slug'];
       const lessonId = params['lessonId'];
       this.currentLessonId.set(lessonId);
@@ -144,7 +154,7 @@ export class WatchComponent implements OnInit, OnDestroy {
             this.course.set(c);
             this.courseId.set(c.id);
             this.loadVideoToken(lessonId);
-          }
+          },
         });
       }
     });
@@ -172,24 +182,34 @@ export class WatchComponent implements OnInit, OnDestroy {
     this.enrollmentsService.getVideoToken(lessonId).subscribe({
       next: (data) => {
         this.playbackData.set(data);
-        this.safeEmbedUrl.set(data.embedUrl ? this.sanitizer.bypassSecurityTrustResourceUrl(data.embedUrl) : null);
+        this.safeEmbedUrl.set(
+          data.embedUrl
+            ? this.sanitizer.bypassSecurityTrustResourceUrl(data.embedUrl)
+            : null,
+        );
         this.isLoading.set(false);
         this.saveProgressInterval();
       },
       error: () => {
         this.isLoading.set(false);
         this.playbackData.set(null);
-      }
+      },
     });
   }
 
   saveProgressInterval() {
-    if (this.authService.isAuthenticated() && this.courseId() && this.currentLessonId()) {
-      this.enrollmentsService.updateProgress({
-        courseId: this.courseId(),
-        lessonId: this.currentLessonId(),
-        isCompleted: this.isCurrentCompleted(),
-      }).subscribe();
+    if (
+      this.authService.isAuthenticated() &&
+      this.courseId() &&
+      this.currentLessonId()
+    ) {
+      this.enrollmentsService
+        .updateProgress({
+          courseId: this.courseId(),
+          lessonId: this.currentLessonId(),
+          isCompleted: this.isCurrentCompleted(),
+        })
+        .subscribe();
     }
   }
 

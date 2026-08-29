@@ -2,7 +2,12 @@ import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
-import { CoursesService, Course, Module, Lesson } from '../../core/services/courses.service';
+import {
+  CoursesService,
+  Course,
+  Module,
+  Lesson,
+} from '../../core/services/courses.service';
 import { AdminService, Coupon } from '../../core/services/admin.service';
 
 @Component({
@@ -142,7 +147,7 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                 <div>
                   <h2 class="font-['Hanken_Grotesk'] text-2xl font-bold text-white">Curriculum</h2>
                   <p class="font-['Inter'] text-xs text-[#d9c3af] mt-1">
-                    Create your course in sections, each focused on a single learning objective. Add video lectures and preview toggles, then attach Bunny Stream IDs when your Bunny account is ready.
+                    Create your course in sections, each focused on a single learning objective. Add video lectures and preview toggles, then attach a Bunny ID or a protected YouTube reference for each lesson.
                   </p>
                 </div>
                 <button (click)="addSection()" class="font-['JetBrains_Mono'] text-xs text-[#378ADD] border border-[#378ADD]/40 hover:bg-[#378ADD]/10 px-4 py-2 rounded flex items-center gap-1">
@@ -183,11 +188,11 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                                 class="bg-[#040810] border border-[#1E293B] rounded px-2.5 py-1 text-xs text-white font-['Inter'] font-semibold"
                               />
                               <div class="flex items-center gap-2 mt-1">
-                                <span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b]">Bunny Stream Video ID (optional):</span>
+                                <span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b]">Video source reference (optional):</span>
                                 <input
                                   type="text"
                                   [(ngModel)]="lesson.videoAssetRef"
-                                  placeholder="Paste the Bunny video ID when available"
+                                  placeholder="youtube:VIDEO_ID or Bunny video ID"
                                   class="bg-[#040810] border border-[#1E293B] rounded px-2 py-0.5 text-[10px] text-[#378ADD] font-['JetBrains_Mono']"
                                 />
                                 <span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b] ml-1">Minutes:</span>
@@ -414,7 +419,7 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
         </main>
       </div>
     </div>
-  `
+  `,
 })
 export class CourseEditorComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -425,7 +430,9 @@ export class CourseEditorComponent implements OnInit {
   course = signal<Course | null>(null);
   modules = signal<Module[]>([]);
   coupons = signal<Coupon[]>([]);
-  activeTab = signal<'curriculum' | 'landing' | 'intended' | 'pricing' | 'promotions'>('curriculum');
+  activeTab = signal<
+    'curriculum' | 'landing' | 'intended' | 'pricing' | 'promotions'
+  >('curriculum');
 
   referralUrl = '';
   copiedLink = false;
@@ -443,12 +450,12 @@ export class CourseEditorComponent implements OnInit {
           this.course.set(c);
           this.modules.set(c.modules || []);
           this.referralUrl = `https://technyks.com/courses/${c.slug}?referralCode=3BDC`;
-        }
+        },
       });
     }
 
     this.adminService.getCoupons().subscribe({
-      next: (data) => this.coupons.set(data)
+      next: (data) => this.coupons.set(data),
     });
   }
 
@@ -459,13 +466,15 @@ export class CourseEditorComponent implements OnInit {
     const updated: Course = {
       ...current,
       status: newStatus,
-      isPublished: newStatus === 'LIVE'
+      isPublished: newStatus === 'LIVE',
     };
     this.course.set(updated);
     this.coursesService.saveCourse(updated).subscribe({
       next: () => {
-        alert(`Course is now ${newStatus === 'LIVE' ? 'LIVE (Public)' : 'DRAFT (Private)'}! Changes saved.`);
-      }
+        alert(
+          `Course is now ${newStatus === 'LIVE' ? 'LIVE (Public)' : 'DRAFT (Private)'}! Changes saved.`,
+        );
+      },
     });
   }
 
@@ -481,7 +490,7 @@ export class CourseEditorComponent implements OnInit {
       id: 'mod-' + Date.now(),
       title: `Section ${current.length + 1}: New Curriculum Section`,
       order: current.length + 1,
-      lessons: []
+      lessons: [],
     };
     this.modules.set([...current, newMod]);
   }
@@ -501,7 +510,7 @@ export class CourseEditorComponent implements OnInit {
       duration: 600,
       order: target.lessons.length + 1,
       isFreePreview: false,
-      videoAssetRef: ''
+      videoAssetRef: '',
     };
     target.lessons.push(newLesson);
     this.modules.set([...current]);
@@ -525,22 +534,26 @@ export class CourseEditorComponent implements OnInit {
     if (typeof navigator !== 'undefined') {
       navigator.clipboard.writeText(this.referralUrl);
       this.copiedLink = true;
-      setTimeout(() => this.copiedLink = false, 2000);
+      setTimeout(() => (this.copiedLink = false), 2000);
     }
   }
 
   createCoupon() {
     if (!this.newCouponCode) return;
-    this.adminService.createCoupon({
-      code: this.newCouponCode,
-      discountAmount: this.newCouponDiscount || 479,
-    }).subscribe({
-      next: () => {
-        this.showCouponForm = false;
-        this.newCouponCode = '';
-        this.adminService.getCoupons().subscribe(data => this.coupons.set(data));
-      }
-    });
+    this.adminService
+      .createCoupon({
+        code: this.newCouponCode,
+        discountAmount: this.newCouponDiscount || 479,
+      })
+      .subscribe({
+        next: () => {
+          this.showCouponForm = false;
+          this.newCouponCode = '';
+          this.adminService
+            .getCoupons()
+            .subscribe((data) => this.coupons.set(data));
+        },
+      });
   }
 
   saveAllChanges() {
@@ -550,19 +563,24 @@ export class CourseEditorComponent implements OnInit {
     const updated: Course = {
       ...current,
       modules: this.modules(),
-      isPublished: current.status === 'LIVE'
+      isPublished: current.status === 'LIVE',
     };
 
     this.coursesService.saveCourse(updated).subscribe({
       next: () => {
         alert('Course & Curriculum saved successfully!');
-      }
+      },
     });
   }
 
   deleteCurrentCourse() {
     const current = this.course();
-    if (!current || typeof window === 'undefined' || !window.confirm('Are you sure you want to delete?')) return;
+    if (
+      !current ||
+      typeof window === 'undefined' ||
+      !window.confirm('Are you sure you want to delete?')
+    )
+      return;
 
     this.coursesService.deleteCourse(current.id).subscribe({
       next: () => {

@@ -19,6 +19,7 @@ export interface PlaybackTokenResponse {
   lessonId: string;
   title: string;
   isFreePreview: boolean;
+  provider: 'BUNNY' | 'YOUTUBE' | null;
   videoAvailable: boolean;
   embedUrl: string | null;
   expires: number;
@@ -35,7 +36,11 @@ export class EnrollmentsService {
     return this.http.get<Enrollment[]>('/api/enrollments/my');
   }
 
-  updateProgress(payload: { courseId: string; lessonId: string; isCompleted?: boolean }): Observable<Enrollment> {
+  updateProgress(payload: {
+    courseId: string;
+    lessonId: string;
+    isCompleted?: boolean;
+  }): Observable<Enrollment> {
     return this.http.post<Enrollment>('/api/enrollments/progress', payload);
   }
 
@@ -43,7 +48,11 @@ export class EnrollmentsService {
     return this.http.get<PlaybackTokenResponse>(`/api/video/token/${lessonId}`);
   }
 
-  getCertificate(courseId: string): Observable<{ certificateNumber: string; pdfUrl: string }> {
-    return this.http.get<{ certificateNumber: string; pdfUrl: string }>(`/api/enrollments/certificate/${courseId}`);
+  getCertificate(
+    courseId: string,
+  ): Observable<{ certificateNumber: string; pdfUrl: string }> {
+    return this.http.get<{ certificateNumber: string; pdfUrl: string }>(
+      `/api/enrollments/certificate/${courseId}`,
+    );
   }
 }
