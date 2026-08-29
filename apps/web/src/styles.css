@@ -218,3 +218,165 @@ body.dark-theme {
 .animate-marquee:hover {
   animation-play-state: paused;
 }
+
+/* Learning player layout. These semantic styles keep the curriculum readable
+   in both themes instead of relying on the dark palette token overrides. */
+.watch-shell {
+  background-color: #f8fafc;
+  color: #172033;
+}
+
+.watch-main {
+  min-width: 0;
+}
+
+.watch-sidebar {
+  background-color: #ffffff;
+  border-left: 1px solid #d7deea;
+  color: #172033;
+  box-shadow: -12px 0 30px rgba(15, 23, 42, 0.05);
+}
+
+.watch-card {
+  background-color: #ffffff;
+  border: 1px solid #d7deea;
+  color: #172033;
+}
+
+.watch-player {
+  background-color: #020617;
+  border: 1px solid #cbd5e1;
+}
+
+.watch-heading {
+  color: #172033;
+}
+
+.watch-muted {
+  color: #64748b;
+}
+
+.watch-accent {
+  color: #1d4ed8;
+}
+
+.watch-section {
+  background-color: #ffffff;
+  border: 1px solid #d7deea;
+}
+
+.watch-section-header {
+  background-color: #f1f5f9;
+  border-bottom: 1px solid #d7deea;
+  color: #172033;
+}
+
+.watch-section-header:hover {
+  background-color: #e2e8f0;
+}
+
+.watch-lesson-link {
+  background-color: #ffffff;
+  color: #334155;
+  text-decoration: none;
+}
+
+.watch-lesson-link:hover {
+  background-color: #f1f5f9;
+}
+
+.watch-lesson-link.watch-lesson-active {
+  background-color: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+}
+
+.watch-lesson-title {
+  color: #334155;
+}
+
+.watch-preview {
+  color: #b45309;
+}
+
+.dark-theme .watch-shell {
+  background-color: #040810;
+  color: #e0e3e5;
+}
+
+.dark-theme .watch-sidebar {
+  background-color: #121a2b;
+  border-left-color: #1e293b;
+  color: #e0e3e5;
+  box-shadow: -12px 0 30px rgba(0, 0, 0, 0.18);
+}
+
+.dark-theme .watch-card {
+  background-color: #121a2b;
+  border-color: #1e293b;
+  color: #e0e3e5;
+}
+
+.dark-theme .watch-player {
+  border-color: #1e293b;
+}
+
+.dark-theme .watch-heading {
+  color: #ffffff;
+}
+
+.dark-theme .watch-muted {
+  color: #a18d7b;
+}
+
+.dark-theme .watch-accent {
+  color: #378add;
+}
+
+.dark-theme .watch-section {
+  background-color: #121a2b;
+  border-color: #1e293b;
+}
+
+.dark-theme .watch-section-header {
+  background-color: #040810;
+  border-bottom-color: #1e293b;
+  color: #ffffff;
+}
+
+.dark-theme .watch-section-header:hover {
+  background-color: #0a1220;
+}
+
+.dark-theme .watch-lesson-link {
+  background-color: #121a2b;
+  color: #e0e3e5;
+}
+
+.dark-theme .watch-lesson-link:hover {
+  background-color: #0a1220;
+}
+
+.dark-theme .watch-lesson-link.watch-lesson-active {
+  background-color: rgba(55, 138, 221, 0.15);
+  color: #ffffff;
+}
+
+.dark-theme .watch-lesson-title {
+  color: #e0e3e5;
+}
+
+.dark-theme .watch-preview {
+  color: #e8931a;
+}
+
+@media (max-width: 767px) {
+  .watch-sidebar {
+    border-left: 0;
+    border-top: 1px solid #d7deea;
+    box-shadow: none;
+  }
+
+  .dark-theme .watch-sidebar {
+    border-top-color: #1e293b;
+  }
+}

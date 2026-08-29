@@ -21,16 +21,16 @@ import { AuthService } from '../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <div class="pt-16 min-h-screen bg-[#040810] flex flex-col lg:flex-row">
+    <div class="watch-shell pt-16 min-h-screen flex flex-col md:flex-row overflow-x-hidden">
       <!-- Main Video Player Container -->
-      <div class="flex-grow p-4 lg:p-8 flex flex-col gap-4">
+      <main class="watch-main min-w-0 flex-1 p-3 sm:p-4 md:p-5 lg:p-7 flex flex-col gap-4">
         @if (isLoading()) {
-          <div class="w-full aspect-video bg-[#121A2B] technical-border rounded flex flex-col items-center justify-center">
+          <div class="watch-card w-full aspect-video rounded flex flex-col items-center justify-center">
             <span class="material-symbols-outlined animate-spin text-4xl text-[#E8931A] mb-2">progress_activity</span>
             <span class="font-['JetBrains_Mono'] text-xs text-[#378ADD]">Verifying protected lesson playback...</span>
           </div>
         } @else if (playbackData()?.videoAvailable && safeEmbedUrl()) {
-          <div class="w-full aspect-video bg-black rounded overflow-hidden shadow-2xl relative border border-[#1E293B]">
+          <div class="watch-player w-full aspect-video rounded overflow-hidden shadow-2xl relative">
             <iframe
               [src]="safeEmbedUrl()"
               class="w-full h-full border-0"
@@ -39,13 +39,13 @@ import { AuthService } from '../../core/services/auth.service';
             ></iframe>
           </div>
 
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#121A2B] technical-border p-6 rounded">
+          <div class="watch-card flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4 sm:p-6 rounded">
             <div>
-              <div class="inline-flex items-center gap-2 font-['JetBrains_Mono'] text-[11px] text-[#E8931A] mb-1">
+              <div class="watch-accent inline-flex items-center gap-2 font-['JetBrains_Mono'] text-[11px] mb-1">
                 <span class="material-symbols-outlined text-sm">lock</span>
                 {{ playbackData()?.provider === 'YOUTUBE' ? 'YOUTUBE MEMBERSHIP VIDEO' : 'TOKEN AUTHENTICATED BUNNY STREAM (EXPIRES IN 4H)' }}
               </div>
-              <h1 class="font-['Hanken_Grotesk'] text-xl font-bold text-white">
+              <h1 class="watch-heading font-['Hanken_Grotesk'] text-lg sm:text-xl font-bold">
                 {{ playbackData()?.title }}
               </h1>
             </div>
@@ -63,20 +63,20 @@ import { AuthService } from '../../core/services/auth.service';
             </button>
           </div>
         } @else if (playbackData()) {
-          <div class="w-full aspect-video bg-[#121A2B] technical-border rounded flex flex-col items-center justify-center p-8 text-center">
+          <div class="watch-card w-full aspect-video rounded flex flex-col items-center justify-center p-5 sm:p-8 text-center">
             <span class="material-symbols-outlined text-4xl text-[#E8931A] mb-2">video_settings</span>
-            <h3 class="font-['Hanken_Grotesk'] text-lg font-bold text-white mb-2">Video not connected yet</h3>
-            <p class="font-['Inter'] text-sm text-[#d9c3af] max-w-md">
+            <h3 class="watch-heading font-['Hanken_Grotesk'] text-lg font-bold mb-2">Video not connected yet</h3>
+            <p class="watch-muted font-['Inter'] text-sm max-w-md">
               This lesson does not have a playable video source yet. Add a Bunny Stream video ID or a YouTube Membership video reference in the curriculum.
             </p>
           </div>
         } @else {
-          <div class="w-full aspect-video bg-[#121A2B] technical-border rounded flex flex-col items-center justify-center p-8 text-center">
+          <div class="watch-card w-full aspect-video rounded flex flex-col items-center justify-center p-5 sm:p-8 text-center">
             <span class="material-symbols-outlined text-4xl text-[#ffb4ab] mb-2">lock_person</span>
-            <h3 class="font-['Hanken_Grotesk'] text-lg font-bold text-white mb-2">
+            <h3 class="watch-heading font-['Hanken_Grotesk'] text-lg font-bold mb-2">
               {{ playbackError() ? 'This lesson is locked' : 'Streaming Unauthorized' }}
             </h3>
-            <p class="font-['Inter'] text-sm text-[#d9c3af] max-w-md mb-6">
+            <p class="watch-muted font-['Inter'] text-sm max-w-md mb-6">
               {{ playbackError() || 'This is paid token-gated content. Please enroll in this track or join Membership to stream this lesson.' }}
             </p>
             <a routerLink="/courses" class="font-['JetBrains_Mono'] text-xs uppercase text-[#040810] bg-[#E8931A] px-6 py-3 rounded font-bold">
@@ -84,43 +84,43 @@ import { AuthService } from '../../core/services/auth.service';
             </a>
           </div>
         }
-      </div>
+      </main>
 
       <!-- Right Drawer Curriculum Navigation Sidebar -->
-      <aside class="w-full lg:w-96 bg-[#121A2B] border-l border-[#1E293B] p-6 flex flex-col gap-6 lg:sticky lg:top-16 lg:h-[calc(100vh-4rem)]">
+      <aside class="watch-sidebar w-full md:w-[40%] md:min-w-[320px] md:max-w-[520px] p-4 sm:p-5 md:p-6 flex flex-col gap-5 md:sticky md:top-16 md:h-[calc(100vh-4rem)]">
         <div class="shrink-0">
-          <span class="font-['JetBrains_Mono'] text-xs uppercase text-[#378ADD] font-bold">// TRACK CURRICULUM</span>
-          <h2 class="font-['Hanken_Grotesk'] text-lg font-bold text-white mt-1">{{ course()?.title }}</h2>
+          <span class="watch-accent font-['JetBrains_Mono'] text-xs uppercase font-bold">// TRACK CURRICULUM</span>
+          <h2 class="watch-heading font-['Hanken_Grotesk'] text-lg font-bold mt-1">{{ course()?.title }}</h2>
           <div class="flex items-center justify-between gap-3 mt-4">
-            <span class="font-['JetBrains_Mono'] text-[11px] uppercase text-[#a18d7b]">
+            <span class="watch-muted font-['JetBrains_Mono'] text-[11px] uppercase">
               {{ course()?.modules?.length || 0 }} sections
             </span>
             <button
               type="button"
               (click)="toggleAllModules()"
-              class="font-['JetBrains_Mono'] text-[11px] uppercase text-[#378ADD] hover:text-[#E8931A] transition-colors"
+              class="watch-accent font-['JetBrains_Mono'] text-[11px] uppercase hover:text-[#E8931A] transition-colors"
             >
               {{ allModulesExpanded() ? 'Collapse all' : 'Expand all' }}
             </button>
           </div>
         </div>
 
-        <div class="flex-1 flex flex-col gap-3 overflow-y-auto pr-1" role="list" aria-label="Course curriculum">
+        <div class="flex-1 min-h-0 flex flex-col gap-3 overflow-y-auto pr-1" role="list" aria-label="Course curriculum">
           @for (module of course()?.modules; track module.id) {
-            <section class="border border-[#1E293B] rounded overflow-hidden" role="listitem">
+            <section class="watch-section rounded overflow-hidden shrink-0" role="listitem">
               <button
                 type="button"
                 (click)="toggleModule(module.id)"
                 [attr.aria-expanded]="isModuleExpanded(module.id)"
-                class="w-full p-3.5 bg-[#040810] flex items-center justify-between gap-3 text-left border-b border-[#1E293B] hover:bg-[#0a1220] transition-colors"
+                class="watch-section-header w-full p-3.5 flex items-center justify-between gap-3 text-left transition-colors"
               >
                 <span class="flex items-center gap-2 min-w-0">
                   <span class="material-symbols-outlined text-base text-[#E8931A]">
                     {{ isModuleExpanded(module.id) ? 'expand_less' : 'expand_more' }}
                   </span>
-                  <span class="font-['Hanken_Grotesk'] text-xs font-bold text-white truncate">{{ module.title }}</span>
+                  <span class="watch-heading font-['Hanken_Grotesk'] text-xs font-bold truncate">{{ module.title }}</span>
                 </span>
-                <span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b] whitespace-nowrap">
+                <span class="watch-muted font-['JetBrains_Mono'] text-[10px] whitespace-nowrap">
                   {{ module.lessons.length }} lectures
                 </span>
               </button>
@@ -131,21 +131,22 @@ import { AuthService } from '../../core/services/auth.service';
                     <a
                       [routerLink]="['/courses', course()?.slug, 'watch', lesson.id]"
                       [class.bg-[#378ADD]/15]="lesson.id === currentLessonId()"
+                      [class.watch-lesson-active]="lesson.id === currentLessonId()"
                       [attr.aria-current]="lesson.id === currentLessonId() ? 'page' : null"
-                      class="p-3.5 flex items-center justify-between gap-3 text-xs font-['Inter'] hover:bg-[#040810]/60 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#E8931A]"
+                      class="watch-lesson-link p-3.5 flex items-center justify-between gap-3 text-xs font-['Inter'] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#E8931A]"
                     >
                       <span class="flex items-center gap-2.5 min-w-0">
                         <span class="material-symbols-outlined text-sm text-[#378ADD]">
                           {{ lesson.id === currentLessonId() ? 'play_circle' : (lesson.isFreePreview ? 'lock_open' : 'ondemand_video') }}
                         </span>
-                        <span class="text-[#e0e3e5] line-clamp-2">{{ lesson.title }}</span>
+                        <span class="watch-lesson-title line-clamp-2">{{ lesson.title }}</span>
                       </span>
 
                       <span class="flex items-center gap-2 shrink-0">
                         @if (lesson.isFreePreview) {
-                          <span class="font-['JetBrains_Mono'] text-[10px] uppercase text-[#E8931A]">Preview</span>
+                          <span class="watch-preview font-['JetBrains_Mono'] text-[10px] uppercase">Preview</span>
                         }
-                        <span class="font-['JetBrains_Mono'] text-[11px] text-[#a18d7b]">
+                        <span class="watch-muted font-['JetBrains_Mono'] text-[11px]">
                           {{ Math.max(1, Math.round(lesson.duration / 60)) }}m
                         </span>
                       </span>
