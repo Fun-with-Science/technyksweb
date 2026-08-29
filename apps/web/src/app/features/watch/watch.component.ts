@@ -52,16 +52,21 @@ import { AuthService } from '../../core/services/auth.service';
 
             <button
               (click)="markAsCompleted()"
-              [class.bg-[#378ADD]]="isCurrentCompleted()"
-              [class.bg-[#E8931A]]="!isCurrentCompleted()"
+              [class.bg-[#378ADD]]="isCurrentLessonCompleted()"
+              [class.bg-[#E8931A]]="!isCurrentLessonCompleted()"
+              [disabled]="isCurrentLessonCompleted()"
+              [attr.aria-label]="isCurrentLessonCompleted() ? 'Lesson completed' : 'Mark lesson as completed'"
               class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] px-5 py-3 rounded hover:opacity-90 transition-all flex items-center gap-2 shadow-md"
             >
               <span class="material-symbols-outlined text-sm">
-                {{ isCurrentCompleted() ? 'check_circle' : 'task_alt' }}
+                {{ isCurrentLessonCompleted() ? 'check_circle' : 'task_alt' }}
               </span>
-              {{ isCurrentCompleted() ? 'Lesson Completed' : 'Mark as Completed' }}
+              {{ isCurrentLessonCompleted() ? 'Lesson Completed' : 'Mark as Completed' }}
             </button>
           </div>
+          @if (progressError()) {
+            <p class="watch-progress-error font-['Inter'] text-xs" role="alert">{{ progressError() }}</p>
+          }
         } @else if (playbackData()) {
           <div class="watch-card w-full aspect-video rounded flex flex-col items-center justify-center p-5 sm:p-8 text-center">
             <span class="material-symbols-outlined text-4xl text-[#E8931A] mb-2">video_settings</span>
@@ -132,12 +137,13 @@ import { AuthService } from '../../core/services/auth.service';
                       [routerLink]="['/courses', course()?.slug, 'watch', lesson.id]"
                       [class.bg-[#378ADD]/15]="lesson.id === currentLessonId()"
                       [class.watch-lesson-active]="lesson.id === currentLessonId()"
+                      [class.watch-lesson-completed]="isLessonCompleted(lesson.id)"
                       [attr.aria-current]="lesson.id === currentLessonId() ? 'page' : null"
                       class="watch-lesson-link p-3.5 flex items-center justify-between gap-3 text-xs font-['Inter'] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#E8931A]"
                     >
                       <span class="flex items-center gap-2.5 min-w-0">
                         <span class="material-symbols-outlined text-sm text-[#378ADD]">
-                          {{ lesson.id === currentLessonId() ? 'play_circle' : (lesson.isFreePreview ? 'lock_open' : 'ondemand_video') }}
+                          {{ isLessonCompleted(lesson.id) ? 'check_circle' : (lesson.id === currentLessonId() ? 'play_circle' : (lesson.isFreePreview ? 'lock_open' : 'ondemand_video')) }}
                         </span>
                         <span class="watch-lesson-title line-clamp-2">{{ lesson.title }}</span>
                       </span>
@@ -145,6 +151,9 @@ import { AuthService } from '../../core/services/auth.service';
                       <span class="flex items-center gap-2 shrink-0">
                         @if (lesson.isFreePreview) {
                           <span class="watch-preview font-['JetBrains_Mono'] text-[10px] uppercase">Preview</span>
+                        }
+                        @if (isLessonCompleted(lesson.id)) {
+                          <span class="watch-completed-label font-['JetBrains_Mono'] text-[10px] uppercase">Done</span>
                         }
                         <span class="watch-muted font-['JetBrains_Mono'] text-[11px]">
                           {{ Math.max(1, Math.round(lesson.duration / 60)) }}m
@@ -175,7 +184,8 @@ export class WatchComponent implements OnInit, OnDestroy {
   currentLessonId = signal<string>('');
   courseId = signal<string>('');
   isLoading = signal(true);
-  isCurrentCompleted = signal(false);
+  completedLessonIds = signal<Set<string>>(new Set());
+  progressError = signal('');
   expandedModules = signal<Set<string>>(new Set());
 
   private progressInterval: any;
@@ -190,13 +200,15 @@ export class WatchComponent implements OnInit, OnDestroy {
       this.playbackData.set(null);
       this.safeEmbedUrl.set(null);
       this.playbackError.set('');
-      this.isCurrentCompleted.set(false);
+      this.completedLessonIds.set(new Set());
+      this.progressError.set('');
 
       if (slug) {
         this.coursesService.getCourseBySlug(slug).subscribe({
           next: (c) => {
             this.course.set(c);
             this.courseId.set(c.id);
+            this.loadCompletionStatus(c.id, lessonId);
             const activeModule = (c.modules || []).find((module) =>
               (module.lessons || []).some((lesson) => lesson.id === lessonId),
             );
@@ -259,6 +271,50 @@ export class WatchComponent implements OnInit, OnDestroy {
     });
   }
 
+  private loadCompletionStatus(courseId: string, lessonId: string) {
+    if (!this.authService.isAuthenticated()) {
+      this.completedLessonIds.set(new Set());
+      return;
+    }
+
+    this.enrollmentsService.getMyEnrollments().subscribe({
+      next: (enrollments) => {
+        const enrollment = enrollments.find((item) => item.courseId === courseId);
+        const completedLessonIds = new Set(enrollment?.completedLessonIds || []);
+
+        if (this.courseId() !== courseId || this.currentLessonId() !== lessonId) return;
+
+        this.completedLessonIds.set(completedLessonIds);
+      },
+      error: () => {
+        // Preview playback can still work for signed-out users or when the
+        // progress endpoint is temporarily unavailable.
+        if (this.courseId() === courseId && this.currentLessonId() === lessonId) {
+          this.completedLessonIds.set(new Set());
+        }
+      },
+    });
+  }
+
+  isLessonCompleted(lessonId: string): boolean {
+    return this.completedLessonIds().has(lessonId);
+  }
+
+  isCurrentLessonCompleted(): boolean {
+    return this.isLessonCompleted(this.currentLessonId());
+  }
+
+  private applyEnrollmentProgress(
+    courseId: string,
+    lessonId: string,
+    completedLessonIds: string[] | undefined,
+  ) {
+    if (this.courseId() !== courseId) return;
+
+    const completed = new Set(completedLessonIds || []);
+    this.completedLessonIds.set(completed);
+  }
+
   isModuleExpanded(moduleId: string): boolean {
     return this.expandedModules().has(moduleId);
   }
@@ -285,23 +341,48 @@ export class WatchComponent implements OnInit, OnDestroy {
   }
 
   saveProgressInterval() {
-    if (
-      this.authService.isAuthenticated() &&
-      this.courseId() &&
-      this.currentLessonId()
-    ) {
+    const courseId = this.courseId();
+    const lessonId = this.currentLessonId();
+    if (this.authService.isAuthenticated() && courseId && lessonId) {
       this.enrollmentsService
         .updateProgress({
-          courseId: this.courseId(),
-          lessonId: this.currentLessonId(),
-          isCompleted: this.isCurrentCompleted(),
+          courseId,
+          lessonId,
+          isCompleted: this.isCurrentLessonCompleted(),
         })
-        .subscribe();
+        .subscribe({
+          next: (enrollment) => {
+            this.applyEnrollmentProgress(courseId, lessonId, enrollment.completedLessonIds);
+          },
+        });
     }
   }
 
   markAsCompleted() {
-    this.isCurrentCompleted.set(true);
-    this.saveProgressInterval();
+    const courseId = this.courseId();
+    const lessonId = this.currentLessonId();
+    if (this.isCurrentLessonCompleted() || !this.authService.isAuthenticated() || !courseId || !lessonId) return;
+
+    this.progressError.set('');
+
+    const completed = new Set(this.completedLessonIds());
+    completed.add(lessonId);
+    this.completedLessonIds.set(completed);
+
+    this.enrollmentsService
+      .updateProgress({ courseId, lessonId, isCompleted: true })
+      .subscribe({
+        next: (enrollment) => {
+          this.applyEnrollmentProgress(courseId, lessonId, enrollment.completedLessonIds);
+        },
+        error: (error) => {
+          if (this.courseId() === courseId && this.currentLessonId() === lessonId) {
+            const current = new Set(this.completedLessonIds());
+            current.delete(lessonId);
+            this.completedLessonIds.set(current);
+            this.progressError.set(error?.error?.message || 'Progress could not be saved. Please try again.');
+          }
+        },
+      });
   }
 }

@@ -72,11 +72,26 @@ body.dark-theme {
 
 .hero-background {
   background-image: url('/assets/hero-ai-network.png');
-  opacity: .22;
+  opacity: .3;
+  background-position: center;
+  background-size: cover;
 }
 
 .hero-overlay {
   background: linear-gradient(180deg, rgba(248, 250, 252, .88) 0%, rgba(248, 250, 252, .68) 48%, rgba(248, 250, 252, .95) 100%);
+}
+
+/* Keep the AI network visible in light mode while the layered tint protects
+   the centered headline and calls to action from low-contrast areas. */
+.light-theme .hero-background {
+  opacity: .42;
+  filter: saturate(.9) contrast(.94);
+}
+
+.light-theme .hero-overlay {
+  background:
+    radial-gradient(circle at 50% 38%, rgba(248, 250, 252, .22) 0%, rgba(248, 250, 252, .48) 58%, rgba(248, 250, 252, .78) 100%),
+    linear-gradient(180deg, rgba(248, 250, 252, .68) 0%, rgba(248, 250, 252, .28) 48%, rgba(248, 250, 252, .88) 100%);
 }
 
 .dark-theme .hero-background {
@@ -85,6 +100,20 @@ body.dark-theme {
 
 .dark-theme .hero-overlay {
   background: linear-gradient(180deg, rgba(4, 8, 16, .78) 0%, rgba(4, 8, 16, .48) 48%, rgba(4, 8, 16, .9) 100%);
+}
+
+.membership-save-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(232, 147, 26, .55);
+  color: #b45309;
+  background-color: rgba(245, 158, 11, .16);
+}
+
+.dark-theme .membership-save-badge {
+  border-color: rgba(232, 147, 26, .55);
+  color: #ffd28a;
+  background-color: rgba(232, 147, 26, .16);
 }
 
 .technical-border {
@@ -298,6 +327,15 @@ body.dark-theme {
   color: #b45309;
 }
 
+.watch-lesson-completed .watch-lesson-title,
+.watch-completed-label {
+  color: #15803d;
+}
+
+.watch-progress-error {
+  color: #b42318;
+}
+
 .dark-theme .watch-shell {
   background-color: #040810;
   color: #e0e3e5;
@@ -367,6 +405,15 @@ body.dark-theme {
 
 .dark-theme .watch-preview {
   color: #e8931a;
+}
+
+.dark-theme .watch-lesson-completed .watch-lesson-title,
+.dark-theme .watch-completed-label {
+  color: #86efac;
+}
+
+.dark-theme .watch-progress-error {
+  color: #ffb4ab;
 }
 
 @media (max-width: 767px) {

@@ -20,14 +20,14 @@ import { RouterModule } from '@angular/router';
         </p>
 
         <!-- Interval Switcher -->
-        <div class="inline-flex items-center bg-[#121A2B] technical-border p-1.5 rounded-full mt-8">
+        <div class="inline-flex w-full max-w-md flex-col sm:flex-row items-stretch sm:items-center bg-[#121A2B] technical-border p-1.5 rounded-2xl sm:rounded-full mt-8">
           <button
             (click)="isAnnual.set(false)"
             [class.bg-[#E8931A]]="!isAnnual()"
             [class.text-[#040810]]="!isAnnual()"
             [class.font-bold]="!isAnnual()"
             [class.text-[#d9c3af]]="isAnnual()"
-            class="font-['JetBrains_Mono'] text-xs uppercase px-6 py-2 rounded-full transition-all"
+            class="font-['JetBrains_Mono'] text-xs uppercase px-4 sm:px-6 py-2.5 rounded-full transition-all whitespace-nowrap"
           >
             Monthly Billing
           </button>
@@ -37,16 +37,16 @@ import { RouterModule } from '@angular/router';
             [class.text-[#040810]]="isAnnual()"
             [class.font-bold]="isAnnual()"
             [class.text-[#d9c3af]]="!isAnnual()"
-            class="font-['JetBrains_Mono'] text-xs uppercase px-6 py-2 rounded-full transition-all flex items-center gap-2"
+            class="font-['JetBrains_Mono'] text-xs uppercase px-4 sm:px-6 py-2.5 rounded-full transition-all flex items-center justify-center gap-2 whitespace-nowrap"
           >
             Annual Billing
-            <span class="bg-[#378ADD] text-white text-[10px] px-2 py-0.5 rounded-full">SAVE 33%</span>
+            <span class="membership-save-badge text-[10px] px-2 py-0.5 rounded-full">SAVE 33%</span>
           </button>
         </div>
       </div>
 
       <!-- RBI Compliance Note for Indian Users -->
-      <div class="mb-12 max-w-4xl mx-auto p-4 bg-[#121A2B] border border-[#378ADD]/40 rounded text-xs font-['JetBrains_Mono'] text-[#a1c9ff] flex items-center gap-3">
+      <div class="mb-12 max-w-4xl mx-auto p-4 bg-[#121A2B] border border-[#378ADD]/40 rounded text-xs font-['JetBrains_Mono'] text-[#a1c9ff] flex items-start sm:items-center gap-3">
         <span class="material-symbols-outlined text-xl text-[#378ADD]">security</span>
         <div>
           <span class="font-bold uppercase text-[#E8931A]">RBI Compliance Guaranteed:</span> Indian card and UPI Autopay / e-mandate transactions follow strict RBI authentication protocols with pre-debit notifications sent 24h prior to any renewal.
@@ -54,7 +54,7 @@ import { RouterModule } from '@angular/router';
       </div>
 
       <!-- Pricing Cards Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
         <!-- Free Tier -->
         <div class="bg-[#121A2B] technical-border rounded p-8 flex flex-col justify-between">
           <div>
