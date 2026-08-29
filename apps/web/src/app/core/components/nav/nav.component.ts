@@ -16,6 +16,10 @@ import { ThemeService } from '../../services/theme.service';
         </a>
         
         <div class="hidden md:flex gap-6 items-center ml-4">
+          <a routerLink="/" routerLinkActive="text-[#E8931A] font-bold border-b-2 border-[#E8931A] pb-1" [routerLinkActiveOptions]="{exact: true}" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#d9c3af] hover:text-[#E8931A] transition-colors">
+            Home
+          </a>
+
           <a routerLink="/courses" routerLinkActive="text-[#E8931A] font-bold border-b-2 border-[#E8931A] pb-1" [routerLinkActiveOptions]="{exact: false}" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#d9c3af] hover:text-[#E8931A] transition-colors">
             Courses
           </a>
@@ -32,10 +36,6 @@ import { ThemeService } from '../../services/theme.service';
             About
           </a>
           
-          <a routerLink="/dashboard" routerLinkActive="text-[#E8931A] font-bold border-b-2 border-[#E8931A] pb-1" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#d9c3af] hover:text-[#E8931A] transition-colors">
-            Dashboard
-          </a>
-
           @if (authService.isAdmin()) {
             <a routerLink="/admin" routerLinkActive="text-[#E8931A] font-bold border-b-2 border-[#E8931A] pb-1" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#E8931A] hover:underline transition-colors flex items-center gap-1">
               <span class="material-symbols-outlined text-sm">admin_panel_settings</span>
@@ -59,9 +59,14 @@ import { ThemeService } from '../../services/theme.service';
 
         @if (authService.isAuthenticated()) {
           <div class="flex items-center gap-3">
-            <span class="hidden md:inline font-['JetBrains_Mono'] text-xs text-[#e0e3e5]">
-              {{ authService.currentUser()?.name }}
-            </span>
+            <a
+              routerLink="/dashboard"
+              class="profile-link"
+              [attr.aria-label]="'Open dashboard for ' + (authService.currentUser()?.name || 'your account')"
+              [title]="authService.currentUser()?.name || 'Open your dashboard'"
+            >
+              <span class="material-symbols-outlined text-[20px]">account_circle</span>
+            </a>
             <button (click)="authService.logout()" class="font-['JetBrains_Mono'] text-xs uppercase text-[#ffb4ab] border border-[#ffb4ab]/40 hover:bg-[#ffb4ab]/10 px-3 py-1.5 rounded transition-colors">
               Logout
             </button>
@@ -85,6 +90,10 @@ import { ThemeService } from '../../services/theme.service';
     <!-- Mobile Dropdown Navigation -->
     @if (isMobileMenuOpen()) {
       <div class="md:hidden fixed top-16 left-0 w-full bg-[#121A2B] border-b border-[#1E293B] z-40 p-6 flex flex-col gap-4 animate-in slide-in-from-top-2 duration-200">
+        <a routerLink="/" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-[#d9c3af] hover:text-[#E8931A] py-2 border-b border-[#1E293B]/50">
+          Home
+        </a>
+
         <a routerLink="/courses" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-[#d9c3af] hover:text-[#E8931A] py-2 border-b border-[#1E293B]/50">
           Courses
         </a>
@@ -98,13 +107,12 @@ import { ThemeService } from '../../services/theme.service';
         <a routerLink="/about" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-[#d9c3af] hover:text-[#E8931A] py-2 border-b border-[#1E293B]/50">
           About
         </a>
-        <a routerLink="/dashboard" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-[#d9c3af] hover:text-[#E8931A] py-2 border-b border-[#1E293B]/50">
-          Dashboard
-        </a>
-        
         @if (authService.isAuthenticated()) {
           <div class="pt-2 flex flex-col gap-3">
-            <div class="font-['JetBrains_Mono'] text-xs text-[#E8931A]">Logged in as {{ authService.currentUser()?.name }}</div>
+            <a routerLink="/dashboard" (click)="closeMobileMenu()" class="profile-link w-full rounded font-['JetBrains_Mono'] text-xs uppercase gap-2 py-2.5">
+              <span class="material-symbols-outlined text-[20px]">account_circle</span>
+              My dashboard
+            </a>
             <button (click)="authService.logout(); closeMobileMenu()" class="text-center font-['JetBrains_Mono'] text-xs uppercase text-[#ffb4ab] border border-[#ffb4ab]/40 py-2.5 rounded">
               Logout
             </button>

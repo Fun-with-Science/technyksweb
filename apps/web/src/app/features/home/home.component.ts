@@ -22,6 +22,7 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
           class="hero-overlay absolute inset-0 pointer-events-none"
           aria-hidden="true"
         ></div>
+        <div class="hero-artwork absolute pointer-events-none" aria-hidden="true"></div>
 
         <div
           class="max-w-4xl relative z-10 grid justify-items-center gap-8 mt-12 md:mt-0"

@@ -72,7 +72,7 @@ body.dark-theme {
 
 .hero-background {
   background-image: url('/assets/hero-ai-network.png');
-  opacity: .3;
+  opacity: .2;
   background-position: center;
   background-size: cover;
 }
@@ -84,8 +84,8 @@ body.dark-theme {
 /* Keep the AI network visible in light mode while the layered tint protects
    the centered headline and calls to action from low-contrast areas. */
 .light-theme .hero-background {
-  opacity: .42;
-  filter: saturate(.9) contrast(.94);
+  opacity: .24;
+  filter: brightness(1.45) saturate(.9) contrast(.94);
 }
 
 .light-theme .hero-overlay {
@@ -94,12 +94,70 @@ body.dark-theme {
     linear-gradient(180deg, rgba(248, 250, 252, .68) 0%, rgba(248, 250, 252, .28) 48%, rgba(248, 250, 252, .88) 100%);
 }
 
+.hero-artwork {
+  z-index: 1;
+  left: 5%;
+  right: 5%;
+  top: 30%;
+  bottom: 1.5rem;
+  border: 1px solid rgba(37, 99, 235, .16);
+  border-radius: 2rem;
+  background-image:
+    linear-gradient(180deg, rgba(248, 250, 252, .72), rgba(248, 250, 252, .42)),
+    url('/assets/hero-ai-network.png');
+  background-position: center;
+  background-size: cover;
+  opacity: .2;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), 0 18px 60px rgba(37, 99, 235, .06);
+}
+
 .dark-theme .hero-background {
-  opacity: .34;
+  opacity: .3;
 }
 
 .dark-theme .hero-overlay {
   background: linear-gradient(180deg, rgba(4, 8, 16, .78) 0%, rgba(4, 8, 16, .48) 48%, rgba(4, 8, 16, .9) 100%);
+}
+
+.dark-theme .hero-artwork {
+  border-color: rgba(55, 138, 221, .25);
+  background-image:
+    linear-gradient(180deg, rgba(4, 8, 16, .28), rgba(4, 8, 16, .58)),
+    url('/assets/hero-ai-network.png');
+  opacity: .3;
+  box-shadow: inset 0 1px 0 rgba(55, 138, 221, .16), 0 18px 60px rgba(0, 0, 0, .12);
+}
+
+.profile-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 9999px;
+  color: #475569;
+  background-color: #ffffff;
+  text-decoration: none;
+  transition: border-color .2s ease, color .2s ease, background-color .2s ease;
+}
+
+.profile-link:hover {
+  border-color: #2563eb;
+  color: #1d4ed8;
+  background-color: #eff6ff;
+}
+
+.dark-theme .profile-link {
+  border-color: #334155;
+  color: #e0e3e5;
+  background-color: #121a2b;
+}
+
+.dark-theme .profile-link:hover {
+  border-color: #60a5fa;
+  color: #fde68a;
+  background-color: #1e293b;
 }
 
 .membership-save-badge {
@@ -417,6 +475,13 @@ body.dark-theme {
 }
 
 @media (max-width: 767px) {
+  .hero-artwork {
+    left: 1rem;
+    right: 1rem;
+    top: 34%;
+    border-radius: 1.25rem;
+  }
+
   .watch-sidebar {
     border-left: 0;
     border-top: 1px solid #d7deea;
