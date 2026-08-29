@@ -22,6 +22,71 @@
   }
 }
 
+html.dark-theme {
+  color-scheme: dark;
+}
+
+body.dark-theme {
+  background-color: #040810;
+  color: #e0e3e5;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+.dark-theme .technical-border {
+  border-color: #1E293B;
+}
+
+.dark-theme .technical-border:hover {
+  border-color: #378ADD;
+}
+
+.dark-theme .glass-panel {
+  background-color: rgba(18, 26, 43, 0.85);
+}
+
+.theme-toggle {
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  background-color: #ffffff;
+}
+
+.theme-toggle:hover {
+  border-color: #2563eb;
+  color: #1d4ed8;
+  background-color: #eff6ff;
+}
+
+.dark-theme .theme-toggle {
+  border-color: #334155;
+  color: #fbbf24;
+  background-color: #121A2B;
+}
+
+.dark-theme .theme-toggle:hover {
+  border-color: #60a5fa;
+  color: #fde68a;
+  background-color: #1e293b;
+}
+
+.hero-background {
+  background-image: url('/assets/hero-ai-network.png');
+  opacity: .22;
+}
+
+.hero-overlay {
+  background: linear-gradient(180deg, rgba(248, 250, 252, .88) 0%, rgba(248, 250, 252, .68) 48%, rgba(248, 250, 252, .95) 100%);
+}
+
+.dark-theme .hero-background {
+  opacity: .34;
+}
+
+.dark-theme .hero-overlay {
+  background: linear-gradient(180deg, rgba(4, 8, 16, .78) 0%, rgba(4, 8, 16, .48) 48%, rgba(4, 8, 16, .9) 100%);
+}
+
 .technical-border {
   border: 1px solid #d7deea;
   transition: border-color 0.2s ease, background-color 0.2s ease;

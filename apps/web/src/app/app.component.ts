@@ -1,14 +1,19 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NavComponent } from './core/components/nav/nav.component';
 import { FooterComponent } from './core/components/footer/footer.component';
+import { ThemeService } from './core/services/theme.service';
 
 @Component({
   standalone: true,
   imports: [RouterModule, NavComponent, FooterComponent],
   selector: 'app-root',
   template: `
-    <div class="light-theme min-h-screen flex flex-col">
+    <div
+      class="min-h-screen flex flex-col"
+      [class.light-theme]="!themeService.isDarkMode()"
+      [class.dark-theme]="themeService.isDarkMode()"
+    >
       <app-nav></app-nav>
       <main class="flex-grow">
         <router-outlet></router-outlet>
@@ -18,5 +23,6 @@ import { FooterComponent } from './core/components/footer/footer.component';
   `,
 })
 export class AppComponent {
+  themeService = inject(ThemeService);
   title = 'web';
 }

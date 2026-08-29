@@ -2,6 +2,7 @@ import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-nav',
@@ -45,6 +46,17 @@ import { AuthService } from '../../services/auth.service';
       </div>
 
       <div class="flex items-center gap-4">
+        <button
+          type="button"
+          class="theme-toggle inline-flex items-center gap-1.5 rounded px-2.5 py-1.5 font-['JetBrains_Mono'] text-[11px] uppercase tracking-wider transition-colors"
+          (click)="themeService.toggle()"
+          [attr.aria-label]="themeService.isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
+          [title]="themeService.isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
+        >
+          <span class="material-symbols-outlined text-[17px]">{{ themeService.isDarkMode() ? 'light_mode' : 'dark_mode' }}</span>
+          <span class="hidden sm:inline">{{ themeService.isDarkMode() ? 'Light mode' : 'Dark mode' }}</span>
+        </button>
+
         @if (authService.isAuthenticated()) {
           <div class="flex items-center gap-3">
             <span class="hidden md:inline font-['JetBrains_Mono'] text-xs text-[#e0e3e5]">
@@ -110,6 +122,7 @@ import { AuthService } from '../../services/auth.service';
 })
 export class NavComponent {
   authService = inject(AuthService);
+  themeService = inject(ThemeService);
   isMobileMenuOpen = signal<boolean>(false);
 
   toggleMobileMenu() {

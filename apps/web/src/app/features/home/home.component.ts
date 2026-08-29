@@ -11,10 +11,11 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
   template: `
     <div class="flex flex-col gap-24 pb-20 pt-16">
       <!-- Hero Section -->
-      <section class="min-h-[75vh] flex flex-col justify-center px-6 md:px-16 relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-b from-[#121A2B]/30 to-transparent pointer-events-none"></div>
+      <section class="hero-section min-h-[75vh] flex flex-col justify-center items-center px-6 md:px-16 relative overflow-hidden text-center">
+        <div class="hero-background absolute inset-0 bg-cover bg-center pointer-events-none" aria-hidden="true"></div>
+        <div class="hero-overlay absolute inset-0 pointer-events-none" aria-hidden="true"></div>
         
-        <div class="max-w-4xl relative z-10 grid gap-8 mt-12 md:mt-0">
+        <div class="max-w-4xl relative z-10 grid justify-items-center gap-8 mt-12 md:mt-0">
           <div class="inline-flex items-center gap-2 font-['JetBrains_Mono'] text-xs text-[#378ADD] px-3.5 py-1.5 border border-[#378ADD]/30 bg-[#378ADD]/10 rounded-full w-fit">
             <span class="material-symbols-outlined text-[16px]">terminal</span>
             v2.0 Architecture Track Live
@@ -25,11 +26,11 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
             <span class="text-[#E8931A]">Architecture is hard.</span>
           </h1>
           
-          <p class="font-['Inter'] text-lg text-[#d9c3af] max-w-2xl border-l-2 border-[#1E293B] pl-4 leading-relaxed">
+          <p class="font-['Inter'] text-lg text-[#d9c3af] max-w-2xl leading-relaxed">
             Elevate your engineering from building features to designing scalable, resilient systems. Premium training for senior developers focused on Full-Stack, AI, and Angular architecture.
           </p>
           
-          <div class="flex flex-wrap gap-4 mt-2">
+          <div class="flex flex-wrap justify-center gap-4 mt-2">
             <a routerLink="/courses" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#E8931A] px-8 py-4 rounded font-bold hover:scale-[0.98] transition-all flex items-center gap-2 shadow-lg">
               View All Tracks
               <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
@@ -42,15 +43,6 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
           </div>
         </div>
 
-        <!-- Technical Schematic Decorative SVG -->
-        <div class="absolute right-12 top-1/2 -translate-y-1/2 hidden lg:block opacity-20 pointer-events-none">
-          <svg fill="none" height="400" viewBox="0 0 400 400" width="400" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="200" cy="200" r="199.5" stroke="#378ADD" stroke-dasharray="4 4"></circle>
-            <circle cx="200" cy="200" r="149.5" stroke="#378ADD" stroke-dasharray="4 4"></circle>
-            <line stroke="#378ADD" stroke-dasharray="4 4" x1="200" x2="200" y1="0" y2="400"></line>
-            <line stroke="#378ADD" stroke-dasharray="4 4" x1="0" x2="400" y1="200" y2="200"></line>
-          </svg>
-        </div>
       </section>
 
       <!-- AI Tools & Coding Languages Marquee Logo Carousel -->
