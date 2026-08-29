@@ -8,7 +8,7 @@ import { FooterComponent } from './core/components/footer/footer.component';
   imports: [RouterModule, NavComponent, FooterComponent],
   selector: 'app-root',
   template: `
-    <div class="min-h-screen flex flex-col bg-[#040810] text-[#e0e3e5]">
+    <div class="light-theme min-h-screen flex flex-col">
       <app-nav></app-nav>
       <main class="flex-grow">
         <router-outlet></router-outlet>

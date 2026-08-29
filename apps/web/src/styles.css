@@ -3,28 +3,36 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    color-scheme: light;
+  }
+
   body {
-    background-color: #040810;
-    color: #e0e3e5;
+    background-color: #f8fafc;
+    color: #172033;
     font-family: 'Inter', sans-serif;
     background-image: 
-      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      linear-gradient(to right, rgba(15, 23, 42, 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
     background-size: 24px 24px;
+  }
+
+  input, select, textarea, button {
+    color-scheme: light;
   }
 }
 
 .technical-border {
-  border: 1px solid #1E293B;
+  border: 1px solid #d7deea;
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .technical-border:hover {
-  border-color: #378ADD;
+  border-color: #2563eb;
 }
 
 .glass-panel {
-  background-color: rgba(18, 26, 43, 0.85);
+  background-color: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -43,6 +51,89 @@
   background-color: #E8931A;
   transition: width 0.2s ease;
 }
+
+/* The existing component templates use a shared set of Tailwind palette
+   tokens. Keeping the tokens in place makes the light theme apply uniformly
+   to cards, forms, navigation, admin screens, checkout, and the watch page. */
+.light-theme {
+  background-color: #f8fafc !important;
+  color: #172033 !important;
+}
+
+.light-theme [class~="bg-[#040810]"],
+.light-theme [class~="bg-[#040810]/80"],
+.light-theme [class~="bg-[#040810]/90"] { background-color: #ffffff !important; }
+.light-theme [class~="bg-[#121A2B]"],
+.light-theme [class~="bg-[#121A2B]/85"],
+.light-theme [class~="bg-[#121A2B]/90"] { background-color: #ffffff !important; }
+.light-theme [class~="bg-[#0b0f10]"],
+.light-theme [class~="bg-[#191c1e]"],
+.light-theme [class~="bg-[#1d242b]"],
+.light-theme [class~="bg-[#1E293B]"] { background-color: #eef2f7 !important; }
+.light-theme [class~="bg-[#378ADD]/10"] { background-color: rgba(37, 99, 235, .08) !important; }
+.light-theme [class~="bg-[#378ADD]/20"] { background-color: rgba(37, 99, 235, .14) !important; }
+.light-theme [class~="bg-[#378ADD]"],
+.light-theme [class~="bg-[#006fc0]"] { background-color: #2563eb !important; }
+.light-theme [class~="bg-[#E8931A]"] { background-color: #f59e0b !important; }
+.light-theme [class~="bg-[#E8931A]/10"] { background-color: rgba(245, 158, 11, .12) !important; }
+.light-theme [class~="bg-[#6B21A8]"],
+.light-theme [class~="bg-[#7E22CE]"] { background-color: #6d28d9 !important; }
+.light-theme [class~="bg-[#ffb4ab]"] { background-color: #fecdd3 !important; }
+.light-theme [class~="bg-[#690005]"],
+.light-theme [class~="bg-[#ffb4ab]/10"] { background-color: #fff1f2 !important; }
+
+/* Cover opacity variants used by the existing screens as well as the solid
+   palette tokens above. */
+.light-theme [class*="bg-[#040810]/"] { background-color: rgba(255, 255, 255, .76) !important; }
+.light-theme [class*="bg-[#121A2B]/"] { background-color: rgba(255, 255, 255, .9) !important; }
+.light-theme [class*="bg-[#0b0f10]/"] { background-color: rgba(241, 245, 249, .9) !important; }
+.light-theme [class*="bg-[#191c1e]/"],
+.light-theme [class*="bg-[#1d242b]/"] { background-color: rgba(238, 242, 247, .94) !important; }
+.light-theme [class*="bg-[#378ADD]/"] { background-color: rgba(37, 99, 235, .1) !important; }
+.light-theme [class*="bg-[#006fc0]/"] { background-color: rgba(37, 99, 235, .1) !important; }
+.light-theme [class*="bg-[#E8931A]/"] { background-color: rgba(245, 158, 11, .12) !important; }
+.light-theme [class*="bg-[#690005]/"] { background-color: #fff1f2 !important; }
+.light-theme [class*="bg-[#ffb4ab]/"] { background-color: #fff1f2 !important; }
+
+.light-theme [class~="text-white"] { color: #172033 !important; }
+.light-theme [class~="text-[#040810]"] { color: #172033 !important; }
+.light-theme [class~="text-[#e0e3e5]"] { color: #172033 !important; }
+.light-theme [class~="text-[#d9c3af]"] { color: #475569 !important; }
+.light-theme [class~="text-[#a18d7b]"] { color: #64748b !important; }
+.light-theme [class~="text-[#1E293B]"] { color: #64748b !important; }
+.light-theme [class~="text-[#378ADD]"],
+.light-theme [class~="text-[#a1c9ff]"],
+.light-theme [class~="text-[#006fc0]"] { color: #1d4ed8 !important; }
+.light-theme [class~="text-[#E8931A]"],
+.light-theme [class~="text-[#ffb867]"] { color: #b45309 !important; }
+.light-theme [class~="text-[#ffb4ab]"],
+.light-theme [class~="text-[#ffdad6]"] { color: #b42318 !important; }
+.light-theme [class~="bg-[#378ADD]"] [class~="text-white"],
+.light-theme [class~="bg-[#006fc0]"] [class~="text-white"],
+.light-theme [class~="bg-[#6B21A8]"] [class~="text-white"],
+.light-theme [class~="bg-[#7E22CE]"] [class~="text-white"] { color: #ffffff !important; }
+
+.light-theme [class~="border-[#1E293B]"],
+.light-theme [class~="border-[#1E293B]/30"] { border-color: #d7deea !important; }
+.light-theme [class~="border-[#378ADD]"],
+.light-theme [class~="border-[#378ADD]/30"] { border-color: #2563eb !important; }
+.light-theme [class~="border-[#E8931A]"],
+.light-theme [class~="border-[#E8931A]/30"] { border-color: #d97706 !important; }
+.light-theme [class~="border-[#ffb4ab]"] { border-color: #e11d48 !important; }
+.light-theme [class*="border-[#378ADD]/"] { border-color: #93c5fd !important; }
+.light-theme [class*="border-[#E8931A]/"] { border-color: #f59e0b !important; }
+.light-theme [class*="border-[#ffb4ab]/"] { border-color: #fda4af !important; }
+
+.light-theme [class~="hover:bg-[#E8931A]/90"]:hover { background-color: #d97706 !important; }
+.light-theme [class~="hover:bg-[#7E22CE]"]:hover { background-color: #5b21b6 !important; }
+.light-theme [class~="hover:bg-[#378ADD]/10"]:hover { background-color: rgba(37, 99, 235, .12) !important; }
+.light-theme [class*="hover:bg-[#040810]/"]:hover { background-color: #e2e8f0 !important; }
+.light-theme [class*="hover:bg-[#121A2B]/"]:hover { background-color: #eef2f7 !important; }
+.light-theme [class~="hover:bg-[#1d242b]"]:hover { background-color: #e2e8f0 !important; }
+.light-theme [class*="hover:bg-[#ffb4ab]/"]:hover { background-color: #ffe4e6 !important; }
+.light-theme [class~="hover:border-[#378ADD]"]:hover { border-color: #1d4ed8 !important; }
+.light-theme [class~="hover:text-[#E8931A]"]:hover { color: #92400e !important; }
+.light-theme [class*="focus:border-[#E8931A]"]:focus { border-color: #d97706 !important; }
 
 .nav-link:hover::after {
   width: 100%;
