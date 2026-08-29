@@ -1,5 +1,11 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { JAVASCRIPT_COURSE } from '../courses/javascript-course.data';
 
 const COURSE_INCLUDE = {
   modules: {
@@ -9,8 +15,22 @@ const COURSE_INCLUDE = {
 };
 
 const DEFAULT_COUPONS = [
-  { id: 'c1', code: 'TECHNYKS50', discountPercent: 50, usageLimit: 100, timesUsed: 0, isActive: true },
-  { id: 'c2', code: 'ARCH20', discountPercent: 20, usageLimit: 500, timesUsed: 0, isActive: true },
+  {
+    id: 'c1',
+    code: 'TECHNYKS50',
+    discountPercent: 50,
+    usageLimit: 100,
+    timesUsed: 0,
+    isActive: true,
+  },
+  {
+    id: 'c2',
+    code: 'ARCH20',
+    discountPercent: 20,
+    usageLimit: 500,
+    timesUsed: 0,
+    isActive: true,
+  },
 ];
 
 @Injectable()
@@ -27,25 +47,56 @@ export class AdminService {
 
     if (this.prisma.isDbConnected) {
       try {
-        payments = await this.prisma.payment.findMany({ where: { status: 'SUCCESS' }, include: { course: true } });
-        activeSubscriptions = await this.prisma.subscription.count({ where: { status: 'ACTIVE' } });
-        canceledSubscriptions = await this.prisma.subscription.count({ where: { status: 'CANCELED' } });
-        totalStudents = await this.prisma.user.count({ where: { role: 'STUDENT' } });
+        payments = await this.prisma.payment.findMany({
+          where: { status: 'SUCCESS' },
+          include: { course: true },
+        });
+        activeSubscriptions = await this.prisma.subscription.count({
+          where: { status: 'ACTIVE' },
+        });
+        canceledSubscriptions = await this.prisma.subscription.count({
+          where: { status: 'CANCELED' },
+        });
+        totalStudents = await this.prisma.user.count({
+          where: { role: 'STUDENT' },
+        });
       } catch {
-        payments = this.prisma.inMemoryPayments.filter(payment => payment.status === 'SUCCESS');
-        activeSubscriptions = this.prisma.inMemorySubscriptions.filter(subscription => subscription.status === 'ACTIVE').length;
-        canceledSubscriptions = this.prisma.inMemorySubscriptions.filter(subscription => subscription.status === 'CANCELED').length;
-        totalStudents = this.prisma.inMemoryUsers.filter(user => user.role === 'STUDENT').length;
+        payments = this.prisma.inMemoryPayments.filter(
+          (payment) => payment.status === 'SUCCESS',
+        );
+        activeSubscriptions = this.prisma.inMemorySubscriptions.filter(
+          (subscription) => subscription.status === 'ACTIVE',
+        ).length;
+        canceledSubscriptions = this.prisma.inMemorySubscriptions.filter(
+          (subscription) => subscription.status === 'CANCELED',
+        ).length;
+        totalStudents = this.prisma.inMemoryUsers.filter(
+          (user) => user.role === 'STUDENT',
+        ).length;
       }
     } else {
-      payments = this.prisma.inMemoryPayments.filter(payment => payment.status === 'SUCCESS');
-      activeSubscriptions = this.prisma.inMemorySubscriptions.filter(subscription => subscription.status === 'ACTIVE').length;
-      canceledSubscriptions = this.prisma.inMemorySubscriptions.filter(subscription => subscription.status === 'CANCELED').length;
-      totalStudents = this.prisma.inMemoryUsers.filter(user => user.role === 'STUDENT').length;
+      payments = this.prisma.inMemoryPayments.filter(
+        (payment) => payment.status === 'SUCCESS',
+      );
+      activeSubscriptions = this.prisma.inMemorySubscriptions.filter(
+        (subscription) => subscription.status === 'ACTIVE',
+      ).length;
+      canceledSubscriptions = this.prisma.inMemorySubscriptions.filter(
+        (subscription) => subscription.status === 'CANCELED',
+      ).length;
+      totalStudents = this.prisma.inMemoryUsers.filter(
+        (user) => user.role === 'STUDENT',
+      ).length;
     }
 
-    const totalRevenue = payments.reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
-    const courseSalesMap: Record<string, { title: string; count: number; totalAmount: number }> = {};
+    const totalRevenue = payments.reduce(
+      (sum, payment) => sum + Number(payment.amount || 0),
+      0,
+    );
+    const courseSalesMap: Record<
+      string,
+      { title: string; count: number; totalAmount: number }
+    > = {};
     for (const payment of payments) {
       const title = payment.course?.title || 'Membership Subscription';
       courseSalesMap[title] ??= { title, count: 0, totalAmount: 0 };
@@ -54,9 +105,10 @@ export class AdminService {
     }
 
     const subscriptionCount = activeSubscriptions + canceledSubscriptions;
-    const churnRate = subscriptionCount === 0
-      ? '0%'
-      : `${Math.round((canceledSubscriptions / subscriptionCount) * 100)}%`;
+    const churnRate =
+      subscriptionCount === 0
+        ? '0%'
+        : `${Math.round((canceledSubscriptions / subscriptionCount) * 100)}%`;
 
     return {
       totalRevenue: Math.round(totalRevenue),
@@ -74,13 +126,15 @@ export class AdminService {
 
     if (this.prisma.isDbConnected) {
       try {
-        users = await this.prisma.user.findMany({
-          where: q ? {
-            OR: [
-              { name: { contains: q, mode: 'insensitive' } },
-              { email: { contains: q, mode: 'insensitive' } },
-            ],
-          } : undefined,
+        users = (await this.prisma.user.findMany({
+          where: q
+            ? {
+                OR: [
+                  { name: { contains: q, mode: 'insensitive' } },
+                  { email: { contains: q, mode: 'insensitive' } },
+                ],
+              }
+            : undefined,
           select: {
             id: true,
             name: true,
@@ -90,7 +144,7 @@ export class AdminService {
             _count: { select: { enrollments: true, subscriptions: true } },
           },
           orderBy: { createdAt: 'desc' },
-        }) as any[];
+        })) as any[];
         usingDatabaseUsers = true;
       } catch {
         // Keep using the in-memory adapter.
@@ -99,17 +153,26 @@ export class AdminService {
 
     const filteredUsers = usingDatabaseUsers
       ? users
-      : users.filter(user => !q || user.name.toLowerCase().includes(q) || user.email.toLowerCase().includes(q));
+      : users.filter(
+          (user) =>
+            !q ||
+            user.name.toLowerCase().includes(q) ||
+            user.email.toLowerCase().includes(q),
+        );
 
-    return filteredUsers.map(user => ({
+    return filteredUsers.map((user) => ({
       id: user.id,
       name: user.name,
       email: user.email,
       role: user.role,
       createdAt: user.createdAt || new Date(),
       _count: user._count || {
-        enrollments: this.prisma.inMemoryEnrollments.filter(enrollment => enrollment.userId === user.id).length,
-        subscriptions: this.prisma.inMemorySubscriptions.filter(subscription => subscription.userId === user.id).length,
+        enrollments: this.prisma.inMemoryEnrollments.filter(
+          (enrollment) => enrollment.userId === user.id,
+        ).length,
+        subscriptions: this.prisma.inMemorySubscriptions.filter(
+          (subscription) => subscription.userId === user.id,
+        ).length,
       },
     }));
   }
@@ -118,7 +181,10 @@ export class AdminService {
     let courses: any[];
     if (this.prisma.isDbConnected) {
       try {
-        courses = await this.prisma.course.findMany({ include: COURSE_INCLUDE, orderBy: { createdAt: 'desc' } });
+        courses = await this.prisma.course.findMany({
+          include: COURSE_INCLUDE,
+          orderBy: { createdAt: 'desc' },
+        });
         return this.withCourseMetrics(courses);
       } catch {
         // Use the local adapter if the database becomes unavailable.
@@ -126,7 +192,10 @@ export class AdminService {
     }
 
     courses = [...this.prisma.inMemoryCourses].sort((a, b) => {
-      return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      return (
+        new Date(b.createdAt || 0).getTime() -
+        new Date(a.createdAt || 0).getTime()
+      );
     });
     return this.withCourseMetrics(courses);
   }
@@ -134,14 +203,21 @@ export class AdminService {
   async getCourseById(id: string) {
     if (this.prisma.isDbConnected) {
       try {
-        const course = await this.prisma.course.findUnique({ where: { id }, include: COURSE_INCLUDE });
+        const course = await this.prisma.course.findUnique({
+          where: { id },
+          include: COURSE_INCLUDE,
+        });
         if (course) return (await this.withCourseMetrics([course]))[0];
-      } catch {
+        throw new NotFoundException('Course not found.');
+      } catch (error) {
+        if (error instanceof NotFoundException) throw error;
         // Use the local adapter if the database becomes unavailable.
       }
     }
 
-    const course = this.prisma.inMemoryCourses.find(candidate => candidate.id === id);
+    const course = this.prisma.inMemoryCourses.find(
+      (candidate) => candidate.id === id,
+    );
     if (!course) throw new NotFoundException('Course not found.');
     return (await this.withCourseMetrics([course]))[0];
   }
@@ -158,6 +234,7 @@ export class AdminService {
             subtitle: fields.subtitle,
             description: fields.description,
             thumbnail: fields.thumbnail,
+            promoVideoUrl: fields.promoVideoUrl,
             price: fields.price,
             currency: fields.currency,
             level: fields.level,
@@ -181,6 +258,84 @@ export class AdminService {
     return course;
   }
 
+  async importJavascriptCourse() {
+    const template = JAVASCRIPT_COURSE as typeof JAVASCRIPT_COURSE & {
+      promoVideoUrl?: string;
+    };
+
+    if (this.prisma.isDbConnected) {
+      try {
+        const existing = await this.prisma.course.findUnique({
+          where: { id: template.id },
+          include: COURSE_INCLUDE,
+        });
+        if (existing) return (await this.withCourseMetrics([existing]))[0];
+
+        const course = await this.prisma.course.create({
+          data: {
+            id: template.id,
+            slug: template.slug,
+            title: template.title,
+            subtitle: template.subtitle,
+            description: template.description,
+            thumbnail: template.thumbnail,
+            promoVideoUrl: template.promoVideoUrl ?? null,
+            price: template.price,
+            currency: template.currency,
+            level: template.level,
+            isPublished: template.isPublished,
+            modules: {
+              create: template.modules.map((module) => ({
+                id: module.id,
+                title: module.title,
+                order: module.order,
+                lessons: {
+                  create: module.lessons.map((lesson) => ({
+                    id: lesson.id,
+                    title: lesson.title,
+                    duration: lesson.duration,
+                    order: lesson.order,
+                    isFreePreview: lesson.isFreePreview,
+                    videoAssetRef: lesson.videoAssetRef,
+                  })),
+                },
+              })),
+            },
+          } as any,
+          include: COURSE_INCLUDE,
+        });
+        return course;
+      } catch (error: any) {
+        if (error?.code !== 'P2002') {
+          this.logger.error(
+            `JavaScript course import failed: ${error?.message || 'unknown database error'}`,
+          );
+          throw new BadRequestException(
+            'The JavaScript course could not be imported.',
+          );
+        }
+        const existing = await this.prisma.course.findUnique({
+          where: { id: template.id },
+          include: COURSE_INCLUDE,
+        });
+        if (existing) return (await this.withCourseMetrics([existing]))[0];
+      }
+    }
+
+    const existing = this.prisma.inMemoryCourses.find(
+      (course) => course.id === template.id,
+    );
+    if (existing) return existing;
+
+    const course = {
+      ...template,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.prisma.inMemoryCourses.unshift(course);
+    return course;
+  }
+
   async updateCourse(id: string, dto: any) {
     const current = await this.getCourseById(id);
     const fields = await this.normaliseCourse(dto, id, current);
@@ -195,11 +350,15 @@ export class AdminService {
             subtitle: fields.subtitle,
             description: fields.description,
             thumbnail: fields.thumbnail,
+            promoVideoUrl: fields.promoVideoUrl,
             price: fields.price,
             currency: fields.currency,
             level: fields.level,
             isPublished: fields.isPublished,
-            modules: { deleteMany: {}, create: this.toPrismaModules(fields.modules) },
+            modules: {
+              deleteMany: {},
+              create: this.toPrismaModules(fields.modules),
+            },
           } as any,
           include: COURSE_INCLUDE,
         });
@@ -208,7 +367,9 @@ export class AdminService {
       }
     }
 
-    const index = this.prisma.inMemoryCourses.findIndex(course => course.id === id);
+    const index = this.prisma.inMemoryCourses.findIndex(
+      (course) => course.id === id,
+    );
     if (index === -1) throw new NotFoundException('Course not found.');
 
     const updated = {
@@ -229,14 +390,21 @@ export class AdminService {
         // course relation must be detached before deleting the course. The
         // other course-owned records can be removed with the course.
         await this.prisma.$transaction(async (transaction) => {
-          await transaction.payment.updateMany({ where: { courseId: id }, data: { courseId: null } });
+          await transaction.payment.updateMany({
+            where: { courseId: id },
+            data: { courseId: null },
+          });
           await transaction.certificate.deleteMany({ where: { courseId: id } });
           await transaction.enrollment.deleteMany({ where: { courseId: id } });
           await transaction.course.delete({ where: { id } });
         });
+        this.removeInMemoryCourse(id);
         return { success: true, deleted: true };
       } catch (error: any) {
-        if (error?.code === 'P2025') return { success: true, deleted: false };
+        if (error?.code === 'P2025') {
+          this.removeInMemoryCourse(id);
+          return { success: true, deleted: false };
+        }
         this.logger.error(
           `Course deletion failed for ${id}: ${error?.message || 'unknown database error'}`,
           error?.stack,
@@ -246,18 +414,28 @@ export class AdminService {
     }
 
     const before = this.prisma.inMemoryCourses.length;
-    this.prisma.inMemoryCourses = this.prisma.inMemoryCourses.filter(course => course.id !== id);
-    if (before === this.prisma.inMemoryCourses.length) return { success: true, deleted: false };
-    this.prisma.inMemoryEnrollments = this.prisma.inMemoryEnrollments.filter(enrollment => enrollment.courseId !== id);
-    this.prisma.inMemoryCertificates = this.prisma.inMemoryCertificates.filter(certificate => certificate.courseId !== id);
-    this.prisma.inMemoryPayments = this.prisma.inMemoryPayments.map(payment =>
-      payment.courseId === id ? { ...payment, courseId: null } : payment
+    this.prisma.inMemoryCourses = this.prisma.inMemoryCourses.filter(
+      (course) => course.id !== id,
+    );
+    if (before === this.prisma.inMemoryCourses.length)
+      return { success: true, deleted: false };
+    this.prisma.inMemoryEnrollments = this.prisma.inMemoryEnrollments.filter(
+      (enrollment) => enrollment.courseId !== id,
+    );
+    this.prisma.inMemoryCertificates = this.prisma.inMemoryCertificates.filter(
+      (certificate) => certificate.courseId !== id,
+    );
+    this.prisma.inMemoryPayments = this.prisma.inMemoryPayments.map(
+      (payment) =>
+        payment.courseId === id ? { ...payment, courseId: null } : payment,
     );
     return { success: true, deleted: true };
   }
 
   async createCoupon(dto: any) {
-    const code = String(dto.code || '').trim().toUpperCase();
+    const code = String(dto.code || '')
+      .trim()
+      .toUpperCase();
     if (!code) throw new BadRequestException('Coupon code is required.');
 
     const data = {
@@ -290,14 +468,19 @@ export class AdminService {
   async getAllCoupons() {
     if (this.prisma.isDbConnected) {
       try {
-        return await this.prisma.coupon.findMany({ orderBy: { createdAt: 'desc' } });
+        return await this.prisma.coupon.findMany({
+          orderBy: { createdAt: 'desc' },
+        });
       } catch {
         // Use the local adapter if the database becomes unavailable.
       }
     }
 
     if (this.prisma.inMemoryCoupons.length === 0) {
-      this.prisma.inMemoryCoupons = DEFAULT_COUPONS.map(coupon => ({ ...coupon, createdAt: new Date() }));
+      this.prisma.inMemoryCoupons = DEFAULT_COUPONS.map((coupon) => ({
+        ...coupon,
+        createdAt: new Date(),
+      }));
     }
     return this.prisma.inMemoryCoupons;
   }
@@ -312,7 +495,9 @@ export class AdminService {
       }
     }
 
-    this.prisma.inMemoryCoupons = this.prisma.inMemoryCoupons.filter(coupon => coupon.id !== id);
+    this.prisma.inMemoryCoupons = this.prisma.inMemoryCoupons.filter(
+      (coupon) => coupon.id !== id,
+    );
     return { success: true };
   }
 
@@ -321,22 +506,37 @@ export class AdminService {
     if (!title) throw new BadRequestException('Course title is required.');
 
     const price = Number(dto.price ?? current?.price ?? 0);
-    if (!Number.isFinite(price) || price < 0) throw new BadRequestException('Course price must be a non-negative number.');
+    if (!Number.isFinite(price) || price < 0)
+      throw new BadRequestException(
+        'Course price must be a non-negative number.',
+      );
 
     const requestedSlug = String(dto.slug ?? current?.slug ?? title);
     const slug = await this.uniqueSlug(requestedSlug, existingId);
-    const modules = this.normaliseModules(dto.modules ?? current?.modules ?? []);
+    const modules = this.normaliseModules(
+      dto.modules ?? current?.modules ?? [],
+    );
 
     return {
       slug,
       title,
       subtitle: String(dto.subtitle ?? current?.subtitle ?? '').trim(),
       description: String(dto.description ?? current?.description ?? '').trim(),
-      thumbnail: dto.thumbnail ?? current?.thumbnail ?? null,
+      thumbnail: this.cleanThumbnail(dto.thumbnail ?? current?.thumbnail),
+      promoVideoUrl: this.cleanPromoVideoUrl(
+        dto.promoVideoUrl ?? current?.promoVideoUrl,
+      ),
       price,
-      currency: String(dto.currency ?? current?.currency ?? 'INR').toUpperCase(),
+      currency: String(
+        dto.currency ?? current?.currency ?? 'INR',
+      ).toUpperCase(),
       level: String(dto.level ?? current?.level ?? 'Intermediate'),
-      isPublished: Boolean(dto.isPublished ?? (dto.status ? dto.status === 'LIVE' : current?.isPublished ?? false)),
+      isPublished: Boolean(
+        dto.isPublished ??
+          (dto.status
+            ? dto.status === 'LIVE'
+            : (current?.isPublished ?? false)),
+      ),
       modules,
     };
   }
@@ -344,7 +544,7 @@ export class AdminService {
   private async withCourseMetrics(courses: any[]) {
     if (!courses.length) return courses;
 
-    const courseIds = courses.map(course => course.id).filter(Boolean);
+    const courseIds = courses.map((course) => course.id).filter(Boolean);
     const monthStart = new Date();
     monthStart.setHours(0, 0, 0, 0);
     monthStart.setDate(1);
@@ -389,7 +589,8 @@ export class AdminService {
       ) {
         revenueByCourse.set(
           payment.courseId,
-          (revenueByCourse.get(payment.courseId) || 0) + Number(payment.amount || 0),
+          (revenueByCourse.get(payment.courseId) || 0) +
+            Number(payment.amount || 0),
         );
       }
     }
@@ -407,7 +608,7 @@ export class AdminService {
       }
     }
 
-    return courses.map(course => ({
+    return courses.map((course) => ({
       ...course,
       // Ratings are intentionally zero until a real reviews data source exists.
       rating: 0,
@@ -417,24 +618,30 @@ export class AdminService {
   }
 
   private normaliseModules(modules: any[]) {
-    return (Array.isArray(modules) ? modules : []).map((module, moduleIndex) => ({
-      id: module.id || `module_${Date.now().toString(36)}_${moduleIndex + 1}`,
-      title: String(module.title || `Section ${moduleIndex + 1}`).trim(),
-      order: moduleIndex + 1,
-      lessons: (Array.isArray(module.lessons) ? module.lessons : []).map((lesson: any, lessonIndex: number) => ({
-          id: lesson.id || `lesson_${Date.now().toString(36)}_${moduleIndex + 1}_${lessonIndex + 1}`,
-          title: String(lesson.title || `Lecture ${lessonIndex + 1}`).trim(),
-          description: lesson.description ? String(lesson.description) : null,
-          videoAssetRef: this.cleanVideoAssetRef(lesson.videoAssetRef),
-          duration: Math.max(0, Number(lesson.duration) || 0),
-          order: lessonIndex + 1,
-          isFreePreview: Boolean(lesson.isFreePreview),
-        })),
-    }));
+    return (Array.isArray(modules) ? modules : []).map(
+      (module, moduleIndex) => ({
+        id: module.id || `module_${Date.now().toString(36)}_${moduleIndex + 1}`,
+        title: String(module.title || `Section ${moduleIndex + 1}`).trim(),
+        order: moduleIndex + 1,
+        lessons: (Array.isArray(module.lessons) ? module.lessons : []).map(
+          (lesson: any, lessonIndex: number) => ({
+            id:
+              lesson.id ||
+              `lesson_${Date.now().toString(36)}_${moduleIndex + 1}_${lessonIndex + 1}`,
+            title: String(lesson.title || `Lecture ${lessonIndex + 1}`).trim(),
+            description: lesson.description ? String(lesson.description) : null,
+            videoAssetRef: this.cleanVideoAssetRef(lesson.videoAssetRef),
+            duration: Math.max(0, Number(lesson.duration) || 0),
+            order: lessonIndex + 1,
+            isFreePreview: Boolean(lesson.isFreePreview),
+          }),
+        ),
+      }),
+    );
   }
 
   private toPrismaModules(modules: any[]) {
-    return modules.map(module => ({
+    return modules.map((module) => ({
       title: module.title,
       order: module.order,
       lessons: {
@@ -454,28 +661,87 @@ export class AdminService {
     const base = this.slugify(value) || `course-${Date.now().toString(36)}`;
     let slug = base;
     let suffix = 2;
-    while (await this.slugExists(slug, existingId)) slug = `${base}-${suffix++}`;
+    while (await this.slugExists(slug, existingId))
+      slug = `${base}-${suffix++}`;
     return slug;
   }
 
   private async slugExists(slug: string, existingId?: string) {
     if (this.prisma.isDbConnected) {
       try {
-        const existing = await this.prisma.course.findUnique({ where: { slug }, select: { id: true } });
+        const existing = await this.prisma.course.findUnique({
+          where: { slug },
+          select: { id: true },
+        });
         return Boolean(existing && existing.id !== existingId);
       } catch {
         // Check the local adapter below.
       }
     }
-    return this.prisma.inMemoryCourses.some(course => course.slug === slug && course.id !== existingId);
+    return this.prisma.inMemoryCourses.some(
+      (course) => course.slug === slug && course.id !== existingId,
+    );
   }
 
   private slugify(value: string) {
-    return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    return value
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
   }
 
   private cleanVideoAssetRef(value: unknown): string | null {
     const ref = String(value || '').trim();
     return ref && !/^demo(?:[_-]|$)/i.test(ref) ? ref : null;
+  }
+
+  private cleanPromoVideoUrl(value: unknown): string | null {
+    const url = String(value || '').trim();
+    if (!url) return null;
+    if (url.length > 12_000_000) {
+      throw new BadRequestException(
+        'Promotional video files must be 8 MB or smaller.',
+      );
+    }
+    if (url.startsWith('data:video/')) return url;
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        throw new Error('Unsupported protocol');
+      }
+      return parsed.toString();
+    } catch {
+      throw new BadRequestException(
+        'Promotional video must be a valid YouTube, Vimeo, or video URL.',
+      );
+    }
+  }
+
+  private cleanThumbnail(value: unknown): string | null {
+    const thumbnail = String(value || '').trim();
+    if (!thumbnail) return null;
+    if (thumbnail.length > 8_000_000) {
+      throw new BadRequestException('Course images must be 4 MB or smaller.');
+    }
+    if (thumbnail.startsWith('data:image/') || thumbnail.startsWith('/'))
+      return thumbnail;
+    try {
+      const parsed = new URL(thumbnail);
+      if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+        throw new Error('Unsupported protocol');
+      }
+      return parsed.toString();
+    } catch {
+      throw new BadRequestException(
+        'Course thumbnail must be a valid image URL or uploaded image.',
+      );
+    }
+  }
+
+  private removeInMemoryCourse(id: string) {
+    this.prisma.inMemoryCourses = this.prisma.inMemoryCourses.filter(
+      (course) => course.id !== id,
+    );
   }
 }

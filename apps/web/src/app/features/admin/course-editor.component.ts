@@ -287,18 +287,23 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                     <p class="text-[#d9c3af]">
                       Upload your course image here. Important guidelines: <span class="font-['JetBrains_Mono'] text-white font-bold">750x422 pixels</span>; .jpg, .jpeg, .gif, or .png. No text on the image.
                     </p>
-                    <div class="flex gap-2">
+                    <div class="flex flex-wrap gap-2">
                       <input
                         type="text"
                         [ngModel]="course()?.thumbnail"
                         (ngModelChange)="updateCourseField('thumbnail', $event)"
-                        placeholder="/assets/agentic-ai.jpg"
+                        placeholder="Paste an image URL or choose a file"
                         class="flex-grow bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']"
                       />
-                      <button (click)="saveAllChanges()" class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-4 py-2 rounded shrink-0">
-                        Upload File
+                      <label class="font-['JetBrains_Mono'] text-xs font-bold text-[#040810] bg-[#E8931A] hover:bg-[#f6a52a] px-4 py-2 rounded shrink-0 cursor-pointer">
+                        Choose image
+                        <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden" (change)="handleThumbnailFile($event)" />
+                      </label>
+                      <button type="button" (click)="saveAllChanges()" class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-4 py-2 rounded shrink-0">
+                        Save image
                       </button>
                     </div>
+                    <span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b]">Images are read by your browser and saved with the course record. Maximum file size: 4 MB.</span>
                   </div>
                 </div>
               </div>
@@ -309,10 +314,14 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div class="relative w-full h-44 bg-[#040810] border border-[#1E293B] rounded-lg flex flex-col justify-between p-4">
                     <div class="flex-grow flex items-center justify-center">
-                      <span class="material-symbols-outlined text-4xl text-white opacity-80">play_circle</span>
+                      @if (course()?.promoVideoUrl?.startsWith('data:video/')) {
+                        <video [src]="course()?.promoVideoUrl" controls class="w-full h-full object-contain rounded"></video>
+                      } @else {
+                        <span class="material-symbols-outlined text-4xl text-white opacity-80">play_circle</span>
+                      }
                     </div>
                     <div class="flex items-center justify-between text-[#a18d7b] font-['JetBrains_Mono'] text-[10px]">
-                      <span>0:00 / 0:00</span>
+                      <span>{{ course()?.promoVideoUrl ? 'Promo video configured' : 'No promo video configured' }}</span>
                       <span class="material-symbols-outlined text-sm">settings</span>
                     </div>
                   </div>
@@ -321,16 +330,23 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                     <p class="text-[#d9c3af]">
                       Your promo video is a quick and compelling way for students to preview what they'll learn in your course.
                     </p>
-                    <div class="flex gap-2">
+                    <div class="flex flex-wrap gap-2">
                       <input
                         type="text"
-                        placeholder="Paste Bunny Stream promo video ID when available"
+                        [ngModel]="course()?.promoVideoUrl"
+                        (ngModelChange)="updateCourseField('promoVideoUrl', $event)"
+                        placeholder="Paste YouTube, Vimeo, or direct video URL"
                         class="flex-grow bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']"
                       />
-                      <button (click)="saveAllChanges()" class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-4 py-2 rounded shrink-0">
-                        Upload File
+                      <label class="font-['JetBrains_Mono'] text-xs font-bold text-[#040810] bg-[#E8931A] hover:bg-[#f6a52a] px-4 py-2 rounded shrink-0 cursor-pointer">
+                        Upload intro
+                        <input type="file" accept="video/mp4,video/webm,video/ogg" class="hidden" (change)="handlePromoVideoFile($event)" />
+                      </label>
+                      <button type="button" (click)="saveAllChanges()" class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-4 py-2 rounded shrink-0">
+                        Save video
                       </button>
                     </div>
+                    <span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b]">Short intro files up to 8 MB can be stored with the course. Larger lessons should use Bunny Stream.</span>
                   </div>
                 </div>
               </div>
@@ -482,6 +498,47 @@ export class CourseEditorComponent implements OnInit {
     const current = this.course();
     if (!current) return;
     this.course.set({ ...current, [field]: value });
+  }
+
+  handleThumbnailFile(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('Please choose an image file.');
+      return;
+    }
+    if (file.size > 4 * 1024 * 1024) {
+      alert('Please choose an image smaller than 4 MB.');
+      return;
+    }
+    this.readFileAsDataUrl(file).then((dataUrl) =>
+      this.updateCourseField('thumbnail', dataUrl),
+    );
+  }
+
+  handlePromoVideoFile(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('video/')) {
+      alert('Please choose a video file.');
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      alert('Please choose a short intro video smaller than 8 MB.');
+      return;
+    }
+    this.readFileAsDataUrl(file).then((dataUrl) =>
+      this.updateCourseField('promoVideoUrl', dataUrl),
+    );
+  }
+
+  private readFileAsDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
   }
 
   addSection() {

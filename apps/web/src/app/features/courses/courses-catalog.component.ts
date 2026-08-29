@@ -11,24 +11,41 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
   template: `
     <div class="px-5 sm:px-8 xl:px-12 pt-24 pb-20 max-w-[1400px] mx-auto">
       <div class="mb-10">
-        <div class="font-['JetBrains_Mono'] text-[11px] uppercase tracking-[0.22em] text-[#378ADD] mb-4">
+        <div
+          class="font-['JetBrains_Mono'] text-[11px] uppercase tracking-[0.22em] text-[#378ADD] mb-4"
+        >
           Technyks Academy / Course catalog
         </div>
-        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
+        <div
+          class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5"
+        >
           <div>
-            <h1 class="font-['Hanken_Grotesk'] text-4xl md:text-5xl font-bold text-white mb-3">Premium Courses</h1>
-            <p class="font-['Inter'] text-base md:text-lg text-[#d9c3af] max-w-2xl">
-              Practical engineering programs for building production-grade products, AI systems, and scalable SaaS.
+            <h1
+              class="font-['Hanken_Grotesk'] text-4xl md:text-5xl font-bold text-white mb-3"
+            >
+              Premium Courses
+            </h1>
+            <p
+              class="font-['Inter'] text-base md:text-lg text-[#d9c3af] max-w-2xl"
+            >
+              Practical engineering programs for building production-grade
+              products, AI systems, and scalable SaaS.
             </p>
           </div>
-          <div class="flex items-center gap-3 text-xs font-['JetBrains_Mono'] text-[#a18d7b]">
-            <span class="w-2 h-2 rounded-full bg-[#E8931A] shadow-[0_0_12px_#E8931A]"></span>
+          <div
+            class="flex items-center gap-3 text-xs font-['JetBrains_Mono'] text-[#a18d7b]"
+          >
+            <span
+              class="w-2 h-2 rounded-full bg-[#E8931A] shadow-[0_0_12px_#E8931A]"
+            ></span>
             {{ courses().length }} courses available
           </div>
         </div>
       </div>
 
-      <div class="flex flex-wrap items-center justify-between gap-4 mb-8 border-y border-[#1E293B] py-4">
+      <div
+        class="flex flex-wrap items-center justify-between gap-4 mb-8 border-y border-[#1E293B] py-4"
+      >
         <div class="flex flex-wrap gap-2">
           @for (level of levels; track level) {
             <button
@@ -45,15 +62,19 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
           }
         </div>
 
-        <div class="font-['JetBrains_Mono'] text-xs text-[#378ADD] uppercase tracking-wider">
+        <div
+          class="font-['JetBrains_Mono'] text-xs text-[#378ADD] uppercase tracking-wider"
+        >
           Showing {{ filteredCourses().length }} courses
         </div>
       </div>
 
       @if (isLoading()) {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          @for (i of [1,2,3,4]; track i) {
-            <div class="bg-[#121A2B] border border-[#1E293B] rounded-lg overflow-hidden animate-pulse">
+          @for (i of [1, 2, 3, 4]; track i) {
+            <div
+              class="bg-[#121A2B] border border-[#1E293B] rounded-lg overflow-hidden animate-pulse"
+            >
               <div class="aspect-video bg-[#1E293B]"></div>
               <div class="p-5">
                 <div class="h-4 bg-[#1E293B] rounded w-1/3 mb-4"></div>
@@ -64,15 +85,39 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
             </div>
           }
         </div>
-      } @else {
+      } @else if (filteredCourses().length) {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           @for (course of filteredCourses(); track course.id) {
             <app-course-card [course]="course" />
           }
         </div>
+      } @else {
+        <div
+          class="border border-dashed border-[#378ADD]/50 rounded-lg px-6 py-16 text-center"
+        >
+          <span class="material-symbols-outlined text-4xl text-[#E8931A] mb-3"
+            >school</span
+          >
+          <h2
+            class="font-['Hanken_Grotesk'] text-2xl font-bold text-white mb-2"
+          >
+            {{
+              courses().length
+                ? 'No courses match this filter'
+                : 'No courses are live right now'
+            }}
+          </h2>
+          <p class="font-['Inter'] text-sm text-[#a18d7b] max-w-xl mx-auto">
+            {{
+              courses().length
+                ? 'Try selecting another level to see available courses.'
+                : 'New courses will appear here after they are published from the admin panel.'
+            }}
+          </p>
+        </div>
       }
     </div>
-  `
+  `,
 })
 export class CoursesCatalogComponent implements OnInit {
   private coursesService = inject(CoursesService);
@@ -95,7 +140,8 @@ export class CoursesCatalogComponent implements OnInit {
   filteredCourses = () => {
     const level = this.selectedLevel();
     if (level === 'ALL') return this.courses();
-    return this.courses().filter(c => c.level.toLowerCase() === level.toLowerCase());
+    return this.courses().filter(
+      (c) => c.level.toLowerCase() === level.toLowerCase(),
+    );
   };
-
 }

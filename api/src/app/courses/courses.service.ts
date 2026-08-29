@@ -159,6 +159,14 @@ export class CoursesService implements OnModuleInit {
   constructor(private prisma: PrismaService) {}
 
   async onModuleInit() {
+    // The catalog is authoritative data. Demo courses are opt-in for local
+    // demos only, so deleting every course cannot be undone by a restart.
+    if (
+      process.env.NODE_ENV === 'production' ||
+      process.env.SEED_DEMO_COURSES !== 'true'
+    )
+      return;
+
     if (this.prisma.inMemoryCourses.length === 0) {
       this.prisma.inMemoryCourses = INITIAL_COURSES.map((course) => ({
         ...course,
@@ -296,7 +304,9 @@ export class CoursesService implements OnModuleInit {
           },
         });
         if (course) return this.toPublicCourse(course);
+        throw new NotFoundException(`Course with slug "${slug}" not found.`);
       } catch (e) {
+        if (e instanceof NotFoundException) throw e;
         // Fallback to in-memory
       }
     }

@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Patch, Delete, Body, Query, Param, UseGuards, SetMetadata } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Query,
+  Param,
+  UseGuards,
+  SetMetadata,
+} from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
 
@@ -33,6 +44,11 @@ export class AdminController {
   @Post('courses')
   async createCourse(@Body() dto: any) {
     return this.adminService.createCourse(dto);
+  }
+
+  @Post('courses/import-javascript')
+  async importJavascriptCourse() {
+    return this.adminService.importJavascriptCourse();
   }
 
   @Patch('courses/:id')

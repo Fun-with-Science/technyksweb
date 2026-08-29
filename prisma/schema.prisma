@@ -59,6 +59,7 @@ model Course {
   subtitle     String
   description  String        @db.Text
   thumbnail    String?
+  promoVideoUrl String?       @db.Text
   price        Float
   currency     String        @default("INR")
   level        String        @default("Intermediate")

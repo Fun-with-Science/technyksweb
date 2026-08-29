@@ -2,7 +2,12 @@ import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
-import { AdminService, RevenueMetrics, Student, Coupon } from '../../core/services/admin.service';
+import {
+  AdminService,
+  RevenueMetrics,
+  Student,
+  Coupon,
+} from '../../core/services/admin.service';
 import { CoursesService, Course } from '../../core/services/courses.service';
 
 @Component({
@@ -22,10 +27,20 @@ import { CoursesService, Course } from '../../core/services/courses.service';
           <h1 class="font-['Hanken_Grotesk'] text-3xl font-bold text-white">Course Management & Dashboard</h1>
         </div>
 
-        <button (click)="createNewCourse()" class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 w-fit">
-          <span class="material-symbols-outlined text-sm">add</span>
-          New Course
-        </button>
+        <div class="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            (click)="importJavaScriptCourse()"
+            class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] bg-[#E8931A] hover:bg-[#f6a52a] px-5 py-3 rounded-lg shadow-lg flex items-center gap-2 w-fit"
+          >
+            <span class="material-symbols-outlined text-sm">code</span>
+            Add JavaScript Course
+          </button>
+          <button (click)="createNewCourse()" class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 w-fit">
+            <span class="material-symbols-outlined text-sm">add</span>
+            New Course
+          </button>
+        </div>
       </div>
 
       <!-- Navigation Tabs -->
@@ -103,9 +118,10 @@ import { CoursesService, Course } from '../../core/services/courses.service';
           </div>
 
           <!-- Course Cards Roster (Screenshot 1 Layout) -->
-          <div class="flex flex-col gap-4">
-            @for (course of filteredCourses(); track course.id) {
-              <div class="bg-[#121A2B] border border-[#1E293B] hover:border-[#378ADD] rounded-lg p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-all group shadow-xl">
+          @if (filteredCourses().length) {
+            <div class="flex flex-col gap-4">
+              @for (course of filteredCourses(); track course.id) {
+                <div class="bg-[#121A2B] border border-[#1E293B] hover:border-[#378ADD] rounded-lg p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-all group shadow-xl">
                 
                 <!-- Left: Thumbnail & Title -->
                 <div class="flex items-center gap-5 flex-grow">
@@ -172,9 +188,20 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                     </button>
                   </div>
                 </div>
-              </div>
-            }
-          </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="bg-[#121A2B] border border-dashed border-[#378ADD]/50 rounded-lg px-6 py-14 text-center">
+              <span class="material-symbols-outlined text-4xl text-[#E8931A] mb-3">school</span>
+              <h2 class="font-['Hanken_Grotesk'] text-xl font-bold text-white mb-2">
+                {{ publishedCourses().length ? 'No courses match your search' : 'No courses are live yet' }}
+              </h2>
+              <p class="font-['Inter'] text-sm text-[#a18d7b] max-w-lg mx-auto">
+                {{ publishedCourses().length ? 'Try another title or slug.' : 'Create a course or add the JavaScript curriculum to start publishing your catalog.' }}
+              </p>
+            </div>
+          }
         </div>
       }
 
@@ -266,7 +293,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
         </div>
       }
     </div>
-  `
+  `,
 })
 export class AdminDashboardComponent implements OnInit {
   private adminService = inject(AdminService);
@@ -284,21 +311,30 @@ export class AdminDashboardComponent implements OnInit {
 
   ngOnInit() {
     this.loadCourses();
-    this.adminService.getMetrics().subscribe(data => this.metrics.set(data));
-    this.adminService.searchStudents('').subscribe(data => this.students.set(data));
-    this.adminService.getCoupons().subscribe(data => this.coupons.set(data));
+    this.adminService.getMetrics().subscribe((data) => this.metrics.set(data));
+    this.adminService
+      .searchStudents('')
+      .subscribe((data) => this.students.set(data));
+    this.adminService.getCoupons().subscribe((data) => this.coupons.set(data));
   }
 
   loadCourses() {
-    this.coursesService.getAllCoursesAdmin().subscribe(data => this.publishedCourses.set(data));
+    this.coursesService
+      .getAllCoursesAdmin()
+      .subscribe((data) => this.publishedCourses.set(data));
   }
 
   filteredCourses(): Course[] {
     const q = this.searchCourseQuery.toLowerCase();
-    const filtered = this.publishedCourses().filter(c => c.title.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q));
+    const filtered = this.publishedCourses().filter(
+      (c) =>
+        c.title.toLowerCase().includes(q) || c.slug.toLowerCase().includes(q),
+    );
     return [...filtered].sort((a, b) => {
-      if (this.sortBy === 'Oldest') return this.createdTime(a) - this.createdTime(b);
-      if (this.sortBy === 'Popular') return (b.enrollmentsThisMonth || 0) - (a.enrollmentsThisMonth || 0);
+      if (this.sortBy === 'Oldest')
+        return this.createdTime(a) - this.createdTime(b);
+      if (this.sortBy === 'Popular')
+        return (b.enrollmentsThisMonth || 0) - (a.enrollmentsThisMonth || 0);
       return this.createdTime(b) - this.createdTime(a);
     });
   }
@@ -319,33 +355,54 @@ export class AdminDashboardComponent implements OnInit {
       earnedThisMonth: 0,
       enrollmentsThisMonth: 0,
       rating: 0,
-      modules: []
+      modules: [],
     };
 
     this.coursesService.createCourse(newCourse).subscribe({
       next: (created) => {
         this.router.navigate(['/admin/courses', created.id, 'manage']);
-      }
+      },
+    });
+  }
+
+  importJavaScriptCourse() {
+    this.coursesService.importJavaScriptCourse().subscribe({
+      next: (course) => {
+        this.loadCourses();
+        this.router.navigate(['/admin/courses', course.id, 'manage']);
+      },
+      error: () =>
+        alert('The JavaScript course could not be created. Please try again.'),
     });
   }
 
   private createdTime(course: Course): number {
-    const createdAt = (course as Course & { createdAt?: string | Date }).createdAt;
+    const createdAt = (course as Course & { createdAt?: string | Date })
+      .createdAt;
     return createdAt ? new Date(createdAt).getTime() : 0;
   }
 
   deleteCoupon(id: string) {
     this.adminService.deleteCoupon(id).subscribe({
-      next: () => this.coupons.update(coupons => coupons.filter(coupon => coupon.id !== id)),
+      next: () =>
+        this.coupons.update((coupons) =>
+          coupons.filter((coupon) => coupon.id !== id),
+        ),
     });
   }
 
   deleteCourse(course: Course) {
-    if (typeof window === 'undefined' || !window.confirm('Are you sure you want to delete?')) return;
+    if (
+      typeof window === 'undefined' ||
+      !window.confirm('Are you sure you want to delete?')
+    )
+      return;
 
     this.coursesService.deleteCourse(course.id).subscribe({
       next: () => {
-        this.publishedCourses.update(courses => courses.filter(candidate => candidate.id !== course.id));
+        this.publishedCourses.update((courses) =>
+          courses.filter((candidate) => candidate.id !== course.id),
+        );
         alert('Course deleted successfully.');
       },
       error: () => alert('The course could not be deleted. Please try again.'),

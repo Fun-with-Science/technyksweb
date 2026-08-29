@@ -181,8 +181,8 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
           <div
             class="border border-[#1E293B] rounded-lg p-8 text-center font-['JetBrains_Mono'] text-sm text-[#a18d7b]"
           >
-            Courses will appear here once they are published from the admin
-            panel.
+            No courses are live right now. New courses will appear here after
+            they are published from the admin panel.
           </div>
         }
       </section>
