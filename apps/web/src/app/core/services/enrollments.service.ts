@@ -36,6 +36,10 @@ export class EnrollmentsService {
     return this.http.get<Enrollment[]>('/api/enrollments/my');
   }
 
+  enrollInFreeCourse(courseId: string): Observable<Enrollment> {
+    return this.http.post<Enrollment>('/api/enrollments/free', { courseId });
+  }
+
   updateProgress(payload: {
     courseId: string;
     lessonId: string;

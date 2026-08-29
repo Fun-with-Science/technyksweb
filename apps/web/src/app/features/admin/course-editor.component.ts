@@ -350,6 +350,32 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                   </div>
                 </div>
               </div>
+
+              <!-- Student Reviews -->
+              <div class="border-t border-[#1E293B] pt-6">
+                <div class="flex items-center justify-between gap-4 mb-4">
+                  <div>
+                    <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white">Student reviews</h3>
+                    <p class="font-['Inter'] text-xs text-[#a18d7b] mt-1">Real reviews from enrolled students appear here automatically.</p>
+                  </div>
+                  <span class="font-['JetBrains_Mono'] text-xs text-[#E8931A]">{{ course()?.reviewCount || 0 }} reviews</span>
+                </div>
+                @if (course()?.reviews?.length) {
+                  <div class="flex flex-col gap-3">
+                    @for (review of course()?.reviews; track review.id) {
+                      <article class="border border-[#1E293B] bg-[#040810]/60 rounded-lg p-4">
+                        <div class="flex items-center justify-between gap-4 mb-2">
+                          <span class="font-['Hanken_Grotesk'] text-sm font-bold text-white">{{ review.user.name }}</span>
+                          <span class="font-['JetBrains_Mono'] text-sm text-[#E8931A]">{{ '★'.repeat(review.rating) }}{{ '☆'.repeat(5 - review.rating) }}</span>
+                        </div>
+                        <p class="font-['Inter'] text-xs text-[#d9c3af] leading-relaxed">{{ review.comment }}</p>
+                      </article>
+                    }
+                  </div>
+                } @else {
+                  <div class="border border-dashed border-[#1E293B] rounded-lg p-5 font-['Inter'] text-xs text-[#a18d7b]">No student reviews yet.</div>
+                }
+              </div>
             </div>
           }
 
@@ -418,10 +444,24 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
             <div class="flex flex-col gap-6 max-w-lg">
               <div class="border-b border-[#1E293B] pb-4">
                 <h2 class="font-['Hanken_Grotesk'] text-2xl font-bold text-white">Pricing & Tier</h2>
-                <p class="font-['Inter'] text-xs text-[#d9c3af] mt-1">Set the standalone price for your course in INR (₹).</p>
+                <p class="font-['Inter'] text-xs text-[#d9c3af] mt-1">Choose whether students pay once or access this course for free after signing in.</p>
               </div>
 
-              <div>
+              <label class="flex items-start gap-3 border border-[#1E293B] bg-[#040810]/60 rounded-lg p-4 cursor-pointer">
+                <input
+                  type="checkbox"
+                  [checked]="course()?.isFree"
+                  (change)="toggleFreeCourse($event)"
+                  class="mt-0.5 rounded bg-[#040810] border-[#1E293B] text-[#E8931A] focus:ring-0"
+                />
+                <span>
+                  <span class="block font-['Hanken_Grotesk'] text-sm font-bold text-white">Make this a free course</span>
+                  <span class="block font-['Inter'] text-xs text-[#a18d7b] mt-1">Logged-in students can enroll directly. The course will not open a payment checkout.</span>
+                </span>
+              </label>
+
+              @if (!course()?.isFree) {
+                <div>
                 <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Course Price (₹ INR)</label>
                 <input
                   type="number"
@@ -429,7 +469,12 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                   (ngModelChange)="updateCourseField('price', $event)"
                   class="w-full bg-[#040810] border border-[#1E293B] rounded px-4 py-2.5 text-sm text-[#E8931A] font-['JetBrains_Mono'] font-bold"
                 />
-              </div>
+                </div>
+              } @else {
+                <div class="border border-[#E8931A]/40 bg-[#E8931A]/10 rounded-lg p-4 font-['JetBrains_Mono'] text-xs text-[#E8931A]">
+                  This course is free. Its price will be saved as ₹0.
+                </div>
+              }
             </div>
           }
         </main>
@@ -498,6 +543,12 @@ export class CourseEditorComponent implements OnInit {
     const current = this.course();
     if (!current) return;
     this.course.set({ ...current, [field]: value });
+  }
+
+  toggleFreeCourse(event: Event) {
+    const isFree = (event.target as HTMLInputElement).checked;
+    this.updateCourseField('isFree', isFree);
+    if (isFree) this.updateCourseField('price', 0);
   }
 
   handleThumbnailFile(event: Event) {

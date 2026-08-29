@@ -13,6 +13,15 @@ export class EnrollmentsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Post('free')
+  async enrollInFreeCourse(
+    @Request() req: any,
+    @Body() dto: { courseId: string },
+  ) {
+    return this.enrollmentsService.enrollInFreeCourse(req.user.id, dto.courseId);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('progress')
   async updateProgress(
     @Request() req: any,

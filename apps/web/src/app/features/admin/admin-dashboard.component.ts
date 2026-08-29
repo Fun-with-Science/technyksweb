@@ -146,7 +146,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                       </span>
                       <span class="text-[#a18d7b]">{{ course.isPublished ? 'Public' : 'Private' }}</span>
                       <span class="text-[#1E293B]">|</span>
-                      <span class="text-[#378ADD]">₹{{ course.price.toLocaleString('en-IN') }}</span>
+                      <span class="text-[#378ADD]">{{ course.isFree ? 'FREE' : '₹' + course.price.toLocaleString('en-IN') }}</span>
                     </div>
                   </div>
                 </div>
@@ -163,13 +163,13 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                     <span class="text-[10px] text-[#a18d7b]">Enrollments this month</span>
                   </div>
 
-                  <div class="flex flex-col text-right font-['JetBrains_Mono']">
-                    <div class="flex items-center justify-end gap-1 text-[#E8931A] text-xs font-bold">
-                      <span>{{ course.rating ?? 0 }}</span>
-                      <span class="material-symbols-outlined text-sm text-[#E8931A]">star</span>
+                    <div class="flex flex-col text-right font-['JetBrains_Mono']">
+                      <div class="flex items-center justify-end gap-1 text-[#E8931A] text-xs font-bold">
+                        <span>{{ course.rating ?? 0 }}</span>
+                        <span class="material-symbols-outlined text-sm text-[#E8931A]">star</span>
+                      </div>
+                      <span class="text-[10px] text-[#a18d7b]">{{ course.reviewCount || 0 }} reviews</span>
                     </div>
-                    <span class="text-[10px] text-[#a18d7b]">Course rating</span>
-                  </div>
 
                   <div class="flex items-center gap-2 shrink-0">
                     <!-- Edit / Manage Course Action Button -->
@@ -348,6 +348,7 @@ export class AdminDashboardComponent implements OnInit {
       description: 'Comprehensive hands-on architectural masterclass.',
       thumbnail: '/assets/course-agentic-ai.png',
       price: 4999,
+      isFree: false,
       currency: 'INR',
       level: 'Advanced',
       status: 'DRAFT',

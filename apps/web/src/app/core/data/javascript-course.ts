@@ -209,6 +209,7 @@ export const JAVASCRIPT_COURSE: Course = {
     'A complete JavaScript learning path from absolute beginner to advanced concepts. Follow a structured roadmap through core syntax, functions, objects, asynchronous JavaScript, APIs, the DOM, modern language features, object-oriented programming, debugging, browser storage, real-world projects, and performance optimization.',
   thumbnail: '/assets/course-javascript.png',
   price: 2999,
+  isFree: false,
   currency: 'INR',
   level: 'Beginner to Advanced',
   status: 'LIVE',

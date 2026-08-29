@@ -29,6 +29,18 @@ export interface Module {
   lessons: Lesson[];
 }
 
+export interface CourseReview {
+  id: string;
+  rating: number;
+  comment: string;
+  user: {
+    name: string;
+    avatarUrl?: string | null;
+  };
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface Course {
   id: string;
   slug: string;
@@ -38,6 +50,7 @@ export interface Course {
   thumbnail?: string;
   promoVideoUrl?: string;
   price: number;
+  isFree: boolean;
   currency: string;
   level: string;
   status?: 'LIVE' | 'DRAFT' | 'BANNED';
@@ -45,6 +58,8 @@ export interface Course {
   earnedThisMonth?: number;
   enrollmentsThisMonth?: number;
   rating?: number;
+  reviewCount?: number;
+  reviews?: CourseReview[];
   modules: Module[];
 }
 
@@ -218,6 +233,16 @@ export class CoursesService {
             ? fallback()
             : throwError(() => error),
       ),
+    );
+  }
+
+  submitReview(
+    courseId: string,
+    payload: { rating: number; comment: string },
+  ): Observable<CourseReview> {
+    return this.http.post<CourseReview>(
+      `/api/courses/${encodeURIComponent(courseId)}/reviews`,
+      payload,
     );
   }
 
@@ -409,6 +434,7 @@ export class CoursesService {
       thumbnail: this.normaliseThumbnail(course.thumbnail),
       promoVideoUrl: this.normaliseMediaUrl(course.promoVideoUrl),
       price: Number(course.price || 0),
+      isFree: Boolean(course.isFree ?? Number(course.price || 0) === 0),
       currency: course.currency || 'INR',
       level: course.level || 'Intermediate',
       status,
@@ -416,6 +442,20 @@ export class CoursesService {
       earnedThisMonth: Number(course.earnedThisMonth ?? 0),
       enrollmentsThisMonth: Number(course.enrollmentsThisMonth ?? 0),
       rating: Number(course.rating ?? 0),
+      reviewCount: Number(course.reviewCount ?? course.reviews?.length ?? 0),
+      reviews: Array.isArray(course.reviews)
+        ? course.reviews.map((review: any) => ({
+            id: review.id,
+            rating: Number(review.rating || 0),
+            comment: review.comment || '',
+            user: {
+              name: review.user?.name || 'Student',
+              avatarUrl: review.user?.avatarUrl || null,
+            },
+            createdAt: review.createdAt,
+            updatedAt: review.updatedAt,
+          }))
+        : [],
       modules: (course.modules || []).map(
         (module: any, moduleIndex: number) => ({
           ...module,

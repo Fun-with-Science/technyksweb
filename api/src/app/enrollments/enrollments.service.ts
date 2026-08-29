@@ -36,6 +36,67 @@ export class EnrollmentsService {
       .filter(enrollment => enrollment.course);
   }
 
+  async enrollInFreeCourse(userId: string, courseId: string) {
+    let course: any = null;
+
+    if (this.prisma.isDbConnected) {
+      try {
+        course = await this.prisma.course.findUnique({
+          where: { id: courseId },
+          select: { id: true, isFree: true, price: true },
+        });
+      } catch {
+        // Use the local adapter below.
+      }
+    }
+
+    course ??= this.prisma.inMemoryCourses.find(
+      candidate => candidate.id === courseId || candidate.slug === courseId,
+    );
+    if (!course) throw new NotFoundException('Course not found.');
+
+    const isFree = Boolean(course.isFree ?? Number(course.price || 0) === 0);
+    if (!isFree) {
+      throw new ForbiddenException('This course requires payment before enrollment.');
+    }
+
+    if (this.prisma.isDbConnected) {
+      try {
+        return await this.prisma.enrollment.upsert({
+          where: { userId_courseId: { userId, courseId: course.id } },
+          create: {
+            userId,
+            courseId: course.id,
+            progressPercent: 0,
+            completedLessonIds: [],
+          },
+          update: {},
+        });
+      } catch {
+        // Use the local adapter below.
+      }
+    }
+
+    const existing = this.prisma.inMemoryEnrollments.find(
+      enrollment =>
+        enrollment.userId === userId && enrollment.courseId === course.id,
+    );
+    if (existing) return existing;
+
+    const enrollment = {
+      id: `enrollment_${Date.now().toString(36)}`,
+      userId,
+      courseId: course.id,
+      progressPercent: 0,
+      completedLessonIds: [],
+      course,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.prisma.inMemoryEnrollments.push(enrollment);
+    return enrollment;
+  }
+
   async updateProgress(userId: string, dto: { courseId: string; lessonId: string; isCompleted?: boolean }) {
     let enrollment: any = null;
     let course: any = null;

@@ -12,6 +12,10 @@ const COURSE_INCLUDE = {
     include: { lessons: { orderBy: { order: 'asc' as const } } },
     orderBy: { order: 'asc' as const },
   },
+  reviews: {
+    include: { user: { select: { name: true, avatarUrl: true } } },
+    orderBy: { createdAt: 'desc' as const },
+  },
 };
 
 const DEFAULT_COUPONS = [
@@ -236,6 +240,7 @@ export class AdminService {
             thumbnail: fields.thumbnail,
             promoVideoUrl: fields.promoVideoUrl,
             price: fields.price,
+            isFree: fields.isFree,
             currency: fields.currency,
             level: fields.level,
             isPublished: fields.isPublished,
@@ -281,6 +286,7 @@ export class AdminService {
             thumbnail: template.thumbnail,
             promoVideoUrl: template.promoVideoUrl ?? null,
             price: template.price,
+            isFree: template.isFree ?? Number(template.price || 0) === 0,
             currency: template.currency,
             level: template.level,
             isPublished: template.isPublished,
@@ -352,6 +358,7 @@ export class AdminService {
             thumbnail: fields.thumbnail,
             promoVideoUrl: fields.promoVideoUrl,
             price: fields.price,
+            isFree: fields.isFree,
             currency: fields.currency,
             level: fields.level,
             isPublished: fields.isPublished,
@@ -505,11 +512,15 @@ export class AdminService {
     const title = String(dto.title ?? current?.title ?? '').trim();
     if (!title) throw new BadRequestException('Course title is required.');
 
-    const price = Number(dto.price ?? current?.price ?? 0);
-    if (!Number.isFinite(price) || price < 0)
+    const requestedPrice = Number(dto.price ?? current?.price ?? 0);
+    if (!Number.isFinite(requestedPrice) || requestedPrice < 0)
       throw new BadRequestException(
         'Course price must be a non-negative number.',
       );
+    const isFree = Boolean(
+      dto.isFree ?? current?.isFree ?? requestedPrice === 0,
+    );
+    const price = isFree ? 0 : requestedPrice;
 
     const requestedSlug = String(dto.slug ?? current?.slug ?? title);
     const slug = await this.uniqueSlug(requestedSlug, existingId);
@@ -527,6 +538,7 @@ export class AdminService {
         dto.promoVideoUrl ?? current?.promoVideoUrl,
       ),
       price,
+      isFree,
       currency: String(
         dto.currency ?? current?.currency ?? 'INR',
       ).toUpperCase(),
@@ -608,13 +620,28 @@ export class AdminService {
       }
     }
 
-    return courses.map((course) => ({
-      ...course,
-      // Ratings are intentionally zero until a real reviews data source exists.
-      rating: 0,
-      earnedThisMonth: Math.round(revenueByCourse.get(course.id) || 0),
-      enrollmentsThisMonth: enrollmentsByCourse.get(course.id) || 0,
-    }));
+    return courses.map((course) => {
+      const reviews = Array.isArray(course.reviews) ? course.reviews : [];
+      const rating = reviews.length
+        ? Number(
+            (
+              reviews.reduce(
+                (total: number, review: any) =>
+                  total + Number(review.rating || 0),
+                0,
+              ) / reviews.length
+            ).toFixed(1),
+          )
+        : 0;
+      return {
+        ...course,
+        isFree: Boolean(course.isFree ?? Number(course.price || 0) === 0),
+        rating,
+        reviewCount: reviews.length,
+        earnedThisMonth: Math.round(revenueByCourse.get(course.id) || 0),
+        enrollmentsThisMonth: enrollmentsByCourse.get(course.id) || 0,
+      };
+    });
   }
 
   private normaliseModules(modules: any[]) {

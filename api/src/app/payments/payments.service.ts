@@ -83,6 +83,11 @@ export class PaymentsService implements OnModuleInit {
       const course = await this.findCourse(dto.courseId);
       if (!course) throw new NotFoundException('Course not found');
       originalPrice = Number(course.price);
+      if (Boolean(course.isFree ?? originalPrice === 0)) {
+        throw new BadRequestException(
+          'This course is free. Use the free enrollment flow instead.',
+        );
+      }
       currency = course.currency;
       title = course.title;
     } else if (dto.planId) {

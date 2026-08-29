@@ -18,7 +18,7 @@ import { Course } from '../../services/courses.service';
           />
           <div class="absolute inset-0 bg-gradient-to-t from-[#121A2B] via-transparent to-transparent opacity-80"></div>
           <span class="absolute top-3 left-3 font-['JetBrains_Mono'] text-[10px] text-[#040810] bg-[#E8931A] px-2.5 py-1 rounded font-bold uppercase">
-            Premium
+            {{ course.isFree ? 'Free' : 'Premium' }}
           </span>
           <span class="absolute top-3 right-3 font-['JetBrains_Mono'] text-[10px] text-white bg-[#040810]/90 backdrop-blur-md border border-[#378ADD]/40 px-2.5 py-1 rounded font-semibold uppercase">
             {{ course.level }}
@@ -32,6 +32,11 @@ import { Course } from '../../services/courses.service';
           <p class="font-['Inter'] text-sm text-[#d9c3af] mb-5 line-clamp-3 leading-relaxed">
             {{ course.subtitle || course.description }}
           </p>
+
+          <div class="flex items-center gap-2 mb-4 font-['JetBrains_Mono'] text-xs">
+            <span class="text-[#E8931A] font-bold">{{ (course.rating || 0) | number:'1.1-1' }} ★</span>
+            <span class="text-[#a18d7b]">({{ course.reviewCount || 0 }} reviews)</span>
+          </div>
 
           <div class="grid grid-cols-2 gap-y-3 gap-x-2 pt-4 border-t border-[#1E293B]/60 font-['JetBrains_Mono'] text-[11px] text-[#a18d7b] mt-auto">
             <div class="flex items-center gap-1.5">
@@ -52,7 +57,7 @@ import { Course } from '../../services/courses.service';
 
       <div class="px-5 py-4 flex items-center justify-between border-t border-[#1E293B]/40 bg-[#0b0f10]/40">
         <div class="font-['JetBrains_Mono'] text-lg font-bold text-[#E8931A]">
-          ₹{{ course.price.toLocaleString('en-IN') }}
+          {{ course.isFree ? 'FREE' : '₹' + course.price.toLocaleString('en-IN') }}
         </div>
         <a
           [routerLink]="['/courses', course.slug]"

@@ -1,15 +1,17 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Title, Meta } from '@angular/platform-browser';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { CoursesService, Course } from '../../core/services/courses.service';
 import { AuthService } from '../../core/services/auth.service';
+import { EnrollmentsService } from '../../core/services/enrollments.service';
 
 @Component({
   selector: 'app-course-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   template: `
     @if (isLoading()) {
       <div class="min-h-[70vh] flex items-center justify-center">
@@ -43,7 +45,7 @@ import { AuthService } from '../../core/services/auth.service';
                 <span
                   class="font-['JetBrains_Mono'] text-xs text-[#040810] bg-[#E8931A] px-3 py-1 rounded font-bold uppercase"
                 >
-                  Premium course
+                  {{ course()?.isFree ? 'Free course' : 'Premium course' }}
                 </span>
                 <span
                   class="font-['JetBrains_Mono'] text-xs text-[#E8931A] font-bold uppercase"
@@ -88,6 +90,14 @@ import { AuthService } from '../../core/services/auth.service';
                     >verified</span
                   >
                   Certificate Included
+                </div>
+                <div class="flex items-center gap-2">
+                  <span
+                    class="material-symbols-outlined text-[#E8931A] text-base"
+                    >star</span
+                  >
+                  {{ (course()?.rating || 0) | number: '1.1-1' }}
+                  ({{ course()?.reviewCount || 0 }} reviews)
                 </div>
               </div>
             </div>
@@ -134,27 +144,63 @@ import { AuthService } from '../../core/services/auth.service';
                 // INSTANT ACCESS
               </div>
 
-              <div class="flex items-baseline justify-between">
-                <span
-                  class="font-['JetBrains_Mono'] text-3xl font-bold text-white"
-                  >₹{{ course()?.price?.toLocaleString('en-IN') }}</span
-                >
-                <span
-                  class="font-['JetBrains_Mono'] text-xs text-[#E8931A] font-semibold"
-                  >ONE-TIME OR MEMBERSHIP</span
-                >
+              <div class="flex items-baseline justify-between gap-4">
+                @if (course()?.isFree) {
+                  <span
+                    class="font-['JetBrains_Mono'] text-3xl font-bold text-[#E8931A]"
+                    >FREE</span
+                  >
+                  <span
+                    class="font-['JetBrains_Mono'] text-xs text-[#E8931A] font-semibold text-right"
+                    >LOGGED-IN STUDENTS ONLY</span
+                  >
+                } @else {
+                  <span
+                    class="font-['JetBrains_Mono'] text-3xl font-bold text-white"
+                    >₹{{ course()?.price?.toLocaleString('en-IN') }}</span
+                  >
+                  <span
+                    class="font-['JetBrains_Mono'] text-xs text-[#E8931A] font-semibold"
+                    >ONE-TIME OR MEMBERSHIP</span
+                  >
+                }
               </div>
 
-              <a
-                [routerLink]="['/checkout']"
-                [queryParams]="{ courseId: course()?.id, slug: course()?.slug }"
-                class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#E8931A] py-4 rounded font-bold hover:bg-[#E8931A]/90 transition-all flex items-center justify-center gap-2 shadow-lg"
-              >
-                Enroll in Track Now
-                <span class="material-symbols-outlined text-sm"
-                  >arrow_forward</span
+              @if (course()?.isFree) {
+                @if (isEnrolled()) {
+                  <a
+                    [routerLink]="['/courses', course()?.slug, 'watch', getFirstLessonId()]"
+                    class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#378ADD] py-4 rounded font-bold hover:bg-[#378ADD]/90 transition-all flex items-center justify-center gap-2 shadow-lg"
+                  >
+                    Start learning
+                    <span class="material-symbols-outlined text-sm">play_arrow</span>
+                  </a>
+                } @else {
+                  <button
+                    type="button"
+                    (click)="enrollInFreeCourse()"
+                    [disabled]="isEnrolling()"
+                    class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#E8931A] py-4 rounded font-bold hover:bg-[#E8931A]/90 transition-all flex items-center justify-center gap-2 shadow-lg disabled:opacity-60"
+                  >
+                    {{ isEnrolling() ? 'Enrolling...' : 'Enroll for free' }}
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                  </button>
+                }
+                @if (enrollmentMessage()) {
+                  <p class="font-['Inter'] text-xs text-[#d9c3af] text-center">
+                    {{ enrollmentMessage() }}
+                  </p>
+                }
+              } @else {
+                <a
+                  [routerLink]="['/checkout']"
+                  [queryParams]="{ courseId: course()?.id, slug: course()?.slug }"
+                  class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#E8931A] py-4 rounded font-bold hover:bg-[#E8931A]/90 transition-all flex items-center justify-center gap-2 shadow-lg"
                 >
-              </a>
+                  Enroll in Track Now
+                  <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </a>
+              }
 
               <a
                 routerLink="/membership"
@@ -326,21 +372,122 @@ import { AuthService } from '../../core/services/auth.service';
             </div>
           </div>
         </section>
+
+        <!-- Student Reviews -->
+        <section class="max-w-6xl mx-auto px-6 md:px-16 mt-16">
+          <div class="max-w-3xl">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+              <div>
+                <h2 class="font-['Hanken_Grotesk'] text-2xl font-bold text-white flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[#E8931A]">reviews</span>
+                  Student reviews
+                </h2>
+                <p class="font-['Inter'] text-sm text-[#a18d7b] mt-2">
+                  {{ (course()?.rating || 0) | number: '1.1-1' }} average rating · {{ course()?.reviewCount || 0 }} reviews
+                </p>
+              </div>
+            </div>
+
+            @if (course()?.reviews?.length) {
+              <div class="flex flex-col gap-3">
+                @for (review of course()?.reviews; track review.id) {
+                  <article class="bg-[#121A2B] technical-border rounded p-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                      <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-[#E8931A] text-[#040810] font-bold flex items-center justify-center">
+                          {{ review.user.name.charAt(0).toUpperCase() }}
+                        </div>
+                        <div>
+                          <div class="font-['Hanken_Grotesk'] text-sm font-bold text-white">{{ review.user.name }}</div>
+                          <div class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b]">{{ review.createdAt | date: 'mediumDate' }}</div>
+                        </div>
+                      </div>
+                      <div class="font-['JetBrains_Mono'] text-sm text-[#E8931A]" [attr.aria-label]="review.rating + ' out of 5 stars'">
+                        {{ '★'.repeat(review.rating) }}{{ '☆'.repeat(5 - review.rating) }}
+                      </div>
+                    </div>
+                    <p class="font-['Inter'] text-sm text-[#d9c3af] leading-relaxed">{{ review.comment }}</p>
+                  </article>
+                }
+              </div>
+            } @else {
+              <div class="bg-[#121A2B] border border-dashed border-[#378ADD]/50 rounded p-6 font-['Inter'] text-sm text-[#a18d7b]">
+                No reviews yet. Be the first enrolled student to share your experience.
+              </div>
+            }
+
+            <div class="bg-[#121A2B] technical-border rounded p-6 mt-6">
+              @if (authService.isAuthenticated() && isEnrolled()) {
+                <h3 class="font-['Hanken_Grotesk'] text-lg font-bold text-white mb-4">Share your review</h3>
+                <div class="flex items-center gap-2 mb-4" role="radiogroup" aria-label="Course rating">
+                  @for (star of [1, 2, 3, 4, 5]; track star) {
+                    <button
+                      type="button"
+                      (click)="reviewRating = star"
+                      [attr.aria-label]="star + ' stars'"
+                      [class.text-[#E8931A]]="star <= reviewRating"
+                      [class.text-[#a18d7b]]="star > reviewRating"
+                      class="text-2xl leading-none hover:text-[#E8931A] transition-colors"
+                    >★</button>
+                  }
+                  <span class="font-['JetBrains_Mono'] text-xs text-[#a18d7b] ml-2">{{ reviewRating }}/5</span>
+                </div>
+                <textarea
+                  [(ngModel)]="reviewComment"
+                  rows="4"
+                  maxlength="2000"
+                  placeholder="What did you think about this course?"
+                  class="w-full bg-[#040810] border border-[#1E293B] focus:border-[#E8931A] focus:outline-none rounded px-4 py-3 text-sm text-white font-['Inter'] mb-4"
+                ></textarea>
+                <div class="flex flex-wrap items-center gap-4">
+                  <button
+                    type="button"
+                    (click)="submitReview()"
+                    [disabled]="isSubmittingReview() || reviewRating === 0 || reviewComment.trim().length < 10"
+                    class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] bg-[#E8931A] px-5 py-3 rounded hover:bg-[#f6a52a] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {{ isSubmittingReview() ? 'Saving...' : 'Publish review' }}
+                  </button>
+                  @if (reviewMessage()) {
+                    <span class="font-['Inter'] text-xs text-[#378ADD]">{{ reviewMessage() }}</span>
+                  }
+                </div>
+              } @else if (!authService.isAuthenticated()) {
+                <p class="font-['Inter'] text-sm text-[#d9c3af]">
+                  <a routerLink="/auth/login" [queryParams]="{ returnUrl: router.url }" class="text-[#378ADD] hover:underline">Sign in</a>
+                  and enroll to leave a course review.
+                </p>
+              } @else {
+                <p class="font-['Inter'] text-sm text-[#d9c3af]">Enroll in this course to leave a review.</p>
+              }
+            </div>
+          </div>
+        </section>
       </div>
     }
   `,
 })
 export class CourseDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
+  router = inject(Router);
   private coursesService = inject(CoursesService);
   private titleService = inject(Title);
   private metaService = inject(Meta);
   private sanitizer = inject(DomSanitizer);
+  authService = inject(AuthService);
+  private enrollmentsService = inject(EnrollmentsService);
 
   course = signal<Course | null>(null);
   isLoading = signal(true);
   expandedModules = signal<Set<string>>(new Set());
   promoEmbedUrl = signal<SafeResourceUrl | null>(null);
+  isEnrolled = signal(false);
+  isEnrolling = signal(false);
+  enrollmentMessage = signal('');
+  reviewRating = 0;
+  reviewComment = '';
+  isSubmittingReview = signal(false);
+  reviewMessage = signal('');
   Math = Math;
 
   ngOnInit() {
@@ -350,6 +497,7 @@ export class CourseDetailComponent implements OnInit {
         this.coursesService.getCourseBySlug(slug).subscribe({
           next: (data) => {
             this.course.set(data);
+            this.loadEnrollmentStatus(data.id);
             this.promoEmbedUrl.set(this.toPromoEmbedUrl(data.promoVideoUrl));
             this.expandedModules.set(
               new Set(
@@ -367,6 +515,79 @@ export class CourseDetailComponent implements OnInit {
         });
       }
     });
+  }
+
+  private loadEnrollmentStatus(courseId: string) {
+    if (!this.authService.isAuthenticated()) return;
+    this.enrollmentsService.getMyEnrollments().subscribe({
+      next: (enrollments) =>
+        this.isEnrolled.set(
+          enrollments.some((enrollment) => enrollment.courseId === courseId),
+        ),
+      error: () => this.isEnrolled.set(false),
+    });
+  }
+
+  getFirstLessonId(): string {
+    return this.course()?.modules?.find((module) => module.lessons?.length)?.lessons[0]?.id || '';
+  }
+
+  enrollInFreeCourse() {
+    const course = this.course();
+    if (!course?.isFree) return;
+    if (!this.authService.isAuthenticated()) {
+      this.router.navigate(['/auth/login'], {
+        queryParams: { returnUrl: this.router.url },
+      });
+      return;
+    }
+
+    this.isEnrolling.set(true);
+    this.enrollmentMessage.set('');
+    this.enrollmentsService.enrollInFreeCourse(course.id).subscribe({
+      next: () => {
+        this.isEnrolled.set(true);
+        this.isEnrolling.set(false);
+        this.enrollmentMessage.set('You are enrolled. Your lessons are ready.');
+      },
+      error: (error) => {
+        this.isEnrolling.set(false);
+        this.enrollmentMessage.set(
+          error?.error?.message || 'Free enrollment could not be completed.',
+        );
+      },
+    });
+  }
+
+  submitReview() {
+    const course = this.course();
+    const comment = this.reviewComment.trim();
+    if (!course || !this.isEnrolled() || this.reviewRating < 1 || comment.length < 10) return;
+
+    this.isSubmittingReview.set(true);
+    this.reviewMessage.set('');
+    this.coursesService
+      .submitReview(course.id, { rating: this.reviewRating, comment })
+      .subscribe({
+        next: (review) => {
+          const reviews = [
+            review,
+            ...(course.reviews || []).filter((candidate) => candidate.id !== review.id),
+          ];
+          const rating = Number(
+            (reviews.reduce((total, item) => total + item.rating, 0) / reviews.length).toFixed(1),
+          );
+          this.course.set({ ...course, reviews, rating, reviewCount: reviews.length });
+          this.reviewRating = 0;
+          this.reviewComment = '';
+          this.isSubmittingReview.set(false);
+          this.reviewMessage.set('Your review has been published.');
+        },
+        error: (error) => {
+          this.isSubmittingReview.set(false);
+          this.reviewMessage.set(error?.error?.message || 'Review could not be saved.');
+        },
+      });
   }
 
   getTotalDurationMinutes(): number {

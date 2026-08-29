@@ -2,6 +2,15 @@ import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JAVASCRIPT_COURSE } from './javascript-course.data';
 
+const PUBLIC_REVIEW_INCLUDE = {
+  user: {
+    select: {
+      name: true,
+      avatarUrl: true,
+    },
+  },
+};
+
 const INITIAL_COURSES = [
   JAVASCRIPT_COURSE,
   {
@@ -215,6 +224,7 @@ export class CoursesService implements OnModuleInit {
               description: course.description,
               thumbnail: course.thumbnail,
               price: course.price,
+              isFree: Boolean((course as any).isFree ?? Number(course.price || 0) === 0),
               currency: course.currency,
               level: course.level,
               isPublished: course.isPublished,
@@ -264,6 +274,10 @@ export class CoursesService implements OnModuleInit {
               },
               orderBy: { order: 'asc' },
             },
+            reviews: {
+              include: PUBLIC_REVIEW_INCLUDE,
+              orderBy: { createdAt: 'desc' },
+            },
           },
           orderBy: { createdAt: 'desc' },
         });
@@ -296,10 +310,13 @@ export class CoursesService implements OnModuleInit {
                     isFreePreview: true,
                     order: true,
                   },
-                  orderBy: { order: 'asc' },
                 },
               },
               orderBy: { order: 'asc' },
+            },
+            reviews: {
+              include: PUBLIC_REVIEW_INCLUDE,
+              orderBy: { createdAt: 'desc' },
             },
           },
         });
@@ -320,9 +337,43 @@ export class CoursesService implements OnModuleInit {
     return this.toPublicCourse(found);
   }
 
+  async getReviewsBySlug(slug: string) {
+    const course = await this.findBySlug(slug);
+    return {
+      rating: course.rating || 0,
+      reviewCount: course.reviewCount || 0,
+      reviews: course.reviews || [],
+    };
+  }
+
   private toPublicCourse(course: any) {
+    const reviews = Array.isArray(course.reviews)
+      ? course.reviews.map((review: any) => this.toPublicReview(review))
+      : (this.prisma.inMemoryReviews || [])
+          .filter((review) => review.courseId === course.id)
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt || 0).getTime() -
+              new Date(a.createdAt || 0).getTime(),
+          )
+          .map((review) => this.toPublicReview(review));
+    const rating = reviews.length
+      ? Number(
+          (
+            reviews.reduce(
+              (total: number, review: any) => total + Number(review.rating || 0),
+              0,
+            ) / reviews.length
+          ).toFixed(1),
+        )
+      : 0;
+
     return {
       ...course,
+      isFree: Boolean(course.isFree ?? Number(course.price || 0) === 0),
+      rating,
+      reviewCount: reviews.length,
+      reviews,
       modules: (course.modules || []).map((module: any) => ({
         ...module,
         lessons: (module.lessons || []).map((lesson: any) => {
@@ -331,6 +382,20 @@ export class CoursesService implements OnModuleInit {
           return publicLesson;
         }),
       })),
+    };
+  }
+
+  private toPublicReview(review: any) {
+    return {
+      id: review.id,
+      rating: Number(review.rating || 0),
+      comment: review.comment || '',
+      user: {
+        name: review.user?.name || 'Student',
+        avatarUrl: review.user?.avatarUrl || null,
+      },
+      createdAt: review.createdAt,
+      updatedAt: review.updatedAt,
     };
   }
 }

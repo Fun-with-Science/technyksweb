@@ -50,6 +50,7 @@ model User {
   subscriptions Subscription[]
   certificates  Certificate[]
   payments      Payment[]
+  reviews       Review[]
 }
 
 model Course {
@@ -70,6 +71,7 @@ model Course {
   enrollments  Enrollment[]
   certificates Certificate[]
   payments     Payment[]
+  reviews      Review[]
 }
 
 model Module {
@@ -110,6 +112,21 @@ model Enrollment {
   updatedAt           DateTime @updatedAt
 
   @@unique([userId, courseId])
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  rating    Int
+  comment   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, courseId])
+  @@index([courseId, createdAt])
 }
 
 model MembershipPlan {
