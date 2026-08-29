@@ -24,12 +24,8 @@ import { ThemeService } from '../../services/theme.service';
             Courses
           </a>
           
-          <a routerLink="/membership" routerLinkActive="text-[#E8931A] font-bold border-b-2 border-[#E8931A] pb-1" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#d9c3af] hover:text-[#E8931A] transition-colors flex items-center gap-2">
+          <a routerLink="/membership" routerLinkActive="text-[#E8931A] font-bold border-b-2 border-[#E8931A] pb-1" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#d9c3af] hover:text-[#E8931A] transition-colors">
             Membership
-            <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E8931A] opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-[#E8931A]"></span>
-            </span>
           </a>
           
           <a routerLink="/contact" routerLinkActive="text-[#E8931A] font-bold border-b-2 border-[#E8931A] pb-1" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#d9c3af] hover:text-[#E8931A] transition-colors">
@@ -97,12 +93,8 @@ import { ThemeService } from '../../services/theme.service';
         <a routerLink="/courses" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-[#d9c3af] hover:text-[#E8931A] py-2 border-b border-[#1E293B]/50">
           Courses
         </a>
-        <a routerLink="/membership" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-[#d9c3af] hover:text-[#E8931A] py-2 border-b border-[#1E293B]/50 flex items-center justify-between">
+        <a routerLink="/membership" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-[#d9c3af] hover:text-[#E8931A] py-2 border-b border-[#1E293B]/50">
           Membership
-          <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E8931A] opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-[#E8931A]"></span>
-          </span>
         </a>
         <a routerLink="/contact" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-[#d9c3af] hover:text-[#E8931A] py-2 border-b border-[#1E293B]/50">
           Contact

@@ -1,5 +1,5 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnDestroy, OnInit, PLATFORM_ID, inject, signal } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Course, CoursesService } from '../../core/services/courses.service';
 import { CourseCardComponent } from '../../core/components/course-card/course-card.component';
@@ -25,26 +25,18 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
         <div
           class="hero-content max-w-4xl relative z-10 grid justify-items-center gap-8 mt-12 md:mt-0"
         >
-          <div
-            class="inline-flex items-center gap-2 font-['JetBrains_Mono'] text-xs text-[#378ADD] px-3.5 py-1.5 border border-[#378ADD]/30 bg-[#378ADD]/10 rounded-full w-fit"
-          >
-            <span class="material-symbols-outlined text-[16px]">terminal</span>
-            v2.0 Course Catalog Live
-          </div>
-
           <h1
             class="font-['Hanken_Grotesk'] text-4xl sm:text-6xl md:text-[72px] leading-[1.1] font-bold text-white tracking-tight"
           >
-            Code is easy.<br />
-            <span class="text-[#E8931A]">Architecture is hard.</span>
+            Learn <span class="text-[#E8931A]">{{ typedTopic() }}</span><span class="typing-caret" aria-hidden="true">|</span><br />
+            <span class="text-[#E8931A]">Think. Build. Innovate.</span>
           </h1>
 
           <p
             class="font-['Inter'] text-lg text-[#d9c3af] max-w-2xl leading-relaxed"
           >
-            Elevate your engineering from building features to designing
-            scalable, resilient systems. Premium training for senior developers
-            focused on Full-Stack, AI, and Angular architecture.
+            Learn AI, think for yourself, and turn powerful AI tools into new
+            ideas, useful products, and real-world innovations.
           </p>
 
           <div class="flex flex-wrap justify-center gap-4 mt-2">
@@ -60,7 +52,7 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
 
             <a
               routerLink="/membership"
-              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#378ADD] border border-[#378ADD] px-8 py-4 rounded hover:bg-[#378ADD]/10 transition-colors flex items-center gap-2"
+              class="hero-membership-button font-['JetBrains_Mono'] text-xs uppercase tracking-wider px-8 py-4 rounded flex items-center gap-2"
             >
               <span class="material-symbols-outlined text-[18px]"
                 >workspace_premium</span
@@ -404,11 +396,18 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
     </div>
   `,
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   private coursesService = inject(CoursesService);
+  private platformId = inject(PLATFORM_ID);
 
   featuredCourses = signal<Course[]>([]);
   isLoading = signal(true);
+  typedTopic = signal('NN');
+  private readonly typingTopics = ['NN', 'Full Stack', 'Data Science', 'Data Engineering'];
+  private typingTopicIndex = 0;
+  private typingCharacterIndex = this.typingTopics[0].length;
+  private isDeletingTyping = true;
+  private typingTimer?: ReturnType<typeof setTimeout>;
 
   ngOnInit() {
     this.coursesService.getCourses().subscribe({
@@ -418,6 +417,35 @@ export class HomeComponent implements OnInit {
       },
       error: () => this.isLoading.set(false),
     });
+    if (isPlatformBrowser(this.platformId)) {
+      this.runTypingAnimation();
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.typingTimer) clearTimeout(this.typingTimer);
+  }
+
+  private runTypingAnimation() {
+    const topic = this.typingTopics[this.typingTopicIndex];
+    if (this.isDeletingTyping) {
+      this.typingCharacterIndex = Math.max(0, this.typingCharacterIndex - 1);
+    } else {
+      this.typingCharacterIndex = Math.min(topic.length, this.typingCharacterIndex + 1);
+    }
+    this.typedTopic.set(topic.slice(0, this.typingCharacterIndex));
+
+    let delay = this.isDeletingTyping ? 55 : 90;
+    if (this.isDeletingTyping && this.typingCharacterIndex === 0) {
+      this.isDeletingTyping = false;
+      this.typingTopicIndex = (this.typingTopicIndex + 1) % this.typingTopics.length;
+      this.typingCharacterIndex = 0;
+      delay = 280;
+    } else if (!this.isDeletingTyping && this.typingCharacterIndex === topic.length) {
+      this.isDeletingTyping = true;
+      delay = 1500;
+    }
+    this.typingTimer = setTimeout(() => this.runTypingAnimation(), delay);
   }
 
   techList = [
