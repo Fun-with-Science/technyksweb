@@ -25,11 +25,14 @@ export class ThemeService {
   }
 
   private readStoredTheme(): boolean {
-    if (typeof localStorage === 'undefined') return false;
+    // Dark mode is the first-visit default. Once a learner chooses a theme,
+    // their explicit preference remains the source of truth on later visits.
+    if (typeof localStorage === 'undefined') return true;
     try {
-      return localStorage.getItem(THEME_STORAGE_KEY) === 'dark';
+      const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+      return storedTheme ? storedTheme === 'dark' : true;
     } catch {
-      return false;
+      return true;
     }
   }
 
