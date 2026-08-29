@@ -17,7 +17,7 @@ import { AuthService } from '../../core/services/auth.service';
         </div>
 
         <h1 class="font-['Hanken_Grotesk'] text-2xl font-bold text-white mb-2">Access Console</h1>
-        <p class="font-['Inter'] text-sm text-[#d9c3af] mb-8">Sign in to your Technyks Academy account to resume your tracks.</p>
+        <p class="font-['Inter'] text-sm text-[#d9c3af] mb-8">Sign in to your Technyks Academy account to resume your courses.</p>
 
         @if (errorMessage()) {
           <div class="mb-6 p-4 bg-[#690005]/40 border border-[#ffb4ab]/30 rounded text-[#ffdad6] text-xs font-['JetBrains_Mono'] flex items-center gap-2">

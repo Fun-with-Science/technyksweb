@@ -27,7 +27,7 @@ import { AuthService } from '../../core/services/auth.service';
 
         <a routerLink="/courses" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#E8931A] px-5 py-3 rounded font-bold hover:bg-[#E8931A]/90 transition-colors flex items-center gap-2 shadow-md">
           <span class="material-symbols-outlined text-sm">add</span>
-          Browse More Tracks
+          Browse More Courses
         </a>
       </div>
 
@@ -48,7 +48,7 @@ import { AuthService } from '../../core/services/auth.service';
         </div>
       }
 
-      <!-- Enrolled Tracks Grid -->
+      <!-- Enrolled Courses Grid -->
       @if (isLoading()) {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           @for (i of [1,2]; track i) {
@@ -62,9 +62,9 @@ import { AuthService } from '../../core/services/auth.service';
       } @else if (enrollments().length === 0) {
         <div class="bg-[#121A2B] technical-border rounded p-12 text-center max-w-2xl mx-auto">
           <span class="material-symbols-outlined text-4xl text-[#378ADD] mb-3">school</span>
-          <h3 class="font-['Hanken_Grotesk'] text-xl font-bold text-white mb-2">No Enrolled Tracks Yet</h3>
+          <h3 class="font-['Hanken_Grotesk'] text-xl font-bold text-white mb-2">No Enrolled Courses Yet</h3>
           <p class="font-['Inter'] text-sm text-[#d9c3af] mb-6">
-            You haven't enrolled in any architecture tracks yet. Explore our course catalog or join the Pro Membership!
+            You haven't enrolled in any architecture courses yet. Explore our course catalog or join the Pro Membership!
           </p>
           <a routerLink="/courses" class="inline-flex font-['JetBrains_Mono'] text-xs uppercase text-[#040810] bg-[#E8931A] px-6 py-3 rounded font-bold hover:bg-[#E8931A]/90 transition-colors">
             Explore Architecture Catalog

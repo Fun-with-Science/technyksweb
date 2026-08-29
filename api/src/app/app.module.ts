@@ -9,6 +9,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { EnrollmentsModule } from './enrollments/enrollments.module';
 import { VideoModule } from './video/video.module';
 import { AdminModule } from './admin/admin.module';
+import { ContactModule } from './contact/contact.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AdminModule } from './admin/admin.module';
     EnrollmentsModule,
     VideoModule,
     AdminModule,
+    ContactModule,
   ],
   controllers: [AppController],
   providers: [AppService],

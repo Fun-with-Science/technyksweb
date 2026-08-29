@@ -24,6 +24,7 @@ export class PrismaService
   public inMemoryPayments: any[] = [];
   public inMemoryMembershipPlans: any[] = [];
   public inMemoryReviews: any[] = [];
+  public inMemoryContactMessages: any[] = [];
 
   async onModuleInit() {
     try {
@@ -55,6 +56,22 @@ export class PrismaService
       );
       await this.$executeRawUnsafe(
         'CREATE INDEX IF NOT EXISTS "Review_courseId_createdAt_idx" ON "Review"("courseId", "createdAt")',
+      );
+      await this.$executeRawUnsafe(`
+        CREATE TABLE IF NOT EXISTS "ContactMessage" (
+          "id" TEXT NOT NULL,
+          "name" TEXT NOT NULL,
+          "email" TEXT NOT NULL,
+          "subject" TEXT NOT NULL,
+          "message" TEXT NOT NULL,
+          "status" TEXT NOT NULL DEFAULT 'NEW',
+          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMP(3) NOT NULL,
+          CONSTRAINT "ContactMessage_pkey" PRIMARY KEY ("id")
+        )
+      `);
+      await this.$executeRawUnsafe(
+        'CREATE INDEX IF NOT EXISTS "ContactMessage_createdAt_idx" ON "ContactMessage"("createdAt")',
       );
       // The bundled JavaScript course shipped before preview flags were
       // enabled. Backfill only its public introduction lesson so existing

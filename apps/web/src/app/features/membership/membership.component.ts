@@ -16,7 +16,7 @@ import { RouterModule } from '@angular/router';
         </div>
         <h1 class="font-['Hanken_Grotesk'] text-4xl md:text-5xl font-bold text-white mb-4">Join Technyks Academy Membership</h1>
         <p class="font-['Inter'] text-base md:text-lg text-[#d9c3af]">
-          Get full access to all existing and future architecture tracks, code repositories, private Discord community, and auto-generated certificates.
+          Get full access to all existing and future architecture courses, code repositories, private Discord community, and auto-generated certificates.
         </p>
 
         <!-- Interval Switcher -->
@@ -92,7 +92,7 @@ import { RouterModule } from '@angular/router';
 
             <ul class="flex flex-col gap-3 font-['Inter'] text-sm text-[#d9c3af] mb-8">
               <li class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-[#E8931A] text-base">check_circle</span> Access to ALL Architecture Tracks
+                <span class="material-symbols-outlined text-[#E8931A] text-base">check_circle</span> Access to all architecture courses
               </li>
               <li class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-[#E8931A] text-base">check_circle</span> Full Nx & NestJS Source Code

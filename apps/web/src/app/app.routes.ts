@@ -23,6 +23,10 @@ export const appRoutes: Routes = [
     loadComponent: () => import('./features/membership/membership.component').then(m => m.MembershipComponent),
   },
   {
+    path: 'contact',
+    loadComponent: () => import('./features/contact/contact.component').then(m => m.ContactComponent),
+  },
+  {
     path: 'checkout',
     loadComponent: () => import('./features/checkout/checkout.component').then(m => m.CheckoutComponent),
   },

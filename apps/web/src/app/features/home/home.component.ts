@@ -22,16 +22,14 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
           class="hero-overlay absolute inset-0 pointer-events-none"
           aria-hidden="true"
         ></div>
-        <div class="hero-artwork absolute pointer-events-none" aria-hidden="true"></div>
-
         <div
-          class="max-w-4xl relative z-10 grid justify-items-center gap-8 mt-12 md:mt-0"
+          class="hero-content max-w-4xl relative z-10 grid justify-items-center gap-8 mt-12 md:mt-0"
         >
           <div
             class="inline-flex items-center gap-2 font-['JetBrains_Mono'] text-xs text-[#378ADD] px-3.5 py-1.5 border border-[#378ADD]/30 bg-[#378ADD]/10 rounded-full w-fit"
           >
             <span class="material-symbols-outlined text-[16px]">terminal</span>
-            v2.0 Architecture Track Live
+            v2.0 Course Catalog Live
           </div>
 
           <h1
@@ -54,7 +52,7 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
               routerLink="/courses"
               class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#E8931A] px-8 py-4 rounded font-bold hover:scale-[0.98] transition-all flex items-center gap-2 shadow-lg"
             >
-              View All Tracks
+              View All Courses
               <span class="material-symbols-outlined text-[18px]"
                 >arrow_forward</span
               >
@@ -132,7 +130,7 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
         </div>
       </section>
 
-      <!-- Featured Tracks Highlights Grid -->
+      <!-- Featured Courses Highlights Grid -->
       <section class="px-6 md:px-16">
         <div
           class="flex items-center justify-between mb-8 border-b border-[#1E293B] pb-4"
@@ -145,7 +143,7 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
             <h2
               class="font-['Hanken_Grotesk'] text-2xl md:text-3xl font-bold text-white mt-1"
             >
-              Featured Architecture Tracks
+              Featured Architecture Courses
             </h2>
           </div>
           <a
@@ -203,7 +201,7 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
             Engineered Plans for Every Stage
           </h2>
           <p class="font-['Inter'] text-base text-[#d9c3af]">
-            Unlock full access to production tracks, tokenized stream videos,
+            Unlock full access to production courses, tokenized stream videos,
             weekly architecture teardowns, and certificates.
           </p>
         </div>
@@ -286,7 +284,7 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
                 Pro Monthly
               </h3>
               <p class="font-['Inter'] text-xs text-[#d9c3af] mb-6">
-                Full continuous access to all tracks, updates, and Discord
+                Full continuous access to all courses, updates, and Discord
                 channel.
               </p>
 
@@ -302,7 +300,7 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
                   <span class="material-symbols-outlined text-sm text-[#E8931A]"
                     >check_circle</span
                   >
-                  Unlimited access to ALL 3 Architecture Tracks
+                  Unlimited access to every architecture course
                 </li>
                 <li class="flex items-center gap-2.5">
                   <span class="material-symbols-outlined text-sm text-[#E8931A]"
@@ -388,7 +386,7 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
                   <span class="material-symbols-outlined text-sm text-[#378ADD]"
                     >check</span
                   >
-                  Early access to new Agentic AI tracks
+                  Early access to new Agentic AI courses
                 </li>
               </ul>
             </div>

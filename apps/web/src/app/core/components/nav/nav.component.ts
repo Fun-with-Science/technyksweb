@@ -32,8 +32,8 @@ import { ThemeService } from '../../services/theme.service';
             </span>
           </a>
           
-          <a routerLink="/about" routerLinkActive="text-[#E8931A] font-bold border-b-2 border-[#E8931A] pb-1" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#d9c3af] hover:text-[#E8931A] transition-colors">
-            About
+          <a routerLink="/contact" routerLinkActive="text-[#E8931A] font-bold border-b-2 border-[#E8931A] pb-1" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#d9c3af] hover:text-[#E8931A] transition-colors">
+            Contact
           </a>
           
           @if (authService.isAdmin()) {
@@ -104,8 +104,8 @@ import { ThemeService } from '../../services/theme.service';
             <span class="relative inline-flex rounded-full h-2 w-2 bg-[#E8931A]"></span>
           </span>
         </a>
-        <a routerLink="/about" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-[#d9c3af] hover:text-[#E8931A] py-2 border-b border-[#1E293B]/50">
-          About
+        <a routerLink="/contact" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-[#d9c3af] hover:text-[#E8931A] py-2 border-b border-[#1E293B]/50">
+          Contact
         </a>
         @if (authService.isAuthenticated()) {
           <div class="pt-2 flex flex-col gap-3">

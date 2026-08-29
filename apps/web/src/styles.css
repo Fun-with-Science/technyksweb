@@ -71,61 +71,42 @@ body.dark-theme {
 }
 
 .hero-background {
-  background-image: url('/assets/hero-ai-network.png');
-  opacity: .2;
+  background-image: url('/assets/hero-coding-workspace.png');
+  opacity: .58;
   background-position: center;
   background-size: cover;
+  filter: saturate(.82) contrast(.95) brightness(.86);
+  transform: scale(1.03);
 }
 
 .hero-overlay {
-  background: linear-gradient(180deg, rgba(248, 250, 252, .88) 0%, rgba(248, 250, 252, .68) 48%, rgba(248, 250, 252, .95) 100%);
+  background:
+    linear-gradient(180deg, rgba(4, 8, 16, .52) 0%, rgba(4, 8, 16, .42) 48%, rgba(4, 8, 16, .72) 100%),
+    linear-gradient(90deg, rgba(4, 8, 16, .34) 0%, rgba(4, 8, 16, .1) 50%, rgba(4, 8, 16, .34) 100%);
 }
 
-/* Keep the AI network visible in light mode while the layered tint protects
-   the centered headline and calls to action from low-contrast areas. */
+/* Keep the full-bleed coding scene visible in light mode while the layered
+   tint protects the centered headline and calls to action from low contrast. */
 .light-theme .hero-background {
-  opacity: .24;
-  filter: brightness(1.45) saturate(.9) contrast(.94);
+  opacity: .62;
+  filter: brightness(1.03) saturate(.76) contrast(.94);
 }
 
 .light-theme .hero-overlay {
   background:
-    radial-gradient(circle at 50% 38%, rgba(248, 250, 252, .22) 0%, rgba(248, 250, 252, .48) 58%, rgba(248, 250, 252, .78) 100%),
-    linear-gradient(180deg, rgba(248, 250, 252, .68) 0%, rgba(248, 250, 252, .28) 48%, rgba(248, 250, 252, .88) 100%);
-}
-
-.hero-artwork {
-  z-index: 1;
-  left: 5%;
-  right: 5%;
-  top: 30%;
-  bottom: 1.5rem;
-  border: 1px solid rgba(37, 99, 235, .16);
-  border-radius: 2rem;
-  background-image:
-    linear-gradient(180deg, rgba(248, 250, 252, .72), rgba(248, 250, 252, .42)),
-    url('/assets/hero-ai-network.png');
-  background-position: center;
-  background-size: cover;
-  opacity: .2;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), 0 18px 60px rgba(37, 99, 235, .06);
+    linear-gradient(180deg, rgba(248, 250, 252, .73) 0%, rgba(248, 250, 252, .43) 48%, rgba(248, 250, 252, .86) 100%),
+    linear-gradient(90deg, rgba(248, 250, 252, .66) 0%, rgba(248, 250, 252, .22) 50%, rgba(248, 250, 252, .66) 100%);
 }
 
 .dark-theme .hero-background {
-  opacity: .3;
+  opacity: .74;
+  filter: saturate(.94) contrast(.98) brightness(.72);
 }
 
 .dark-theme .hero-overlay {
-  background: linear-gradient(180deg, rgba(4, 8, 16, .78) 0%, rgba(4, 8, 16, .48) 48%, rgba(4, 8, 16, .9) 100%);
-}
-
-.dark-theme .hero-artwork {
-  border-color: rgba(55, 138, 221, .25);
-  background-image:
-    linear-gradient(180deg, rgba(4, 8, 16, .28), rgba(4, 8, 16, .58)),
-    url('/assets/hero-ai-network.png');
-  opacity: .3;
-  box-shadow: inset 0 1px 0 rgba(55, 138, 221, .16), 0 18px 60px rgba(0, 0, 0, .12);
+  background:
+    linear-gradient(180deg, rgba(4, 8, 16, .7) 0%, rgba(4, 8, 16, .42) 48%, rgba(4, 8, 16, .84) 100%),
+    linear-gradient(90deg, rgba(4, 8, 16, .38) 0%, rgba(4, 8, 16, .12) 50%, rgba(4, 8, 16, .38) 100%);
 }
 
 .profile-link {
@@ -158,6 +139,167 @@ body.dark-theme {
   border-color: #60a5fa;
   color: #fde68a;
   background-color: #1e293b;
+}
+
+.contact-shell {
+  min-height: calc(100vh - 4rem);
+}
+
+.contact-kicker,
+.contact-accent {
+  color: #1d4ed8;
+}
+
+.contact-heading,
+.contact-card-heading {
+  color: #172033;
+}
+
+.contact-lead,
+.contact-muted {
+  color: #475569;
+}
+
+.contact-card {
+  background: rgba(255, 255, 255, .9);
+  border: 1px solid #d7deea;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, .08);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.contact-info-item {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1rem;
+}
+
+.contact-label {
+  color: #64748b;
+}
+
+.contact-input {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #172033;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+}
+
+.contact-input::placeholder {
+  color: #94a3b8;
+}
+
+.contact-input:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+}
+
+.contact-submit {
+  color: #ffffff;
+  background: #2563eb;
+  transition: background-color .2s ease, transform .2s ease;
+}
+
+.contact-submit:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.contact-secondary-button {
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
+.contact-secondary-button:hover {
+  color: #1e40af;
+}
+
+.contact-success {
+  color: #166534;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.contact-error {
+  color: #b42318;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+}
+
+.dark-theme .contact-kicker,
+.dark-theme .contact-accent {
+  color: #60a5fa;
+}
+
+.dark-theme .contact-heading,
+.dark-theme .contact-card-heading {
+  color: #ffffff;
+}
+
+.dark-theme .contact-lead,
+.dark-theme .contact-muted {
+  color: #cbd5e1;
+}
+
+.dark-theme .contact-card {
+  background: rgba(18, 26, 43, .9);
+  border-color: #1e293b;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .18);
+}
+
+.dark-theme .contact-info-item {
+  border-top-color: #1e293b;
+}
+
+.dark-theme .contact-label {
+  color: #a1c9ff;
+}
+
+.dark-theme .contact-input {
+  border-color: #334155;
+  background: #040810;
+  color: #e0e3e5;
+}
+
+.dark-theme .contact-input::placeholder {
+  color: #94a3b8;
+}
+
+.dark-theme .contact-input:focus {
+  border-color: #60a5fa;
+  background: #0a1220;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, .16);
+}
+
+.dark-theme .contact-submit {
+  color: #040810;
+  background: #f59e0b;
+}
+
+.dark-theme .contact-submit:hover:not(:disabled) {
+  background: #fbbf24;
+}
+
+.dark-theme .contact-secondary-button {
+  color: #60a5fa;
+}
+
+.dark-theme .contact-secondary-button:hover {
+  color: #93c5fd;
+}
+
+.dark-theme .contact-success {
+  color: #bbf7d0;
+  background: rgba(20, 83, 45, .3);
+  border-color: #166534;
+}
+
+.dark-theme .contact-error {
+  color: #fecdd3;
+  background: rgba(127, 29, 29, .3);
+  border-color: #9f1239;
 }
 
 .membership-save-badge {
@@ -475,11 +617,8 @@ body.dark-theme {
 }
 
 @media (max-width: 767px) {
-  .hero-artwork {
-    left: 1rem;
-    right: 1rem;
-    top: 34%;
-    border-radius: 1.25rem;
+  .hero-background {
+    background-position: 58% center;
   }
 
   .watch-sidebar {

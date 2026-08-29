@@ -31,7 +31,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
             >Courses</a
           >
           <span class="mx-2 text-[#378ADD]">/</span>
-          <span>{{ course()?.level }} track</span>
+                  <span>{{ course()?.level }} course</span>
         </div>
 
         <section
@@ -197,7 +197,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                   [queryParams]="{ courseId: course()?.id, slug: course()?.slug }"
                   class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#E8931A] py-4 rounded font-bold hover:bg-[#E8931A]/90 transition-all flex items-center justify-center gap-2 shadow-lg"
                 >
-                  Enroll in Track Now
+                  Enroll in Course Now
                   <span class="material-symbols-outlined text-sm">arrow_forward</span>
                 </a>
               }
@@ -206,7 +206,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                 routerLink="/membership"
                 class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#378ADD] border border-[#378ADD] py-3.5 rounded font-semibold hover:bg-[#378ADD]/10 transition-colors"
               >
-                Get All Tracks with Membership
+                Get All Courses with Membership
               </a>
 
               <div

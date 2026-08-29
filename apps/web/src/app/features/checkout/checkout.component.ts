@@ -169,7 +169,7 @@ export class CheckoutComponent implements OnInit {
 
   courseId = signal<string | null>(null);
   planSlug = signal<string | null>(null);
-  itemTitle = signal<string>('Technyks Architecture Track');
+  itemTitle = signal<string>('Technyks Architecture Course');
   originalAmount = signal<number>(4999);
   selectedProvider = signal<'RAZORPAY' | 'LEMON_SQUEEZY'>('RAZORPAY');
 

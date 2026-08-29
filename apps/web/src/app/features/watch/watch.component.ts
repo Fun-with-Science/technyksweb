@@ -82,10 +82,10 @@ import { AuthService } from '../../core/services/auth.service';
               {{ playbackError() ? 'This lesson is locked' : 'Streaming Unauthorized' }}
             </h3>
             <p class="watch-muted font-['Inter'] text-sm max-w-md mb-6">
-              {{ playbackError() || 'This is paid token-gated content. Please enroll in this track or join Membership to stream this lesson.' }}
+              {{ playbackError() || 'This is paid token-gated content. Please enroll in this course or join Membership to stream this lesson.' }}
             </p>
             <a routerLink="/courses" class="font-['JetBrains_Mono'] text-xs uppercase text-[#040810] bg-[#E8931A] px-6 py-3 rounded font-bold">
-              Enroll in Track
+              Enroll in Course
             </a>
           </div>
         }
@@ -94,7 +94,7 @@ import { AuthService } from '../../core/services/auth.service';
       <!-- Right Drawer Curriculum Navigation Sidebar -->
       <aside class="watch-sidebar w-full md:w-[40%] md:min-w-[320px] md:max-w-[520px] p-4 sm:p-5 md:p-6 flex flex-col gap-5 md:sticky md:top-16 md:h-[calc(100vh-4rem)]">
         <div class="shrink-0">
-          <span class="watch-accent font-['JetBrains_Mono'] text-xs uppercase font-bold">// TRACK CURRICULUM</span>
+          <span class="watch-accent font-['JetBrains_Mono'] text-xs uppercase font-bold">// COURSE CURRICULUM</span>
           <h2 class="watch-heading font-['Hanken_Grotesk'] text-lg font-bold mt-1">{{ course()?.title }}</h2>
           <div class="flex items-center justify-between gap-3 mt-4">
             <span class="watch-muted font-['JetBrains_Mono'] text-[11px] uppercase">
