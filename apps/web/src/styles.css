@@ -72,41 +72,43 @@ body.dark-theme {
 
 .hero-background {
   background-image: url('/assets/hero-coding-workspace.png');
-  opacity: .58;
+  opacity: 1;
   background-position: center;
   background-size: cover;
-  filter: saturate(.82) contrast(.95) brightness(.86);
+  filter: saturate(.9) contrast(.96) brightness(.94);
   transform: scale(1.03);
 }
 
 .hero-overlay {
-  background:
-    linear-gradient(180deg, rgba(4, 8, 16, .52) 0%, rgba(4, 8, 16, .42) 48%, rgba(4, 8, 16, .72) 100%),
-    linear-gradient(90deg, rgba(4, 8, 16, .34) 0%, rgba(4, 8, 16, .1) 50%, rgba(4, 8, 16, .34) 100%);
+  background: rgba(0, 0, 0, .7);
 }
 
 /* Keep the full-bleed coding scene visible in light mode while the layered
    tint protects the centered headline and calls to action from low contrast. */
 .light-theme .hero-background {
-  opacity: .62;
-  filter: brightness(1.03) saturate(.76) contrast(.94);
+  opacity: 1;
+  filter: saturate(.86) contrast(.96) brightness(.98);
 }
 
 .light-theme .hero-overlay {
-  background:
-    linear-gradient(180deg, rgba(248, 250, 252, .73) 0%, rgba(248, 250, 252, .43) 48%, rgba(248, 250, 252, .86) 100%),
-    linear-gradient(90deg, rgba(248, 250, 252, .66) 0%, rgba(248, 250, 252, .22) 50%, rgba(248, 250, 252, .66) 100%);
+  background: rgba(0, 0, 0, .7);
 }
 
 .dark-theme .hero-background {
-  opacity: .74;
-  filter: saturate(.94) contrast(.98) brightness(.72);
+  opacity: 1;
+  filter: saturate(.94) contrast(.98) brightness(.82);
 }
 
 .dark-theme .hero-overlay {
-  background:
-    linear-gradient(180deg, rgba(4, 8, 16, .7) 0%, rgba(4, 8, 16, .42) 48%, rgba(4, 8, 16, .84) 100%),
-    linear-gradient(90deg, rgba(4, 8, 16, .38) 0%, rgba(4, 8, 16, .12) 50%, rgba(4, 8, 16, .38) 100%);
+  background: rgba(0, 0, 0, .7);
+}
+
+/* The hero intentionally stays a dark, image-led feature even in light mode.
+   The page theme controls the rest of the site; these overrides keep the
+   centered hero copy readable over the 70% black image treatment. */
+.light-theme .hero-content h1,
+.light-theme .hero-content p {
+  color: #ffffff !important;
 }
 
 .profile-link {
