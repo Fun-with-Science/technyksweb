@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "build": "nx build web",
+    "build": "node scripts/build-hostinger.cjs",
     "build:web": "nx build web",
     "build:api": "nx build api",
     "build:api:production": "nx run api:build:production --skip-nx-cache",
