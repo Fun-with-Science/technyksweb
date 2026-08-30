@@ -128,7 +128,7 @@ export class MembershipComponent implements OnInit {
     }
 
     this.http.get<MembershipPlan[]>('/api/payments/plans').pipe(
-      catchError(() => of(FALLBACK_PLANS)),
+      catchError(() => of(this.getFallbackPlans())),
     ).subscribe((plans) => {
       this.plans.set(plans.filter((plan) => plan.isActive !== false));
       this.isLoading.set(false);
@@ -142,5 +142,17 @@ export class MembershipComponent implements OnInit {
   paidPlan(): MembershipPlan | undefined {
     const interval = this.isAnnual() ? 'ANNUAL' : 'MONTHLY';
     return this.plans().find((plan) => !plan.isFree && plan.interval === interval);
+  }
+
+  private getFallbackPlans(): MembershipPlan[] {
+    if (typeof localStorage === 'undefined') return FALLBACK_PLANS;
+    try {
+      const stored = JSON.parse(
+        localStorage.getItem('technyks_membership_plans_v1') || 'null',
+      );
+      return Array.isArray(stored) && stored.length ? stored : FALLBACK_PLANS;
+    } catch {
+      return FALLBACK_PLANS;
+    }
   }
 }

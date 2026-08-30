@@ -214,12 +214,33 @@ export class CheckoutComponent implements OnInit {
   }
 
   private setFallbackMembershipSummary() {
+    const storedPlan = this.getStoredMembershipPlan();
+    if (storedPlan) {
+      this.itemTitle.set(storedPlan.name);
+      this.originalAmount.set(Number(storedPlan.price) || 0);
+      return;
+    }
     if (this.planSlug() === 'pro-monthly') {
       this.itemTitle.set('Pro Monthly Membership');
       this.originalAmount.set(1499);
     } else {
       this.itemTitle.set('All-Access Annual Membership');
       this.originalAmount.set(11999);
+    }
+  }
+
+  private getStoredMembershipPlan(): { name: string; price: number } | null {
+    if (typeof localStorage === 'undefined') return null;
+    try {
+      const plans = JSON.parse(
+        localStorage.getItem('technyks_membership_plans_v1') || '[]',
+      );
+      const plan = Array.isArray(plans)
+        ? plans.find((candidate: any) => candidate.slug === this.planSlug())
+        : null;
+      return plan ? { name: plan.name, price: Number(plan.price) || 0 } : null;
+    } catch {
+      return null;
     }
   }
 

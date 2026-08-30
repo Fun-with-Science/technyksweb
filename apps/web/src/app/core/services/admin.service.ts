@@ -44,6 +44,7 @@ export interface MembershipPlan {
   isActive: boolean;
   accessAllCourses: boolean;
   features: string[];
+  featuresText?: string;
   courseAccess: { courseId: string }[];
 }
 

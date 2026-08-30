@@ -67,6 +67,7 @@ export interface Course {
 const STORAGE_KEY = 'technyks_courses_store_v2';
 const LEGACY_STORAGE_KEY = 'technyks_courses_store';
 const METRICS_MIGRATION_KEY = 'technyks_course_metrics_v1';
+const ARCHIVED_FALLBACK_COURSE_IDS_KEY = 'technyks_archived_fallback_courses_v1';
 const LEGACY_DEMO_COURSE_IDS = new Set([
   'course-n8n-1',
   'course-vibe-2',
@@ -151,14 +152,39 @@ export class CoursesService {
 
   private getAdminFallbackCourses(): Course[] {
     const stored = this.getStoredCourses();
+    const archivedFallbackIds = this.getArchivedFallbackCourseIds();
     // A static Hostinger deployment has no API process to seed the built-in
-    // course. Show the JavaScript course in the admin roster until the first
-    // local roster is created, while still allowing an intentional empty
-    // roster to remain empty after the admin deletes everything.
-    if (!this.hasStoredRoster()) {
+    // course. Show it in the admin roster until it is explicitly archived in
+    // this browser. This also repairs the empty roster saved by older builds.
+    if (
+      !archivedFallbackIds.has(JAVASCRIPT_COURSE.id) &&
+      !stored.some((course) => course.id === JAVASCRIPT_COURSE.id)
+    ) {
       return [this.normaliseCourse(JAVASCRIPT_COURSE), ...stored];
     }
     return stored;
+  }
+
+  private getArchivedFallbackCourseIds(): Set<string> {
+    if (typeof localStorage === 'undefined') return new Set<string>();
+    try {
+      const stored = JSON.parse(
+        localStorage.getItem(ARCHIVED_FALLBACK_COURSE_IDS_KEY) || '[]',
+      );
+      return new Set(Array.isArray(stored) ? stored : []);
+    } catch {
+      return new Set<string>();
+    }
+  }
+
+  private archiveFallbackCourse(id: string) {
+    if (typeof localStorage === 'undefined') return;
+    const ids = this.getArchivedFallbackCourseIds();
+    ids.add(id);
+    localStorage.setItem(
+      ARCHIVED_FALLBACK_COURSE_IDS_KEY,
+      JSON.stringify([...ids]),
+    );
   }
 
   private saveStoredCourses(courses: Course[]) {
@@ -358,6 +384,7 @@ export class CoursesService {
 
   deleteCourse(id: string): Observable<boolean> {
     const fallback = () => {
+      this.archiveFallbackCourse(id);
       const courses = this.getStoredCourses().filter(
         (course) => course.id !== id,
       );

@@ -459,7 +459,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   featuresText(plan: MembershipPlan): string {
-    return (plan.features || []).join('\n');
+    return plan.featuresText ?? (plan.features || []).join('\n');
   }
 
   updateMembershipPlanField(planId: string, field: string, value: any) {
