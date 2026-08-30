@@ -12,7 +12,9 @@ async function bootstrap() {
   app.enableCors();
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
-  const port = process.env.API_PORT || 3000;
+  // Managed hosts assign the listening port through PORT. Keep API_PORT as a
+  // local-development override and retain 3000 for local runs.
+  const port = Number(process.env.PORT || process.env.API_PORT || 3000);
   await app.listen(port);
   Logger.log(
     `🚀 Backend API is running on: http://localhost:${port}/${globalPrefix}`,
