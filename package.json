@@ -6,7 +6,7 @@
     "build": "node scripts/build-hostinger.cjs",
     "build:web": "nx build web",
     "build:api": "nx build api",
-    "build:api:production": "npm exec -- nx run api:build:production --skip-nx-cache",
+    "build:api:production": "node node_modules/nx/dist/bin/nx.js run api:build:production --skip-nx-cache",
     "build:api:hostinger": "npm run prisma:generate && npm exec prisma db push && npm run build:api:production",
     "build:all": "nx run-many -t build",
     "start": "nx serve web",
