@@ -142,6 +142,25 @@ export class CoursesService {
     return [];
   }
 
+  private hasStoredRoster(): boolean {
+    if (typeof localStorage === 'undefined') return false;
+    return [STORAGE_KEY, LEGACY_STORAGE_KEY].some(
+      (key) => localStorage.getItem(key) !== null,
+    );
+  }
+
+  private getAdminFallbackCourses(): Course[] {
+    const stored = this.getStoredCourses();
+    // A static Hostinger deployment has no API process to seed the built-in
+    // course. Show the JavaScript course in the admin roster until the first
+    // local roster is created, while still allowing an intentional empty
+    // roster to remain empty after the admin deletes everything.
+    if (!this.hasStoredRoster()) {
+      return [this.normaliseCourse(JAVASCRIPT_COURSE), ...stored];
+    }
+    return stored;
+  }
+
   private saveStoredCourses(courses: Course[]) {
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(courses));
@@ -152,7 +171,9 @@ export class CoursesService {
 
   getCourses(includeDrafts = false): Observable<Course[]> {
     const fallback = () => {
-      const courses = this.getStoredCourses();
+      const courses = includeDrafts
+        ? this.getAdminFallbackCourses()
+        : this.getStoredCourses();
       return includeDrafts
         ? courses
         : courses.filter(
@@ -385,6 +406,11 @@ export class CoursesService {
   }
 
   private syncServerCourses(courses: Course[], includeDrafts: boolean) {
+    // Do not turn a public-catalog API outage into a persisted empty roster.
+    // Otherwise a visitor opening /courses before /admin would prevent the
+    // static admin fallback from showing the built-in draft course.
+    if (!includeDrafts && !courses.length && !this.hasStoredRoster()) return;
+
     const current = this.getStoredCourses();
     const serverIds = new Set(courses.map((course) => course.id));
     const localDrafts = current.filter(
