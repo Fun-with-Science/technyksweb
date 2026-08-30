@@ -6,7 +6,7 @@
     "build": "nx build web",
     "build:web": "nx build web",
     "build:api": "nx build api",
-    "build:api:production": "nx run api:build:production",
+    "build:api:production": "nx run api:build:production --skip-nx-cache",
     "build:all": "nx run-many -t build",
     "start": "nx serve web",
     "start:web": "nx serve web",
