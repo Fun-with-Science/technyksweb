@@ -25,6 +25,23 @@ function hasLocalNx() {
   return existsSync(join(process.cwd(), 'node_modules', 'nx', 'dist', 'bin', 'nx.js'));
 }
 
+function requireMySqlDatabaseUrl() {
+  const databaseUrl = String(process.env.DATABASE_URL || '').trim();
+  if (!databaseUrl) {
+    console.error(
+      'DATABASE_URL is required for the API deployment. Add the Hostinger MySQL connection URL before redeploying.',
+    );
+    process.exit(1);
+  }
+
+  if (!/^mysql:\/\//i.test(databaseUrl)) {
+    console.error(
+      'DATABASE_URL must be a MySQL URL for this API deployment (it should start with mysql://).',
+    );
+    process.exit(1);
+  }
+}
+
 // Hostinger can install only production dependencies before running the build.
 // Nx is a build-time dependency, so restore the repository's dev dependencies
 // when the build environment does not contain the local Nx executable.
@@ -40,6 +57,7 @@ if (!hasLocalNx()) {
 }
 
 if (isApiBuild) {
+  requireMySqlDatabaseUrl();
   // The API app uses the shared repository root, so initialize Prisma before
   // compiling the NestJS bundle on Hostinger.
   runNpm(['run', 'prisma:generate']);

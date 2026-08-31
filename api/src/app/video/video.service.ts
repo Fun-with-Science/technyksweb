@@ -26,7 +26,7 @@ export class VideoService {
         });
         usingDatabase = true;
       } catch {
-        // Use the local adapter if PostgreSQL becomes unavailable.
+        // Use the local adapter if the database becomes unavailable.
       }
     }
 

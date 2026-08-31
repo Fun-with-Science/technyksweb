@@ -291,7 +291,7 @@ export class AdminService {
         });
       } catch (error: any) {
         if (error?.code === 'P2025') throw new NotFoundException('Membership plan not found.');
-        // Use the local adapter below when PostgreSQL is unavailable.
+        // Use the local adapter below when the database is unavailable.
       }
     }
 
@@ -328,7 +328,7 @@ export class AdminService {
           include: COURSE_INCLUDE,
         });
       } catch {
-        // Fall back to local persistence for development when PostgreSQL is unavailable.
+        // Fall back to local persistence for development when the database is unavailable.
       }
     }
 
@@ -449,7 +449,7 @@ export class AdminService {
           include: COURSE_INCLUDE,
         });
       } catch {
-        // Fall back to local persistence for development when PostgreSQL is unavailable.
+        // Fall back to local persistence for development when the database is unavailable.
       }
     }
 
@@ -533,7 +533,7 @@ export class AdminService {
       try {
         return await this.prisma.coupon.create({ data: data as any });
       } catch {
-        // Fall back to local persistence for development when PostgreSQL is unavailable.
+        // Fall back to local persistence for development when the database is unavailable.
       }
     }
 
@@ -573,7 +573,7 @@ export class AdminService {
         await this.prisma.coupon.delete({ where: { id } });
         return { success: true };
       } catch {
-        // Fall back to local persistence for development when PostgreSQL is unavailable.
+        // Fall back to local persistence for development when the database is unavailable.
       }
     }
 

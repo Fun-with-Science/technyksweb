@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -111,7 +111,8 @@ model Enrollment {
   course              Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   progressPercent     Float    @default(0.0)
   lastWatchedLessonId String?
-  completedLessonIds  String[]
+  // MySQL does not support Prisma scalar-list columns; keep lesson IDs as JSON.
+  completedLessonIds  Json
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
@@ -144,7 +145,8 @@ model MembershipPlan {
   isFree           Boolean                  @default(false)
   isActive         Boolean                  @default(true)
   accessAllCourses Boolean                  @default(true)
-  features         String[]
+  // MySQL does not support Prisma scalar-list columns; keep feature lines as JSON.
+  features         Json
   createdAt        DateTime                 @default(now())
   updatedAt        DateTime                 @updatedAt
   subscriptions    Subscription[]
