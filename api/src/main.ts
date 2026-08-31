@@ -14,29 +14,39 @@ async function bootstrap() {
   );
 
   const app = await NestFactory.create(AppModule, { bodyParser: false });
-  // Course thumbnails and short promotional clips are uploaded as data URLs
-  // from the admin studio until object storage is configured.
   app.use(json({ limit: '16mb' }));
   app.use(urlencoded({ extended: true, limit: '16mb' }));
-  app.enableCors();
+  app.enableCors({
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
 
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix, {
     exclude: ['/', 'health'],
   });
 
-  // Managed hosts assign the listening port through PORT. Keep API_PORT as a
-  // local-development override and retain 3000 for local runs.
-  const port = Number(process.env.PORT || process.env.API_PORT || 3000);
-  await app.listen(port, '0.0.0.0');
-  Logger.log(
-    `🚀 Backend API is running on: http://0.0.0.0:${port}/${globalPrefix}`,
-    'Bootstrap',
-  );
+  const rawPort = process.env.PORT || process.env.API_PORT || 3000;
+  const numericPort = Number(rawPort);
+
+  if (!isNaN(numericPort) && numericPort > 0) {
+    await app.listen(numericPort, '0.0.0.0');
+    Logger.log(
+      `🚀 Backend API is running on: http://0.0.0.0:${numericPort}/${globalPrefix}`,
+      'Bootstrap',
+    );
+  } else {
+    // Unix domain socket or named pipe provided by host
+    await app.listen(rawPort);
+    Logger.log(
+      `🚀 Backend API is running on socket: ${rawPort}`,
+      'Bootstrap',
+    );
+  }
 }
 
 bootstrap().catch((err) => {
-  // Log the startup failure visibly so Hostinger runtime logs capture it.
   console.error('[FATAL] Technyks API failed to start:', err?.message || err);
   console.error(err);
   process.exit(1);
