@@ -6,7 +6,7 @@
     "build": "node scripts/build-hostinger.cjs",
     "build:web": "nx build web",
     "build:api": "nx build api",
-    "build:api:production": "node node_modules/nx/dist/bin/nx.js run api:build:production --skip-nx-cache",
+    "build:api:production": "node node_modules/webpack-cli/bin/cli.js build --config api/webpack.hostinger.config.js",
     "build:api:hostinger": "npm run prisma:generate && npm exec prisma db push && npm run build:api:production",
     "build:all": "nx run-many -t build",
     "start": "nx serve web",
@@ -53,7 +53,7 @@
     "prettier": "~3.6.2",
     "prisma": "5.22.0",
     "tailwindcss": "^3.4.17",
-    "tslib": "^2.3.0",
+    "ts-loader": "^9.5.7",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.58.0",
     "vitest": "^4.0.8",
@@ -83,6 +83,7 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.0",
-    "rxjs": "~7.8.0"
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
   }
 }

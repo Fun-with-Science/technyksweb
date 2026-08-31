@@ -74,6 +74,9 @@ importers:
       rxjs:
         specifier: ~7.8.0
         version: 7.8.2
+      tslib:
+        specifier: ^2.3.0
+        version: 2.8.1
     devDependencies:
       '@angular-devkit/core':
         specifier: ~22.0.0
@@ -180,9 +183,9 @@ importers:
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17
-      tslib:
-        specifier: ^2.3.0
-        version: 2.8.1
+      ts-loader:
+        specifier: ^9.5.7
+        version: 9.6.2(loader-utils@2.0.4)(typescript@6.0.3)(webpack@5.106.2)
       typescript:
         specifier: ~6.0.3
         version: 6.0.3
