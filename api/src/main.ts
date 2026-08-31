@@ -4,6 +4,15 @@ import { json, urlencoded } from 'express';
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
+  Logger.log('[Startup] Technyks API bootstrap() starting...', 'Bootstrap');
+  Logger.log(
+    `[Startup] NODE_ENV=${process.env.NODE_ENV || 'unset'}, ` +
+      `PORT=${process.env.PORT || 'unset'}, ` +
+      `API_PORT=${process.env.API_PORT || 'unset'}, ` +
+      `DATABASE_URL=${process.env.DATABASE_URL ? 'set (hidden)' : 'NOT SET'}`,
+    'Bootstrap',
+  );
+
   const app = await NestFactory.create(AppModule, { bodyParser: false });
   // Course thumbnails and short promotional clips are uploaded as data URLs
   // from the admin studio until object storage is configured.
@@ -18,7 +27,13 @@ async function bootstrap() {
   await app.listen(port);
   Logger.log(
     `🚀 Backend API is running on: http://localhost:${port}/${globalPrefix}`,
+    'Bootstrap',
   );
 }
 
-bootstrap();
+bootstrap().catch((err) => {
+  // Log the startup failure visibly so Hostinger runtime logs capture it.
+  console.error('[FATAL] Technyks API failed to start:', err?.message || err);
+  console.error(err);
+  process.exit(1);
+});
