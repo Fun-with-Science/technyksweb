@@ -64,16 +64,41 @@ if (isApiBuild) {
   runNpm(['exec', 'prisma', 'db', 'push']);
   runNpm(['run', 'build:api:production']);
 
-  // Ensure root and dist/api entry points exist for any Hostinger configuration
+  // Ensure root, dist, and dist/api entry points exist for ANY Hostinger configuration
+  const distDir = join(process.cwd(), 'dist');
   const distApiDir = join(process.cwd(), 'dist', 'api');
+  const nestedDistApiDir = join(process.cwd(), 'dist', 'api', 'dist', 'api');
+
   if (!existsSync(distApiDir)) {
     mkdirSync(distApiDir, { recursive: true });
   }
+  if (!existsSync(nestedDistApiDir)) {
+    mkdirSync(nestedDistApiDir, { recursive: true });
+  }
+
+  // Root wrappers
+  writeFileSync(join(process.cwd(), 'main.js'), 'require("./dist/api/main.js");\n');
   writeFileSync(join(process.cwd(), 'server.js'), 'require("./dist/api/main.js");\n');
   writeFileSync(join(process.cwd(), 'index.js'), 'require("./dist/api/main.js");\n');
+  writeFileSync(join(process.cwd(), 'app.js'), 'require("./dist/api/main.js");\n');
+
+  // dist wrappers
+  writeFileSync(join(distDir, 'main.js'), 'require("./api/main.js");\n');
+  writeFileSync(join(distDir, 'server.js'), 'require("./api/main.js");\n');
+  writeFileSync(join(distDir, 'index.js'), 'require("./api/main.js");\n');
+  writeFileSync(join(distDir, 'app.js'), 'require("./api/main.js");\n');
+
+  // dist/api wrappers
   writeFileSync(join(distApiDir, 'server.js'), 'require("./main.js");\n');
   writeFileSync(join(distApiDir, 'index.js'), 'require("./main.js");\n');
-  console.log('✅ Entry point wrappers verified (server.js, index.js, dist/api/main.js).');
+  writeFileSync(join(distApiDir, 'app.js'), 'require("./main.js");\n');
+
+  // Nested dist/api/dist/api wrappers (in case Hostinger searches output_dir/entry_file)
+  writeFileSync(join(nestedDistApiDir, 'main.js'), 'require("../../main.js");\n');
+  writeFileSync(join(nestedDistApiDir, 'server.js'), 'require("../../main.js");\n');
+  writeFileSync(join(nestedDistApiDir, 'index.js'), 'require("../../main.js");\n');
+
+  console.log('✅ All entry point variations created: root, dist, dist/api, and nested wrappers.');
 } else {
   // The existing frontend deployment continues to use the normal Angular
   // build when HOSTINGER_API_BUILD is not enabled.
