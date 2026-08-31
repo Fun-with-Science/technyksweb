@@ -19,14 +19,18 @@ async function bootstrap() {
   app.use(json({ limit: '16mb' }));
   app.use(urlencoded({ extended: true, limit: '16mb' }));
   app.enableCors();
+
   const globalPrefix = 'api';
-  app.setGlobalPrefix(globalPrefix);
+  app.setGlobalPrefix(globalPrefix, {
+    exclude: ['/', 'health'],
+  });
+
   // Managed hosts assign the listening port through PORT. Keep API_PORT as a
   // local-development override and retain 3000 for local runs.
   const port = Number(process.env.PORT || process.env.API_PORT || 3000);
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
   Logger.log(
-    `🚀 Backend API is running on: http://localhost:${port}/${globalPrefix}`,
+    `🚀 Backend API is running on: http://0.0.0.0:${port}/${globalPrefix}`,
     'Bootstrap',
   );
 }

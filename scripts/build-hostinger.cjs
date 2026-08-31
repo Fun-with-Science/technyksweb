@@ -1,5 +1,5 @@
 const { spawnSync } = require('node:child_process');
-const { existsSync } = require('node:fs');
+const { existsSync, writeFileSync, mkdirSync } = require('node:fs');
 const { join } = require('node:path');
 
 const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
@@ -63,6 +63,17 @@ if (isApiBuild) {
   runNpm(['run', 'prisma:generate']);
   runNpm(['exec', 'prisma', 'db', 'push']);
   runNpm(['run', 'build:api:production']);
+
+  // Ensure root and dist/api entry points exist for any Hostinger configuration
+  const distApiDir = join(process.cwd(), 'dist', 'api');
+  if (!existsSync(distApiDir)) {
+    mkdirSync(distApiDir, { recursive: true });
+  }
+  writeFileSync(join(process.cwd(), 'server.js'), 'require("./dist/api/main.js");\n');
+  writeFileSync(join(process.cwd(), 'index.js'), 'require("./dist/api/main.js");\n');
+  writeFileSync(join(distApiDir, 'server.js'), 'require("./main.js");\n');
+  writeFileSync(join(distApiDir, 'index.js'), 'require("./main.js");\n');
+  console.log('✅ Entry point wrappers verified (server.js, index.js, dist/api/main.js).');
 } else {
   // The existing frontend deployment continues to use the normal Angular
   // build when HOSTINGER_API_BUILD is not enabled.
