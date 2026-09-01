@@ -3,6 +3,30 @@ import { NestFactory } from '@nestjs/core';
 import { json, urlencoded } from 'express';
 import { AppModule } from './app/app.module';
 
+function validateProductionEnvironment() {
+  if (process.env.NODE_ENV !== 'production') return;
+
+  const databaseUrl = String(process.env.DATABASE_URL || '').trim();
+  if (!databaseUrl) {
+    throw new Error(
+      'DATABASE_URL is required in production. Configure the Hostinger MySQL connection URL.',
+    );
+  }
+
+  if (!/^mysql:\/\//i.test(databaseUrl)) {
+    throw new Error(
+      'DATABASE_URL must use the mysql:// protocol because prisma/schema.prisma is configured for MySQL.',
+    );
+  }
+
+  const jwtSecret = String(process.env.JWT_SECRET || '').trim();
+  if (jwtSecret.length < 32) {
+    throw new Error(
+      'JWT_SECRET is required in production and must contain at least 32 characters.',
+    );
+  }
+}
+
 async function bootstrap() {
   Logger.log('[Startup] Technyks API bootstrap() starting...', 'Bootstrap');
   Logger.log(
@@ -12,6 +36,8 @@ async function bootstrap() {
       `DATABASE_URL=${process.env.DATABASE_URL ? 'set (hidden)' : 'NOT SET'}`,
     'Bootstrap',
   );
+
+  validateProductionEnvironment();
 
   const app = await NestFactory.create(AppModule, { bodyParser: false });
   app.use(json({ limit: '16mb' }));

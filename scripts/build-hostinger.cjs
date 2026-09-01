@@ -1,5 +1,13 @@
 const { spawnSync } = require('node:child_process');
-const { existsSync, writeFileSync, mkdirSync } = require('node:fs');
+const {
+  copyFileSync,
+  chmodSync,
+  existsSync,
+  writeFileSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+} = require('node:fs');
 const { join } = require('node:path');
 
 const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
@@ -42,6 +50,24 @@ function requireMySqlDatabaseUrl() {
   }
 }
 
+function ensurePrismaEngineExecutable() {
+  if (process.platform === 'win32') return;
+
+  const enginesDir = join(
+    process.cwd(),
+    'node_modules',
+    '@prisma',
+    'engines',
+  );
+  if (!existsSync(enginesDir)) return;
+
+  for (const fileName of readdirSync(enginesDir)) {
+    if (fileName.startsWith('schema-engine-')) {
+      chmodSync(join(enginesDir, fileName), 0o755);
+    }
+  }
+}
+
 // Hostinger can install only production dependencies before running the build.
 // Nx is a build-time dependency, so restore the repository's dev dependencies
 // when the build environment does not contain the local Nx executable.
@@ -58,10 +84,11 @@ if (!hasLocalNx()) {
 
 if (isApiBuild) {
   requireMySqlDatabaseUrl();
+  ensurePrismaEngineExecutable();
   // The API app uses the shared repository root, so initialize Prisma before
   // compiling the NestJS bundle on Hostinger.
   runNpm(['run', 'prisma:generate']);
-  runNpm(['exec', 'prisma', 'db', 'push']);
+  runNpm(['run', 'prisma:db:push']);
   runNpm(['run', 'build:api:production']);
 
   // Ensure root, dist, and dist/api entry points exist for ANY Hostinger configuration
@@ -75,6 +102,42 @@ if (isApiBuild) {
   if (!existsSync(nestedDistApiDir)) {
     mkdirSync(nestedDistApiDir, { recursive: true });
   }
+
+  // Hostinger promotes only the configured output directory. Make dist/api a
+  // complete Node application rather than a directory containing only a
+  // webpack bundle; otherwise the promotion succeeds with an empty release.
+  const rootPackage = JSON.parse(
+    readFileSync(join(process.cwd(), 'package.json'), 'utf8'),
+  );
+  const runtimePackage = {
+    name: `${rootPackage.name}-api`,
+    version: rootPackage.version,
+    private: true,
+    main: 'main.js',
+    scripts: {
+      start: 'node main.js',
+      postinstall:
+        'node node_modules/prisma/build/index.js generate --schema prisma/schema.prisma',
+    },
+    dependencies: {
+      ...rootPackage.dependencies,
+      prisma: rootPackage.devDependencies.prisma,
+    },
+    prisma: {
+      schema: 'prisma/schema.prisma',
+    },
+  };
+
+  const runtimePrismaDir = join(distApiDir, 'prisma');
+  mkdirSync(runtimePrismaDir, { recursive: true });
+  copyFileSync(
+    join(process.cwd(), 'prisma', 'schema.prisma'),
+    join(runtimePrismaDir, 'schema.prisma'),
+  );
+  writeFileSync(
+    join(distApiDir, 'package.json'),
+    `${JSON.stringify(runtimePackage, null, 2)}\n`,
+  );
 
   // Root wrappers
   writeFileSync(join(process.cwd(), 'main.js'), 'require("./dist/api/main.js");\n');
@@ -98,7 +161,9 @@ if (isApiBuild) {
   writeFileSync(join(nestedDistApiDir, 'server.js'), 'require("../../main.js");\n');
   writeFileSync(join(nestedDistApiDir, 'index.js'), 'require("../../main.js");\n');
 
-  console.log('✅ All entry point variations created: root, dist, dist/api, and nested wrappers.');
+  console.log(
+    '✅ Hostinger API artifact created with runtime package, Prisma schema, and entry point wrappers.',
+  );
 } else {
   // The existing frontend deployment continues to use the normal Angular
   // build when HOSTINGER_API_BUILD is not enabled.

@@ -8,7 +8,7 @@
     "build:web": "nx build web",
     "build:api": "nx build api",
     "build:api:production": "node node_modules/webpack-cli/bin/cli.js build --config api/webpack.hostinger.config.js",
-    "build:api:hostinger": "npm run prisma:generate && npm exec prisma db push && npm run build:api:production",
+    "build:api:hostinger": "npm run prisma:generate && npm run prisma:db:push && npm run build:api:production",
     "build:all": "nx run-many -t build",
     "start": "node dist/api/main.js",
     "start:prod": "node dist/api/main.js",
@@ -16,7 +16,8 @@
     "start:api": "nx serve api",
     "start:api:production": "node dist/api/main.js",
     "server": "node server.js",
-    "prisma:generate": "prisma generate",
+    "prisma:generate": "node node_modules/prisma/build/index.js generate",
+    "prisma:db:push": "node node_modules/prisma/build/index.js db push",
     "prisma:migrate": "prisma migrate dev"
   },
   "private": true,
