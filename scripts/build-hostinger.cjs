@@ -113,6 +113,28 @@ if (isApiBuild) {
   const rootPackage = JSON.parse(
     readFileSync(join(process.cwd(), 'package.json'), 'utf8'),
   );
+  const apiRuntimeDependencyNames = [
+    '@nestjs/common',
+    '@nestjs/config',
+    '@nestjs/core',
+    '@nestjs/jwt',
+    '@nestjs/passport',
+    '@nestjs/platform-express',
+    '@prisma/client',
+    'bcryptjs',
+    'express',
+    'passport',
+    'passport-jwt',
+    'reflect-metadata',
+    'rxjs',
+    'tslib',
+  ];
+  const apiRuntimeDependencies = Object.fromEntries(
+    apiRuntimeDependencyNames.map((name) => [
+      name,
+      rootPackage.dependencies[name],
+    ]),
+  );
   function createRuntimePackage(outputDir, mainFile) {
     const runtimePackage = {
       name: `${rootPackage.name}-api`,
@@ -125,7 +147,7 @@ if (isApiBuild) {
           'node node_modules/prisma/build/index.js generate --schema prisma/schema.prisma',
       },
       dependencies: {
-        ...rootPackage.dependencies,
+        ...apiRuntimeDependencies,
         prisma: rootPackage.devDependencies.prisma,
       },
       prisma: {
