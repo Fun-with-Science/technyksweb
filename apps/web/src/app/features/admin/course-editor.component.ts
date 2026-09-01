@@ -9,7 +9,11 @@ import {
   Module,
   Lesson,
 } from '../../core/services/courses.service';
-import { AdminService, Coupon } from '../../core/services/admin.service';
+import {
+  AdminService,
+  Coupon,
+  CourseStudent,
+} from '../../core/services/admin.service';
 
 @Component({
   selector: 'app-course-editor',
@@ -40,6 +44,9 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
         </div>
 
         <div class="flex items-center gap-3">
+          @if (saveMessage()) {
+            <span class="hidden lg:flex items-center gap-1.5 font-['JetBrains_Mono'] text-[11px] text-[#86efac]"><span class="material-symbols-outlined text-sm">check_circle</span>{{ saveMessage() }}</span>
+          }
           <!-- LIVE / DRAFT Status Toggle Button -->
           <button
             (click)="togglePublishStatus()"
@@ -57,9 +64,9 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
             Preview Student View <span class="material-symbols-outlined text-sm">open_in_new</span>
           </a>
 
-          <button (click)="saveAllChanges()" class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-5 py-2 rounded transition-all shadow-lg flex items-center gap-1">
-            <span class="material-symbols-outlined text-sm">save</span>
-            Save Changes
+          <button (click)="saveAllChanges()" [disabled]="isSaving()" class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-5 py-2 rounded transition-all shadow-lg flex items-center gap-1 disabled:opacity-60 disabled:cursor-wait">
+            <span class="material-symbols-outlined text-sm" [class.animate-spin]="isSaving()">{{ isSaving() ? 'progress_activity' : 'save' }}</span>
+            {{ isSaving() ? 'Saving…' : 'Save Changes' }}
           </button>
 
           <button
@@ -134,13 +141,37 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
                 <span>Promotions & Coupons</span>
                 <span class="material-symbols-outlined text-sm">confirmation_number</span>
               </button>
+              <button
+                (click)="openStudentsTab()"
+                [class.bg-[#121A2B]]="activeTab() === 'students'"
+                [class.text-[#E8931A]]="activeTab() === 'students'"
+                [class.border-l-4]="activeTab() === 'students'"
+                [class.border-[#E8931A]]="activeTab() === 'students'"
+                [class.text-[#d9c3af]]="activeTab() !== 'students'"
+                class="text-left px-4 py-2.5 rounded hover:bg-[#121A2B]/60 transition-all font-medium flex items-center justify-between"
+              >
+                <span>Enrolled Students</span>
+                <span class="material-symbols-outlined text-sm">groups</span>
+              </button>
             </nav>
           </div>
         </aside>
 
         <!-- Right Main Studio Content Area -->
         <main class="flex-grow bg-[#121A2B] technical-border rounded-lg p-6 md:p-8 min-h-[650px]">
-          
+          @if (isLoading()) {
+            <div class="animate-pulse space-y-7" aria-label="Loading course editor">
+              <div class="h-8 w-56 rounded bg-[#1E293B]"></div>
+              <div class="h-3 w-3/4 rounded bg-[#1E293B]"></div>
+              @for (item of [1, 2, 3, 4]; track item) {
+                <div class="rounded-xl border border-[#1E293B] bg-[#040810]/40 p-5 space-y-4">
+                  <div class="h-5 w-1/3 rounded bg-[#1E293B]"></div>
+                  <div class="h-11 rounded bg-[#1E293B]/70"></div>
+                  <div class="h-11 rounded bg-[#1E293B]/70"></div>
+                </div>
+              }
+            </div>
+          } @else {
           <!-- TAB 1: CURRICULUM BUILDER -->
           @if (activeTab() === 'curriculum') {
             <div>
@@ -278,78 +309,31 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
 
               <!-- Course Image Upload & Preview Card -->
               <div class="border-t border-[#1E293B] pt-6">
-                <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white mb-4">Course image</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div class="relative w-full h-44 bg-[#040810] border border-[#1E293B] rounded-lg overflow-hidden flex items-center justify-center">
-                    <img [src]="course()?.thumbnail || '/assets/agentic-ai.jpg'" class="w-full h-full object-cover" />
+                <div class="flex items-center justify-between mb-4"><div><h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white">Course image</h3><p class="font-['Inter'] text-xs text-[#a18d7b] mt-1">Shown in search results and behind the preview play button.</p></div>@if (course()?.thumbnail) {<button type="button" (click)="removeMedia('thumbnail')" [disabled]="removingMedia() === 'thumbnail'" class="font-['JetBrains_Mono'] text-[11px] text-[#ffb4ab] border border-[#ffb4ab]/40 rounded px-3 py-2 hover:bg-[#ffb4ab]/10 disabled:opacity-50">{{ removingMedia() === 'thumbnail' ? 'Removing…' : 'Remove image' }}</button>}</div>
+                <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)] gap-6 items-stretch">
+                  <div class="relative aspect-[16/9] bg-[#040810] border border-[#1E293B] rounded-xl overflow-hidden flex items-center justify-center shadow-inner">
+                    @if (course()?.thumbnail) {<img [src]="course()?.thumbnail" [alt]="course()?.title" class="w-full h-full object-cover" />} @else {<div class="text-center text-[#a18d7b]"><span class="material-symbols-outlined text-5xl">image</span><p class="text-xs mt-2">No course image</p></div>}
+                    @if (isUploadingImage()) {<div class="absolute inset-0 bg-[#040810]/85 backdrop-blur-sm grid place-items-center"><div class="text-center"><span class="material-symbols-outlined text-3xl text-[#E8931A] animate-spin">progress_activity</span><p class="font-['JetBrains_Mono'] text-[11px] text-white mt-2">Uploading image…</p></div></div>}
                   </div>
-
-                  <div class="flex flex-col gap-3 font-['Inter'] text-xs">
-                    <p class="text-[#d9c3af]">
-                      Upload your course image here. Important guidelines: <span class="font-['JetBrains_Mono'] text-white font-bold">750x422 pixels</span>; .jpg, .jpeg, .gif, or .png. No text on the image.
-                    </p>
-                    <div class="flex flex-wrap gap-2">
-                      <input
-                        type="text"
-                        [ngModel]="course()?.thumbnail"
-                        (ngModelChange)="updateCourseField('thumbnail', $event)"
-                        placeholder="Paste an image URL or choose a file"
-                        class="flex-grow bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']"
-                      />
-                      <label class="font-['JetBrains_Mono'] text-xs font-bold text-[#040810] bg-[#E8931A] hover:bg-[#f6a52a] px-4 py-2 rounded shrink-0 cursor-pointer">
-                        Choose image
-                        <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden" (change)="handleThumbnailFile($event)" />
-                      </label>
-                      <button type="button" (click)="saveAllChanges()" class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-4 py-2 rounded shrink-0">
-                        Save image
-                      </button>
-                    </div>
-                    <span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b]">Images are read by your browser and saved with the course record. Maximum file size: 4 MB.</span>
+                  <div class="rounded-xl border border-[#1E293B] bg-[#040810]/45 p-5 flex flex-col justify-between gap-4">
+                    <div><p class="font-['Inter'] text-xs text-[#d9c3af] leading-relaxed">Use a clean 16:9 image. Recommended size: <strong class="text-white">750 × 422 px</strong>. JPG, PNG, WebP, or GIF up to 10 MB.</p><p class="font-['JetBrains_Mono'] text-[10px] text-[#378ADD] mt-3">Uploads are stored securely and saved to this course automatically.</p></div>
+                    <label [class.pointer-events-none]="isUploadingImage()" class="w-full text-center font-['JetBrains_Mono'] text-xs font-bold text-[#040810] bg-[#E8931A] hover:bg-[#f6a52a] px-4 py-3 rounded-lg cursor-pointer transition-colors disabled:opacity-60">{{ course()?.thumbnail ? 'Replace image' : 'Upload image' }}<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden" (change)="handleThumbnailFile($event)" /></label>
                   </div>
                 </div>
               </div>
 
               <!-- Promotional Video Upload & Player Box -->
               <div class="border-t border-[#1E293B] pt-6">
-                <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white mb-4">Promotional video</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div class="relative w-full h-44 bg-[#040810] border border-[#1E293B] rounded-lg flex flex-col justify-between p-4">
-                    <div class="flex-grow flex items-center justify-center">
-                      @if (course()?.promoVideoUrl?.startsWith('data:video/')) {
-                        <video [src]="course()?.promoVideoUrl" controls class="w-full h-full object-contain rounded"></video>
-                      } @else if (promoEmbedUrl()) {
-                        <iframe [src]="promoEmbedUrl()" title="Course promotional video preview" class="w-full h-full rounded" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
-                      } @else {
-                        <span class="material-symbols-outlined text-4xl text-white opacity-80">play_circle</span>
-                      }
-                    </div>
-                    <div class="flex items-center justify-between text-[#a18d7b] font-['JetBrains_Mono'] text-[10px]">
-                      <span>{{ course()?.promoVideoUrl ? 'Promo video configured' : 'No promo video configured' }}</span>
-                      <span class="material-symbols-outlined text-sm">settings</span>
-                    </div>
+                <div class="flex items-center justify-between mb-4"><div><h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white">Promotional video</h3><p class="font-['Inter'] text-xs text-[#a18d7b] mt-1">This plays directly inside the landing-page preview card.</p></div>@if (course()?.promoVideoUrl) {<button type="button" (click)="removeMedia('promoVideoUrl')" [disabled]="removingMedia() === 'promoVideoUrl'" class="font-['JetBrains_Mono'] text-[11px] text-[#ffb4ab] border border-[#ffb4ab]/40 rounded px-3 py-2 hover:bg-[#ffb4ab]/10 disabled:opacity-50">{{ removingMedia() === 'promoVideoUrl' ? 'Removing…' : 'Remove video' }}</button>}</div>
+                <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)] gap-6 items-stretch">
+                  <div class="relative aspect-video bg-black border border-[#1E293B] rounded-xl overflow-hidden grid place-items-center">
+                    @if (isDirectPromoVideo(course()?.promoVideoUrl)) {<video [src]="course()?.promoVideoUrl" controls class="w-full h-full object-contain"></video>} @else if (promoEmbedUrl()) {<iframe [src]="promoEmbedUrl()" title="Course promotional video preview" class="w-full h-full border-0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>} @else {<div class="text-center text-[#a18d7b]"><span class="material-symbols-outlined text-5xl">smart_display</span><p class="text-xs mt-2">No promotional video</p></div>}
+                    @if (isUploadingVideo()) {<div class="absolute inset-0 bg-[#040810]/90 backdrop-blur-sm grid place-items-center"><div class="text-center"><span class="material-symbols-outlined text-3xl text-[#E8931A] animate-spin">progress_activity</span><p class="font-['JetBrains_Mono'] text-[11px] text-white mt-2">Uploading video…</p></div></div>}
                   </div>
-
-                  <div class="flex flex-col gap-3 font-['Inter'] text-xs">
-                    <p class="text-[#d9c3af]">
-                      Your promo video is a quick and compelling way for students to preview what they'll learn in your course.
-                    </p>
-                    <div class="flex flex-wrap gap-2">
-                      <input
-                        type="text"
-                        [ngModel]="course()?.promoVideoUrl"
-                        (ngModelChange)="updateCourseField('promoVideoUrl', $event)"
-                        placeholder="Paste YouTube, Vimeo, or direct video URL"
-                        class="flex-grow bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']"
-                      />
-                      <label class="font-['JetBrains_Mono'] text-xs font-bold text-[#040810] bg-[#E8931A] hover:bg-[#f6a52a] px-4 py-2 rounded shrink-0 cursor-pointer">
-                        Upload intro
-                        <input type="file" accept="video/mp4,video/webm,video/ogg" class="hidden" (change)="handlePromoVideoFile($event)" />
-                      </label>
-                      <button type="button" (click)="saveAllChanges()" class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-4 py-2 rounded shrink-0">
-                        Save video
-                      </button>
-                    </div>
-                    <span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b]">Short intro files up to 8 MB can be stored with the course. Larger lessons should use Bunny Stream.</span>
+                  <div class="rounded-xl border border-[#1E293B] bg-[#040810]/45 p-5 flex flex-col gap-4">
+                    <p class="font-['Inter'] text-xs text-[#d9c3af] leading-relaxed">Upload an MP4, WebM, OGG, or MOV intro up to 250 MB, or paste a YouTube/Vimeo URL.</p>
+                    <input type="url" [ngModel]="course()?.promoVideoUrl" (ngModelChange)="updateCourseField('promoVideoUrl', $event)" placeholder="https://youtube.com/watch?v=…" class="w-full bg-[#040810] border border-[#1E293B] focus:border-[#378ADD] outline-none rounded-lg px-3 py-2.5 text-xs text-white" />
+                    <div class="grid grid-cols-2 gap-2"><label [class.pointer-events-none]="isUploadingVideo()" class="text-center font-['JetBrains_Mono'] text-[11px] font-bold text-[#040810] bg-[#E8931A] px-3 py-3 rounded-lg cursor-pointer">Upload video<input type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" class="hidden" (change)="handlePromoVideoFile($event)" /></label><button type="button" (click)="saveAllChanges()" [disabled]="isSaving()" class="font-['JetBrains_Mono'] text-[11px] font-bold text-white bg-[#6B21A8] rounded-lg disabled:opacity-50">Save URL</button></div>
                   </div>
                 </div>
               </div>
@@ -442,7 +426,55 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
             </div>
           }
 
-          <!-- TAB 4: PRICING -->
+          <!-- TAB 4: ENROLLED STUDENTS -->
+          @if (activeTab() === 'students') {
+            <div class="flex flex-col gap-6">
+              <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b border-[#1E293B] pb-5">
+                <div>
+                  <span class="font-['JetBrains_Mono'] text-[10px] uppercase tracking-[0.2em] text-[#378ADD]">Course audience</span>
+                  <h2 class="font-['Hanken_Grotesk'] text-2xl font-bold text-white mt-1">Enrolled students</h2>
+                  <p class="font-['Inter'] text-xs text-[#a18d7b] mt-1">Enrollment date, latest activity, and curriculum progress for this course.</p>
+                </div>
+                <div class="relative w-full lg:w-72">
+                  <span class="material-symbols-outlined absolute left-3 top-2.5 text-base text-[#a18d7b]">search</span>
+                  <input [(ngModel)]="studentSearch" (ngModelChange)="scheduleStudentSearch()" placeholder="Search students" class="w-full bg-[#040810] border border-[#1E293B] focus:border-[#378ADD] outline-none rounded-lg pl-10 pr-3 py-2.5 text-xs text-white" />
+                </div>
+              </div>
+
+              @if (isLoadingStudents()) {
+                <div class="space-y-3 animate-pulse">
+                  @for (item of [1, 2, 3, 4, 5]; track item) {
+                    <div class="h-16 rounded-lg bg-[#040810] border border-[#1E293B]"></div>
+                  }
+                </div>
+              } @else if (courseStudents().length) {
+                <div class="overflow-x-auto rounded-xl border border-[#1E293B]">
+                  <table class="w-full min-w-[760px] text-left">
+                    <thead class="bg-[#040810] font-['JetBrains_Mono'] text-[10px] uppercase tracking-wider text-[#a18d7b]">
+                      <tr><th class="px-5 py-3">Student</th><th class="px-5 py-3">Enrolled</th><th class="px-5 py-3">Last visited</th><th class="px-5 py-3">Progress</th><th class="px-5 py-3">Completed</th></tr>
+                    </thead>
+                    <tbody class="divide-y divide-[#1E293B]">
+                      @for (student of courseStudents(); track student.id) {
+                        <tr class="bg-[#121A2B] hover:bg-[#172033] transition-colors">
+                          <td class="px-5 py-4">
+                            <div class="flex items-center gap-3"><span class="w-9 h-9 rounded-full bg-[#378ADD]/15 text-[#378ADD] grid place-items-center font-bold">{{ student.name.charAt(0).toUpperCase() }}</span><div><div class="text-sm font-semibold text-white">{{ student.name }}</div><div class="text-[11px] text-[#a18d7b]">{{ student.email }}</div></div></div>
+                          </td>
+                          <td class="px-5 py-4 text-xs text-[#d9c3af]">{{ student.enrolledAt | date:'mediumDate' }}</td>
+                          <td class="px-5 py-4 text-xs text-[#d9c3af]">{{ student.lastVisited | date:'medium' }}</td>
+                          <td class="px-5 py-4"><div class="flex items-center gap-3"><div class="h-2 w-28 rounded-full bg-[#040810] overflow-hidden"><div class="h-full bg-[#E8931A] rounded-full" [style.width.%]="student.progressPercent"></div></div><span class="text-xs text-white">{{ student.progressPercent | number:'1.0-0' }}%</span></div></td>
+                          <td class="px-5 py-4 font-['JetBrains_Mono'] text-xs text-[#378ADD]">{{ student.completedLessons }} lessons</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              } @else {
+                <div class="rounded-xl border border-dashed border-[#378ADD]/40 bg-[#040810]/40 py-16 text-center"><span class="material-symbols-outlined text-4xl text-[#378ADD]">group_off</span><h3 class="text-lg font-bold text-white mt-3">No enrolled students yet</h3><p class="text-xs text-[#a18d7b] mt-1">Students will appear here after a completed enrollment.</p></div>
+              }
+            </div>
+          }
+
+          <!-- TAB 5: PRICING -->
           @if (activeTab() === 'pricing') {
             <div class="flex flex-col gap-6 max-w-lg">
               <div class="border-b border-[#1E293B] pb-4">
@@ -480,6 +512,7 @@ import { AdminService, Coupon } from '../../core/services/admin.service';
               }
             </div>
           }
+          }
         </main>
       </div>
     </div>
@@ -496,13 +529,23 @@ export class CourseEditorComponent implements OnInit {
   modules = signal<Module[]>([]);
   promoEmbedUrl = signal<SafeResourceUrl | null>(null);
   coupons = signal<Coupon[]>([]);
+  courseStudents = signal<CourseStudent[]>([]);
+  isLoading = signal(true);
+  isSaving = signal(false);
+  isUploadingImage = signal(false);
+  isUploadingVideo = signal(false);
+  isLoadingStudents = signal(false);
+  removingMedia = signal<'thumbnail' | 'promoVideoUrl' | null>(null);
+  saveMessage = signal('');
   activeTab = signal<
-    'curriculum' | 'landing' | 'intended' | 'pricing' | 'promotions'
+    'curriculum' | 'landing' | 'intended' | 'pricing' | 'promotions' | 'students'
   >('curriculum');
 
   referralUrl = '';
   copiedLink = false;
   showCouponForm = false;
+  studentSearch = '';
+  private studentSearchTimer?: ReturnType<typeof setTimeout>;
 
   newCouponCode = '';
   newCouponDiscount: number | null = 479;
@@ -517,9 +560,11 @@ export class CourseEditorComponent implements OnInit {
           this.modules.set(c.modules || []);
           this.promoEmbedUrl.set(this.toPromoEmbedUrl(c.promoVideoUrl));
           this.referralUrl = `https://technyks.com/courses/${c.slug}?referralCode=3BDC`;
+          this.isLoading.set(false);
         },
+        error: () => this.isLoading.set(false),
       });
-    }
+    } else this.isLoading.set(false);
 
     this.adminService.getCoupons().subscribe({
       next: (data) => this.coupons.set(data),
@@ -567,13 +612,19 @@ export class CourseEditorComponent implements OnInit {
       alert('Please choose an image file.');
       return;
     }
-    if (file.size > 4 * 1024 * 1024) {
-      alert('Please choose an image smaller than 4 MB.');
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Please choose an image smaller than 10 MB.');
       return;
     }
-    this.readFileAsDataUrl(file).then((dataUrl) =>
-      this.updateCourseField('thumbnail', dataUrl),
-    );
+    this.isUploadingImage.set(true);
+    this.adminService.uploadCourseMedia('image', file).subscribe({
+      next: ({ url }) => this.persistMediaField('thumbnail', url),
+      error: (error) => {
+        this.isUploadingImage.set(false);
+        alert(error?.error?.message || 'The image upload failed. Please try again.');
+      },
+    });
+    (event.target as HTMLInputElement).value = '';
   }
 
   handlePromoVideoFile(event: Event) {
@@ -583,26 +634,87 @@ export class CourseEditorComponent implements OnInit {
       alert('Please choose a video file.');
       return;
     }
-    if (file.size > 8 * 1024 * 1024) {
-      alert('Please choose a short intro video smaller than 8 MB.');
+    if (file.size > 250 * 1024 * 1024) {
+      alert('Please choose an intro video smaller than 250 MB.');
       return;
     }
-    this.readFileAsDataUrl(file).then((dataUrl) =>
-      this.updateCourseField('promoVideoUrl', dataUrl),
-    );
+    this.isUploadingVideo.set(true);
+    this.adminService.uploadCourseMedia('video', file).subscribe({
+      next: ({ url }) => this.persistMediaField('promoVideoUrl', url),
+      error: (error) => {
+        this.isUploadingVideo.set(false);
+        alert(error?.error?.message || 'The video upload failed. Please try again.');
+      },
+    });
+    (event.target as HTMLInputElement).value = '';
   }
 
-  private readFileAsDataUrl(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result || ''));
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(file);
+  removeMedia(field: 'thumbnail' | 'promoVideoUrl') {
+    const current = this.course();
+    if (!current) return;
+    const previousUrl = String(current[field] || '');
+    const updated = { ...current, [field]: null } as Course;
+    this.removingMedia.set(field);
+    this.coursesService.saveCourse(updated).subscribe({
+      next: (saved) => {
+        this.course.set(saved);
+        if (field === 'promoVideoUrl') this.promoEmbedUrl.set(null);
+        if (this.isManagedUpload(previousUrl)) {
+          this.adminService.removeCourseMedia(previousUrl).subscribe({
+            next: () => this.removingMedia.set(null),
+            error: () => this.removingMedia.set(null),
+          });
+        } else this.removingMedia.set(null);
+        this.showSavedMessage('Media removed');
+      },
+      error: () => {
+        this.removingMedia.set(null);
+        alert('The media could not be removed. Please try again.');
+      },
     });
   }
 
-  private toPromoEmbedUrl(value?: string): SafeResourceUrl | null {
-    if (!value || value.startsWith('data:video/')) return null;
+  isDirectPromoVideo(value?: string | null) {
+    const url = String(value || '');
+    return url.startsWith('data:video/') || /\.(?:mp4|webm|ogv|ogg|mov)(?:\?|$)/i.test(url);
+  }
+
+  private persistMediaField(
+    field: 'thumbnail' | 'promoVideoUrl',
+    url: string,
+  ) {
+    const current = this.course();
+    if (!current) return;
+    const previousUrl = String(current[field] || '');
+    const updated = { ...current, [field]: url } as Course;
+    this.coursesService.saveCourse(updated).subscribe({
+      next: (saved) => {
+        this.course.set(saved);
+        this.modules.set(saved.modules || this.modules());
+        if (field === 'promoVideoUrl') {
+          this.promoEmbedUrl.set(this.toPromoEmbedUrl(saved.promoVideoUrl));
+          this.isUploadingVideo.set(false);
+        } else this.isUploadingImage.set(false);
+        if (previousUrl && previousUrl !== url && this.isManagedUpload(previousUrl)) {
+          this.adminService.removeCourseMedia(previousUrl).subscribe();
+        }
+        this.showSavedMessage(field === 'thumbnail' ? 'Image uploaded and saved' : 'Video uploaded and saved');
+      },
+      error: () => {
+        if (field === 'promoVideoUrl') this.isUploadingVideo.set(false);
+        else this.isUploadingImage.set(false);
+        this.adminService.removeCourseMedia(url).subscribe();
+        alert('The file uploaded, but the course could not be updated. Please try again.');
+      },
+    });
+  }
+
+  private isManagedUpload(url: string) {
+    return url.includes('/uploads/course-media/');
+  }
+
+  private toPromoEmbedUrl(value?: string | null): SafeResourceUrl | null {
+    if (!value || this.isDirectPromoVideo(value)) return null;
     try {
       const url = new URL(value);
       if (url.hostname === 'youtu.be') {
@@ -703,6 +815,29 @@ export class CourseEditorComponent implements OnInit {
       });
   }
 
+  openStudentsTab() {
+    this.activeTab.set('students');
+    this.loadCourseStudents();
+  }
+
+  scheduleStudentSearch() {
+    if (this.studentSearchTimer) clearTimeout(this.studentSearchTimer);
+    this.studentSearchTimer = setTimeout(() => this.loadCourseStudents(), 250);
+  }
+
+  private loadCourseStudents() {
+    const courseId = this.course()?.id;
+    if (!courseId) return;
+    this.isLoadingStudents.set(true);
+    this.adminService.getCourseStudents(courseId, this.studentSearch).subscribe({
+      next: (students) => {
+        this.courseStudents.set(students);
+        this.isLoadingStudents.set(false);
+      },
+      error: () => this.isLoadingStudents.set(false),
+    });
+  }
+
   saveAllChanges() {
     const current = this.course();
     if (!current) return;
@@ -713,11 +848,25 @@ export class CourseEditorComponent implements OnInit {
       isPublished: current.status === 'LIVE',
     };
 
+    this.isSaving.set(true);
     this.coursesService.saveCourse(updated).subscribe({
-      next: () => {
-        alert('Course & Curriculum saved successfully!');
+      next: (saved) => {
+        this.course.set(saved);
+        this.modules.set(saved.modules || []);
+        this.promoEmbedUrl.set(this.toPromoEmbedUrl(saved.promoVideoUrl));
+        this.isSaving.set(false);
+        this.showSavedMessage('All changes saved');
+      },
+      error: (error) => {
+        this.isSaving.set(false);
+        alert(error?.error?.message || 'The course could not be saved.');
       },
     });
+  }
+
+  private showSavedMessage(message: string) {
+    this.saveMessage.set(message);
+    setTimeout(() => this.saveMessage.set(''), 2500);
   }
 
   deleteCurrentCourse() {

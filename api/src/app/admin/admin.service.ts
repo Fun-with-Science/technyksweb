@@ -233,6 +233,82 @@ export class AdminService {
     return (await this.withCourseMetrics([course]))[0];
   }
 
+  async getCourseStudents(courseId: string, query?: string) {
+    const q = String(query || '').trim().toLowerCase();
+    if (this.prisma.isDbConnected) {
+      try {
+        const course = await this.prisma.course.findUnique({
+          where: { id: courseId },
+          select: { id: true },
+        });
+        if (!course) throw new NotFoundException('Course not found.');
+
+        const enrollments = await this.prisma.enrollment.findMany({
+          where: {
+            courseId,
+            ...(q
+              ? {
+                  user: {
+                    OR: [
+                      { name: { contains: q } },
+                      { email: { contains: q } },
+                    ],
+                  },
+                }
+              : {}),
+          },
+          include: {
+            user: {
+              select: { id: true, name: true, email: true, avatarUrl: true },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+        });
+        return enrollments.map((enrollment) => ({
+          id: enrollment.id,
+          userId: enrollment.user.id,
+          name: enrollment.user.name,
+          email: enrollment.user.email,
+          avatarUrl: enrollment.user.avatarUrl,
+          enrolledAt: enrollment.createdAt,
+          lastVisited: enrollment.updatedAt,
+          progressPercent: Number(enrollment.progressPercent || 0),
+          completedLessons: Array.isArray(enrollment.completedLessonIds)
+            ? enrollment.completedLessonIds.length
+            : 0,
+        }));
+      } catch (error) {
+        if (error instanceof NotFoundException) throw error;
+        // Use the local adapter below.
+      }
+    }
+
+    const users = new Map(
+      this.prisma.inMemoryUsers.map((user) => [user.id, user]),
+    );
+    return this.prisma.inMemoryEnrollments
+      .filter((enrollment) => enrollment.courseId === courseId)
+      .map((enrollment) => ({ enrollment, user: users.get(enrollment.userId) }))
+      .filter(
+        ({ user }) =>
+          user &&
+          (!q ||
+            String(user.name || '').toLowerCase().includes(q) ||
+            String(user.email || '').toLowerCase().includes(q)),
+      )
+      .map(({ enrollment, user }: any) => ({
+        id: enrollment.id,
+        userId: user.id,
+        name: user.name,
+        email: user.email,
+        avatarUrl: user.avatarUrl || null,
+        enrolledAt: enrollment.createdAt,
+        lastVisited: enrollment.updatedAt,
+        progressPercent: Number(enrollment.progressPercent || 0),
+        completedLessons: (enrollment.completedLessonIds || []).length,
+      }));
+  }
+
   async getMembershipPlans() {
     if (this.prisma.isDbConnected) {
       try {
@@ -608,9 +684,15 @@ export class AdminService {
       title,
       subtitle: String(dto.subtitle ?? current?.subtitle ?? '').trim(),
       description: String(dto.description ?? current?.description ?? '').trim(),
-      thumbnail: this.cleanThumbnail(dto.thumbnail ?? current?.thumbnail),
+      thumbnail: this.cleanThumbnail(
+        Object.prototype.hasOwnProperty.call(dto, 'thumbnail')
+          ? dto.thumbnail
+          : current?.thumbnail,
+      ),
       promoVideoUrl: this.cleanPromoVideoUrl(
-        dto.promoVideoUrl ?? current?.promoVideoUrl,
+        Object.prototype.hasOwnProperty.call(dto, 'promoVideoUrl')
+          ? dto.promoVideoUrl
+          : current?.promoVideoUrl,
       ),
       price,
       isFree,

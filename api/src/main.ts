@@ -1,7 +1,10 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { json, urlencoded } from 'express';
+import { mkdirSync } from 'node:fs';
 import { AppModule } from './app/app.module';
+import { getUploadsDirectory } from './app/admin/media.service';
 
 function validateProductionEnvironment() {
   if (process.env.NODE_ENV !== 'production') return;
@@ -39,7 +42,15 @@ async function bootstrap() {
 
   validateProductionEnvironment();
 
-  const app = await NestFactory.create(AppModule, { bodyParser: false });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: false,
+  });
+  const uploadsDirectory = getUploadsDirectory();
+  mkdirSync(uploadsDirectory, { recursive: true });
+  app.useStaticAssets(uploadsDirectory, {
+    prefix: '/uploads/',
+    index: false,
+  });
   app.use(json({ limit: '16mb' }));
   app.use(urlencoded({ extended: true, limit: '16mb' }));
   app.enableCors({

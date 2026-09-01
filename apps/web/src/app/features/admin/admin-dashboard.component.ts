@@ -23,7 +23,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
         <div>
           <div class="inline-flex items-center gap-2 font-['JetBrains_Mono'] text-xs text-[#E8931A] px-3.5 py-1.5 border border-[#E8931A]/30 bg-[#E8931A]/10 rounded-full w-fit mb-2">
             <span class="material-symbols-outlined text-[16px]">school</span>
-            UDEMY INSTRUCTOR STUDIO
+            TECHNYKS INSTRUCTOR STUDIO
           </div>
           <h1 class="font-['Hanken_Grotesk'] text-3xl font-bold text-white">Course Management & Dashboard</h1>
         </div>
@@ -121,8 +121,26 @@ import { CoursesService, Course } from '../../core/services/courses.service';
             </div>
           </div>
 
-          <!-- Course Cards Roster (Screenshot 1 Layout) -->
-          @if (filteredCourses().length) {
+          <!-- Course Cards Roster -->
+          @if (isLoadingCourses()) {
+            <div class="flex flex-col gap-4" aria-label="Loading courses">
+              @for (row of [1, 2, 3]; track row) {
+                <div class="bg-[#121A2B] border border-[#1E293B] rounded-lg p-5 flex flex-col md:flex-row gap-6 animate-pulse">
+                  <div class="flex items-center gap-5 flex-grow">
+                    <div class="w-36 h-20 rounded bg-[#202A3E] shrink-0"></div>
+                    <div class="flex-grow max-w-lg space-y-3">
+                      <div class="h-4 bg-[#202A3E] rounded w-3/4"></div>
+                      <div class="h-3 bg-[#202A3E] rounded w-2/5"></div>
+                    </div>
+                  </div>
+                  <div class="flex gap-5 items-center">
+                    <div class="h-10 w-24 bg-[#202A3E] rounded"></div>
+                    <div class="h-10 w-36 bg-[#202A3E] rounded"></div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else if (filteredCourses().length) {
             <div class="flex flex-col gap-4">
               @for (course of filteredCourses(); track course.id) {
                 <div class="bg-[#121A2B] border border-[#1E293B] hover:border-[#378ADD] rounded-lg p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-all group shadow-xl">
@@ -394,6 +412,7 @@ export class AdminDashboardComponent implements OnInit {
   membershipPlans = signal<MembershipPlan[]>([]);
   savingMembershipPlanId = signal<string | null>(null);
   publishedCourses = signal<Course[]>([]);
+  isLoadingCourses = signal(true);
 
   searchCourseQuery = '';
   sortBy = 'Newest';
@@ -413,7 +432,13 @@ export class AdminDashboardComponent implements OnInit {
   loadCourses() {
     this.coursesService
       .getAllCoursesAdmin()
-      .subscribe((data) => this.publishedCourses.set(data));
+      .subscribe({
+        next: (data) => {
+          this.publishedCourses.set(data);
+          this.isLoadingCourses.set(false);
+        },
+        error: () => this.isLoadingCourses.set(false),
+      });
   }
 
   filteredCourses(): Course[] {

@@ -106,38 +106,52 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
             <div
               class="bg-[#040810] technical-border rounded p-8 flex flex-col gap-6 shadow-2xl"
             >
-              @if (course()?.thumbnail) {
-                <div
-                  class="aspect-video overflow-hidden rounded border border-[#1E293B] -mx-2 -mt-2"
-                >
-                  <img
-                    [src]="course()?.thumbnail"
-                    [alt]="course()?.title"
-                    class="w-full h-full object-cover"
-                  />
-                </div>
-              }
-              @if (course()?.promoVideoUrl) {
-                <div
-                  class="aspect-video overflow-hidden rounded border border-[#1E293B] -mx-2"
-                >
-                  @if (isUploadedPromoVideo(course()?.promoVideoUrl)) {
-                    <video
-                      [src]="course()?.promoVideoUrl"
-                      controls
-                      class="w-full h-full object-contain bg-black"
-                    ></video>
-                  } @else if (promoEmbedUrl()) {
-                    <iframe
-                      [src]="promoEmbedUrl()"
-                      class="w-full h-full border-0"
-                      title="Course introduction video"
-                      allow="autoplay; encrypted-media; picture-in-picture"
-                      allowfullscreen
-                    ></iframe>
+              <div
+                class="relative aspect-video overflow-hidden rounded border border-[#334155] -mx-2 -mt-2 bg-[#0B1120] shadow-xl group"
+              >
+                @if (!promoPlaying()) {
+                  @if (course()?.thumbnail) {
+                    <img
+                      [src]="course()?.thumbnail"
+                      [alt]="course()?.title"
+                      class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                    />
+                  } @else {
+                    <div class="w-full h-full bg-gradient-to-br from-[#172033] to-[#060A12] flex items-center justify-center">
+                      <span class="material-symbols-outlined text-5xl text-[#64748B]">school</span>
+                    </div>
                   }
-                </div>
-              }
+                  @if (course()?.promoVideoUrl) {
+                    <button
+                      type="button"
+                      (click)="playPromo()"
+                      class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/25 hover:bg-black/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#E8931A]"
+                      aria-label="Play course preview"
+                    >
+                      <span class="w-16 h-16 rounded-full bg-white text-[#111827] flex items-center justify-center shadow-2xl transition-transform group-hover:scale-105">
+                        <span class="material-symbols-outlined text-4xl ml-1">play_arrow</span>
+                      </span>
+                      <span class="font-['Inter'] text-sm font-bold text-white drop-shadow">Preview this course</span>
+                    </button>
+                  }
+                } @else if (isUploadedPromoVideo(course()?.promoVideoUrl)) {
+                  <video
+                    [src]="course()?.promoVideoUrl"
+                    controls
+                    autoplay
+                    playsinline
+                    class="w-full h-full object-contain bg-black"
+                  ></video>
+                } @else if (promoEmbedUrl()) {
+                  <iframe
+                    [src]="promoEmbedUrl()"
+                    class="w-full h-full border-0"
+                    title="Course introduction video"
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    allowfullscreen
+                  ></iframe>
+                }
+              </div>
               <div
                 class="font-['JetBrains_Mono'] text-xs text-[#378ADD] uppercase tracking-widest font-semibold"
               >
@@ -482,6 +496,7 @@ export class CourseDetailComponent implements OnInit {
   isLoading = signal(true);
   expandedModules = signal<Set<string>>(new Set());
   promoEmbedUrl = signal<SafeResourceUrl | null>(null);
+  promoPlaying = signal(false);
   isEnrolled = signal(false);
   isEnrolling = signal(false);
   enrollmentMessage = signal('');
@@ -499,6 +514,7 @@ export class CourseDetailComponent implements OnInit {
           next: (data) => {
             this.course.set(data);
             this.loadEnrollmentStatus(data.id);
+            this.promoPlaying.set(false);
             this.promoEmbedUrl.set(this.toPromoEmbedUrl(data.promoVideoUrl));
             this.expandedModules.set(
               new Set(
@@ -654,15 +670,22 @@ export class CourseDetailComponent implements OnInit {
     return 'TA';
   }
 
-  isUploadedPromoVideo(url?: string): boolean {
+  isUploadedPromoVideo(url?: string | null): boolean {
     return Boolean(
       url &&
         (url.startsWith('data:video/') ||
-          /\.(mp4|webm|ogg)(?:\?|$)/i.test(url)),
+          /\.(mp4|webm|ogg|mov)(?:\?|$)/i.test(url)),
     );
   }
 
-  private toPromoEmbedUrl(value?: string): SafeResourceUrl | null {
+  playPromo() {
+    const value = this.course()?.promoVideoUrl;
+    if (!value) return;
+    this.promoEmbedUrl.set(this.toPromoEmbedUrl(value, true));
+    this.promoPlaying.set(true);
+  }
+
+  private toPromoEmbedUrl(value?: string | null, autoplay = false): SafeResourceUrl | null {
     if (!value || this.isUploadedPromoVideo(value)) return null;
     try {
       const url = new URL(value);
@@ -670,7 +693,7 @@ export class CourseDetailComponent implements OnInit {
         const videoId = url.pathname.split('/').filter(Boolean)[0];
         return videoId
           ? this.sanitizer.bypassSecurityTrustResourceUrl(
-              `https://www.youtube-nocookie.com/embed/${videoId}`,
+              `https://www.youtube-nocookie.com/embed/${videoId}${autoplay ? '?autoplay=1' : ''}`,
             )
           : null;
       }
@@ -683,7 +706,7 @@ export class CourseDetailComponent implements OnInit {
           url.pathname.match(/^\/(?:embed|shorts)\/([A-Za-z0-9_-]{11})/)?.[1];
         return videoId
           ? this.sanitizer.bypassSecurityTrustResourceUrl(
-              `https://www.youtube-nocookie.com/embed/${videoId}`,
+              `https://www.youtube-nocookie.com/embed/${videoId}${autoplay ? '?autoplay=1' : ''}`,
             )
           : null;
       }
@@ -694,7 +717,7 @@ export class CourseDetailComponent implements OnInit {
           .find((part) => /^\d+$/.test(part));
         return videoId
           ? this.sanitizer.bypassSecurityTrustResourceUrl(
-              `https://player.vimeo.com/video/${videoId}`,
+              `https://player.vimeo.com/video/${videoId}${autoplay ? '?autoplay=1' : ''}`,
             )
           : null;
       }

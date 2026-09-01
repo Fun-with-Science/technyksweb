@@ -47,8 +47,8 @@ export interface Course {
   title: string;
   subtitle: string;
   description: string;
-  thumbnail?: string;
-  promoVideoUrl?: string;
+  thumbnail?: string | null;
+  promoVideoUrl?: string | null;
   price: number;
   isFree: boolean;
   currency: string;

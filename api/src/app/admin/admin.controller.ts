@@ -9,8 +9,12 @@ import {
   Param,
   UseGuards,
   SetMetadata,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminService } from './admin.service';
+import { MediaService } from './media.service';
 import { JwtAuthGuard, RolesGuard } from '../auth/guards';
 
 export const Roles = (...roles: string[]) => SetMetadata('roles', roles);
@@ -19,7 +23,10 @@ export const Roles = (...roles: string[]) => SetMetadata('roles', roles);
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMIN')
 export class AdminController {
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private mediaService: MediaService,
+  ) {}
 
   @Get('metrics')
   async getMetrics() {
@@ -39,6 +46,30 @@ export class AdminController {
   @Get('courses/:id')
   async getCourse(@Param('id') id: string) {
     return this.adminService.getCourseById(id);
+  }
+
+  @Get('courses/:id/students')
+  async getCourseStudents(
+    @Param('id') id: string,
+    @Query('search') search?: string,
+  ) {
+    return this.adminService.getCourseStudents(id, search);
+  }
+
+  @Post('media/:kind')
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: 250 * 1024 * 1024 } }),
+  )
+  async uploadMedia(
+    @Param('kind') kind: 'image' | 'video',
+    @UploadedFile() file: any,
+  ) {
+    return this.mediaService.store(kind, file);
+  }
+
+  @Delete('media')
+  async removeMedia(@Query('url') url: string) {
+    return this.mediaService.remove(url);
   }
 
   @Get('membership/plans')

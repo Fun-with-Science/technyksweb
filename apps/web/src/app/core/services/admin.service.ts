@@ -19,6 +19,25 @@ export interface Student {
   _count: { enrollments: number; subscriptions: number };
 }
 
+export interface CourseStudent {
+  id: string;
+  userId: string;
+  name: string;
+  email: string;
+  avatarUrl?: string | null;
+  enrolledAt: string;
+  lastVisited: string;
+  progressPercent: number;
+  completedLessons: number;
+}
+
+export interface MediaUploadResult {
+  url: string;
+  filename: string;
+  mimeType: string;
+  size: number;
+}
+
 export interface Coupon {
   id: string;
   code: string;
@@ -107,6 +126,27 @@ export class AdminService {
 
   searchStudents(query = ''): Observable<Student[]> {
     return this.http.get<Student[]>(`/api/admin/students?search=${encodeURIComponent(query)}`);
+  }
+
+  getCourseStudents(courseId: string, query = ''): Observable<CourseStudent[]> {
+    return this.http.get<CourseStudent[]>(
+      `/api/admin/courses/${encodeURIComponent(courseId)}/students?search=${encodeURIComponent(query)}`,
+    );
+  }
+
+  uploadCourseMedia(
+    kind: 'image' | 'video',
+    file: File,
+  ): Observable<MediaUploadResult> {
+    const body = new FormData();
+    body.append('file', file, file.name);
+    return this.http.post<MediaUploadResult>(`/api/admin/media/${kind}`, body);
+  }
+
+  removeCourseMedia(url: string): Observable<{ success: boolean }> {
+    return this.http.delete<{ success: boolean }>(
+      `/api/admin/media?url=${encodeURIComponent(url)}`,
+    );
   }
 
   createCourse(payload: any): Observable<any> {
