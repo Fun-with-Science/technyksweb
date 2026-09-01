@@ -94,6 +94,7 @@ if (isApiBuild) {
   // Ensure root, dist, and dist/api entry points exist for ANY Hostinger configuration
   const distDir = join(process.cwd(), 'dist');
   const distApiDir = join(process.cwd(), 'dist', 'api');
+  const nestedDistDir = join(process.cwd(), 'dist', 'dist', 'api');
   const nestedDistApiDir = join(process.cwd(), 'dist', 'api', 'dist', 'api');
 
   if (!existsSync(distApiDir)) {
@@ -102,6 +103,9 @@ if (isApiBuild) {
   if (!existsSync(nestedDistApiDir)) {
     mkdirSync(nestedDistApiDir, { recursive: true });
   }
+  if (!existsSync(nestedDistDir)) {
+    mkdirSync(nestedDistDir, { recursive: true });
+  }
 
   // Hostinger promotes only the configured output directory. Make dist/api a
   // complete Node application rather than a directory containing only a
@@ -109,35 +113,42 @@ if (isApiBuild) {
   const rootPackage = JSON.parse(
     readFileSync(join(process.cwd(), 'package.json'), 'utf8'),
   );
-  const runtimePackage = {
-    name: `${rootPackage.name}-api`,
-    version: rootPackage.version,
-    private: true,
-    main: 'main.js',
-    scripts: {
-      start: 'node main.js',
-      postinstall:
-        'node node_modules/prisma/build/index.js generate --schema prisma/schema.prisma',
-    },
-    dependencies: {
-      ...rootPackage.dependencies,
-      prisma: rootPackage.devDependencies.prisma,
-    },
-    prisma: {
-      schema: 'prisma/schema.prisma',
-    },
-  };
+  function createRuntimePackage(outputDir, mainFile) {
+    const runtimePackage = {
+      name: `${rootPackage.name}-api`,
+      version: rootPackage.version,
+      private: true,
+      main: mainFile,
+      scripts: {
+        start: `node ${mainFile}`,
+        postinstall:
+          'node node_modules/prisma/build/index.js generate --schema prisma/schema.prisma',
+      },
+      dependencies: {
+        ...rootPackage.dependencies,
+        prisma: rootPackage.devDependencies.prisma,
+      },
+      prisma: {
+        schema: 'prisma/schema.prisma',
+      },
+    };
 
-  const runtimePrismaDir = join(distApiDir, 'prisma');
-  mkdirSync(runtimePrismaDir, { recursive: true });
-  copyFileSync(
-    join(process.cwd(), 'prisma', 'schema.prisma'),
-    join(runtimePrismaDir, 'schema.prisma'),
-  );
-  writeFileSync(
-    join(distApiDir, 'package.json'),
-    `${JSON.stringify(runtimePackage, null, 2)}\n`,
-  );
+    const runtimePrismaDir = join(outputDir, 'prisma');
+    mkdirSync(runtimePrismaDir, { recursive: true });
+    copyFileSync(
+      join(process.cwd(), 'prisma', 'schema.prisma'),
+      join(runtimePrismaDir, 'schema.prisma'),
+    );
+    writeFileSync(
+      join(outputDir, 'package.json'),
+      `${JSON.stringify(runtimePackage, null, 2)}\n`,
+    );
+  }
+
+  // Hostinger commonly auto-detects NestJS output as `dist`, while custom
+  // configurations may use `dist/api`. Support both promotion layouts.
+  createRuntimePackage(distDir, 'api/main.js');
+  createRuntimePackage(distApiDir, 'main.js');
 
   // Root wrappers
   writeFileSync(join(process.cwd(), 'main.js'), 'require("./dist/api/main.js");\n');
@@ -150,6 +161,11 @@ if (isApiBuild) {
   writeFileSync(join(distDir, 'server.js'), 'require("./api/main.js");\n');
   writeFileSync(join(distDir, 'index.js'), 'require("./api/main.js");\n');
   writeFileSync(join(distDir, 'app.js'), 'require("./api/main.js");\n');
+
+  // dist/dist/api wrappers (when output_dir=dist and entry=dist/api/main.js)
+  writeFileSync(join(nestedDistDir, 'main.js'), 'require("../../api/main.js");\n');
+  writeFileSync(join(nestedDistDir, 'server.js'), 'require("../../api/main.js");\n');
+  writeFileSync(join(nestedDistDir, 'index.js'), 'require("../../api/main.js");\n');
 
   // dist/api wrappers
   writeFileSync(join(distApiDir, 'server.js'), 'require("./main.js");\n');
