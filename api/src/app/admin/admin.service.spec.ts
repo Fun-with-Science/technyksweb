@@ -77,4 +77,33 @@ describe('AdminService - course deletion', () => {
     expect(second.id).toBe(first.id);
     expect(prisma.inMemoryCourses).toHaveLength(1);
   });
+
+  it('creates, updates, and deletes a coupon through database operations', async () => {
+    const coupon = { id: 'coupon_1', code: 'SAVE500', discountAmount: 500, scope: 'COURSE', courseId: 'course_1' };
+    prisma.coupon = {
+      create: vi.fn().mockResolvedValue(coupon),
+      findUnique: vi.fn().mockResolvedValue(coupon),
+      update: vi.fn().mockResolvedValue({ ...coupon, discountAmount: 600 }),
+      delete: vi.fn().mockResolvedValue(coupon),
+    };
+
+    await expect(service.createCoupon({ code: 'save500', discountAmount: 500, scope: 'COURSE', courseId: 'course_1' })).resolves.toEqual(coupon);
+    await expect(service.updateCoupon('coupon_1', { ...coupon, discountAmount: 600 })).resolves.toMatchObject({ discountAmount: 600 });
+    await expect(service.deleteCoupon('coupon_1')).resolves.toEqual({ success: true });
+    expect(prisma.coupon.create).toHaveBeenCalledOnce();
+    expect(prisma.coupon.update).toHaveBeenCalledOnce();
+    expect(prisma.coupon.delete).toHaveBeenCalledOnce();
+  });
+
+  it('creates and deletes an unused membership plan in the database', async () => {
+    const plan = { id: 'plan_1', name: 'Team Monthly', slug: 'team-monthly', price: 2499, accessAllCourses: true, courseAccess: [] };
+    prisma.membershipPlan = {
+      create: vi.fn().mockResolvedValue(plan),
+      delete: vi.fn().mockResolvedValue(plan),
+    };
+    prisma.subscription = { count: vi.fn().mockResolvedValue(0) };
+
+    await expect(service.createMembershipPlan({ name: 'Team Monthly', slug: 'team-monthly', price: 2499, interval: 'MONTHLY', features: ['All courses'] })).resolves.toEqual(plan);
+    await expect(service.deleteMembershipPlan('plan_1')).resolves.toEqual({ success: true });
+  });
 });

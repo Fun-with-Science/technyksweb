@@ -123,6 +123,7 @@ if (isApiBuild) {
     '@prisma/client',
     'bcryptjs',
     'express',
+    'google-auth-library',
     'passport',
     'passport-jwt',
     'reflect-metadata',

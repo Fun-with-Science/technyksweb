@@ -64,7 +64,7 @@ import {
             Preview Student View <span class="material-symbols-outlined text-sm">open_in_new</span>
           </a>
 
-          <button (click)="saveAllChanges()" [disabled]="isSaving()" class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-5 py-2 rounded transition-all shadow-lg flex items-center gap-1 disabled:opacity-60 disabled:cursor-wait">
+          <button (click)="saveAllChanges()" [disabled]="isSaving()" class="admin-action-primary font-['JetBrains_Mono'] text-xs font-bold uppercase !text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-5 py-2 transition-all shadow-lg flex items-center gap-1 disabled:opacity-60 disabled:cursor-wait">
             <span class="material-symbols-outlined text-sm" [class.animate-spin]="isSaving()">{{ isSaving() ? 'progress_activity' : 'save' }}</span>
             {{ isSaving() ? 'Saving…' : 'Save Changes' }}
           </button>
@@ -333,7 +333,7 @@ import {
                   <div class="rounded-xl border border-[#1E293B] bg-[#040810]/45 p-5 flex flex-col gap-4">
                     <p class="font-['Inter'] text-xs text-[#d9c3af] leading-relaxed">Upload an MP4, WebM, OGG, or MOV intro up to 250 MB, or paste a YouTube/Vimeo URL.</p>
                     <input type="url" [ngModel]="course()?.promoVideoUrl" (ngModelChange)="updateCourseField('promoVideoUrl', $event)" placeholder="https://youtube.com/watch?v=…" class="w-full bg-[#040810] border border-[#1E293B] focus:border-[#378ADD] outline-none rounded-lg px-3 py-2.5 text-xs text-white" />
-                    <div class="grid grid-cols-2 gap-2"><label [class.pointer-events-none]="isUploadingVideo()" class="text-center font-['JetBrains_Mono'] text-[11px] font-bold text-[#040810] bg-[#E8931A] px-3 py-3 rounded-lg cursor-pointer">Upload video<input type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" class="hidden" (change)="handlePromoVideoFile($event)" /></label><button type="button" (click)="saveAllChanges()" [disabled]="isSaving()" class="font-['JetBrains_Mono'] text-[11px] font-bold text-white bg-[#6B21A8] rounded-lg disabled:opacity-50">Save URL</button></div>
+                    <div class="grid grid-cols-2 gap-2"><label [class.pointer-events-none]="isUploadingVideo()" class="text-center font-['JetBrains_Mono'] text-[11px] font-bold text-[#040810] bg-[#E8931A] px-3 py-3 cursor-pointer">Upload video<input type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" class="hidden" (change)="handlePromoVideoFile($event)" /></label><button type="button" (click)="saveAllChanges()" [disabled]="isSaving()" class="admin-action-primary font-['JetBrains_Mono'] text-[11px] font-bold !text-white bg-[#6B21A8] disabled:opacity-50">Save URL</button></div>
                   </div>
                 </div>
               </div>

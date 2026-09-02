@@ -1,11 +1,13 @@
 import { Injectable, BadRequestException, UnauthorizedException, OnModuleInit, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import { OAuth2Client } from 'google-auth-library';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
   private readonly logger = new Logger(AuthService.name);
+  private readonly googleClient = new OAuth2Client();
 
   constructor(
     private prisma: PrismaService,
@@ -17,8 +19,13 @@ export class AuthService implements OnModuleInit {
   }
 
   async seedDefaultAdmin() {
-    const adminEmail = 'admin@technyks.com';
-    const passwordHash = await bcrypt.hash('admin123', 10);
+    const adminEmail = String(process.env.ADMIN_EMAIL || 'admin@technyks.com').toLowerCase().trim();
+    const initialPassword = String(process.env.ADMIN_PASSWORD || (process.env.NODE_ENV === 'production' ? '' : 'admin123'));
+    if (!initialPassword) {
+      this.logger.log('Admin seed skipped because ADMIN_PASSWORD is not configured.');
+      return;
+    }
+    const passwordHash = await bcrypt.hash(initialPassword, 10);
     const adminUser = {
       id: 'usr_admin_default',
       email: adminEmail,
@@ -35,8 +42,8 @@ export class AuthService implements OnModuleInit {
         if (!existing) {
           await this.prisma.user.create({ data: adminUser as any });
         }
-      } catch (e) {
-        this.logger.warn('Prisma seed admin check deferred to in-memory store.');
+      } catch (error: any) {
+        throw new Error(`Admin database initialization failed: ${error?.message || 'unknown error'}`);
       }
     }
 
@@ -53,11 +60,7 @@ export class AuthService implements OnModuleInit {
     // Check existing user
     let existing: any = null;
     if (this.prisma.isDbConnected) {
-      try {
-        existing = await this.prisma.user.findUnique({ where: { email: cleanEmail } });
-      } catch (e) {
-        existing = this.prisma.inMemoryUsers.find(u => u.email === cleanEmail);
-      }
+      existing = await this.prisma.user.findUnique({ where: { email: cleanEmail } });
     } else {
       existing = this.prisma.inMemoryUsers.find(u => u.email === cleanEmail);
     }
@@ -85,17 +88,9 @@ export class AuthService implements OnModuleInit {
       updatedAt: new Date(),
     };
 
-    let persistedInDatabase = false;
     if (this.prisma.isDbConnected) {
-      try {
-        await this.prisma.user.create({ data: newUser as any });
-        persistedInDatabase = true;
-      } catch (e) {
-        // Use the local adapter only when the database write fails.
-      }
-    }
-
-    if (!persistedInDatabase) {
+      await this.prisma.user.create({ data: newUser as any });
+    } else {
       this.prisma.inMemoryUsers.push(newUser);
     }
 
@@ -118,11 +113,7 @@ export class AuthService implements OnModuleInit {
 
     let user: any = null;
     if (this.prisma.isDbConnected) {
-      try {
-        user = await this.prisma.user.findUnique({ where: { email: cleanEmail } });
-      } catch (e) {
-        user = this.prisma.inMemoryUsers.find(u => u.email === cleanEmail);
-      }
+      user = await this.prisma.user.findUnique({ where: { email: cleanEmail } });
     }
     
     if (!user) {
@@ -163,15 +154,97 @@ export class AuthService implements OnModuleInit {
     };
   }
 
+  getPublicConfig() {
+    return {
+      googleClientId: String(process.env.GOOGLE_CLIENT_ID || '').trim() || null,
+    };
+  }
+
+  async loginWithGoogle(credential: string) {
+    const clientId = String(process.env.GOOGLE_CLIENT_ID || '').trim();
+    if (!clientId) {
+      throw new BadRequestException('Google sign-in is not configured.');
+    }
+    if (!credential) {
+      throw new BadRequestException('Google credential is required.');
+    }
+
+    let payload: any;
+    try {
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken: credential,
+        audience: clientId,
+      });
+      payload = ticket.getPayload();
+    } catch {
+      throw new UnauthorizedException('Google authentication could not be verified.');
+    }
+
+    if (!payload?.sub || !payload?.email || payload.email_verified !== true) {
+      throw new UnauthorizedException('A verified Google email address is required.');
+    }
+
+    const email = String(payload.email).toLowerCase().trim();
+    const googleId = String(payload.sub);
+    const name = String(payload.name || email.split('@')[0] || 'Technyks learner').trim();
+    const avatarUrl = payload.picture ? String(payload.picture) : null;
+    let user: any = null;
+
+    if (this.prisma.isDbConnected) {
+      user = await this.prisma.user.findUnique({ where: { email } });
+      if (user) {
+        user = await this.prisma.user.update({
+          where: { id: user.id },
+          data: {
+            googleId,
+            name: user.name || name,
+            avatarUrl: avatarUrl || user.avatarUrl,
+          },
+        });
+      } else {
+        user = await this.prisma.user.create({
+          data: { email, googleId, name, avatarUrl, role: 'STUDENT' },
+        });
+      }
+    } else {
+      user = this.prisma.inMemoryUsers.find(
+        (candidate) => candidate.email === email || candidate.googleId === googleId,
+      );
+      if (user) {
+        Object.assign(user, { googleId, avatarUrl: avatarUrl || user.avatarUrl });
+      } else {
+        user = {
+          id: `usr_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`,
+          email,
+          googleId,
+          name,
+          avatarUrl,
+          role: 'STUDENT',
+          passwordHash: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        this.prisma.inMemoryUsers.push(user);
+      }
+    }
+
+    return {
+      accessToken: this.generateToken(user.id, user.email, user.role),
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        avatarUrl: user.avatarUrl || null,
+      },
+    };
+  }
+
   async forgotPassword(email: string) {
     const cleanEmail = email.toLowerCase().trim();
     let user: any = null;
     if (this.prisma.isDbConnected) {
-      try {
-        user = await this.prisma.user.findUnique({ where: { email: cleanEmail } });
-      } catch (e) {
-        user = this.prisma.inMemoryUsers.find(u => u.email === cleanEmail);
-      }
+      user = await this.prisma.user.findUnique({ where: { email: cleanEmail } });
     } else {
       user = this.prisma.inMemoryUsers.find(u => u.email === cleanEmail);
     }
@@ -205,15 +278,10 @@ export class AuthService implements OnModuleInit {
       const passwordHash = await bcrypt.hash(newPassword, 10);
 
       if (this.prisma.isDbConnected) {
-        try {
-          await this.prisma.user.update({
-            where: { id: payload.sub },
-            data: { passwordHash },
-          });
-        } catch (e) {
-          const u = this.prisma.inMemoryUsers.find(x => x.id === payload.sub);
-          if (u) u.passwordHash = passwordHash;
-        }
+        await this.prisma.user.update({
+          where: { id: payload.sub },
+          data: { passwordHash },
+        });
       }
       
       const u = this.prisma.inMemoryUsers.find(x => x.id === payload.sub);

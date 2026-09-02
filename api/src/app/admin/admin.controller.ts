@@ -77,9 +77,19 @@ export class AdminController {
     return this.adminService.getMembershipPlans();
   }
 
+  @Post('membership/plans')
+  async createMembershipPlan(@Body() dto: any) {
+    return this.adminService.createMembershipPlan(dto);
+  }
+
   @Patch('membership/plans/:id')
   async updateMembershipPlan(@Param('id') id: string, @Body() dto: any) {
     return this.adminService.updateMembershipPlan(id, dto);
+  }
+
+  @Delete('membership/plans/:id')
+  async deleteMembershipPlan(@Param('id') id: string) {
+    return this.adminService.deleteMembershipPlan(id);
   }
 
   @Post('courses')
@@ -110,6 +120,11 @@ export class AdminController {
   @Post('coupons')
   async createCoupon(@Body() dto: any) {
     return this.adminService.createCoupon(dto);
+  }
+
+  @Patch('coupons/:id')
+  async updateCoupon(@Param('id') id: string, @Body() dto: any) {
+    return this.adminService.updateCoupon(id, dto);
   }
 
   @Delete('coupons/:id')

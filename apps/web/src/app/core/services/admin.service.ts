@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, of, tap, throwError } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 
 export interface RevenueMetrics {
   totalRevenue: number;
@@ -41,8 +41,8 @@ export interface MediaUploadResult {
 export interface Coupon {
   id: string;
   code: string;
-  discountPercent?: number;
-  discountAmount?: number;
+  discountPercent?: number | null;
+  discountAmount?: number | null;
   scope: 'COURSE' | 'MEMBERSHIP';
   courseId?: string | null;
   usageLimit?: number;
@@ -156,99 +156,66 @@ export class AdminService {
   getCoupons(): Observable<Coupon[]> {
     return this.http.get<Coupon[]>('/api/admin/coupons').pipe(
       tap((coupons) => this.storeLocal(COUPONS_STORAGE_KEY, coupons)),
-      catchError((error) =>
-        this.isApiUnavailable(error)
-          ? of(this.readLocal<Coupon[]>(COUPONS_STORAGE_KEY, []))
-          : throwError(() => error),
-      ),
     );
   }
 
   getMembershipPlans(): Observable<MembershipPlan[]> {
     return this.http.get<MembershipPlan[]>('/api/admin/membership/plans').pipe(
       tap((plans) => this.storeLocal(MEMBERSHIP_PLANS_STORAGE_KEY, plans)),
-      catchError((error) =>
-        this.isApiUnavailable(error)
-          ? of(this.readLocal(MEMBERSHIP_PLANS_STORAGE_KEY, FALLBACK_MEMBERSHIP_PLANS))
-          : throwError(() => error),
-      ),
+    );
+  }
+
+  createMembershipPlan(payload: Partial<MembershipPlan> & { featuresText?: string; courseIds?: string[] }): Observable<MembershipPlan> {
+    return this.http.post<MembershipPlan>('/api/admin/membership/plans', payload).pipe(
+      tap((saved) => {
+        const plans = this.readLocal<MembershipPlan[]>(MEMBERSHIP_PLANS_STORAGE_KEY, []);
+        this.storeLocal(MEMBERSHIP_PLANS_STORAGE_KEY, [...plans, saved]);
+      }),
     );
   }
 
   updateMembershipPlan(id: string, payload: Partial<MembershipPlan> & { featuresText?: string; courseIds?: string[] }): Observable<MembershipPlan> {
-    const fallback = () => {
-      const plans = this.readLocal<MembershipPlan[]>(
-        MEMBERSHIP_PLANS_STORAGE_KEY,
-        FALLBACK_MEMBERSHIP_PLANS,
-      );
-      const index = plans.findIndex((plan) => plan.id === id);
-      if (index === -1) return throwError(() => new Error('Membership plan not found.'));
-      const current = plans[index];
-      const updated: MembershipPlan = {
-        ...current,
-        ...payload,
-        features:
-          payload.featuresText !== undefined
-            ? payload.featuresText.split('\n').map((item) => item.trim()).filter(Boolean)
-            : (payload.features || current.features),
-        courseAccess: payload.accessAllCourses
-          ? []
-          : (payload.courseIds || current.courseAccess.map((access) => access.courseId)).map((courseId) => ({ courseId })),
-      };
-      delete (updated as MembershipPlan & { featuresText?: string }).featuresText;
-      plans[index] = updated;
-      this.storeLocal(MEMBERSHIP_PLANS_STORAGE_KEY, plans);
-      return of(updated);
-    };
-
     return this.http.patch<MembershipPlan>(`/api/admin/membership/plans/${encodeURIComponent(id)}`, payload).pipe(
       tap((saved) => {
         const plans = this.readLocal<MembershipPlan[]>(MEMBERSHIP_PLANS_STORAGE_KEY, FALLBACK_MEMBERSHIP_PLANS);
         this.storeLocal(MEMBERSHIP_PLANS_STORAGE_KEY, plans.map((plan) => plan.id === saved.id ? saved : plan));
       }),
-      catchError((error) => this.isApiUnavailable(error) ? fallback() : throwError(() => error)),
+    );
+  }
+
+  deleteMembershipPlan(id: string): Observable<{ success: boolean }> {
+    return this.http.delete<{ success: boolean }>(`/api/admin/membership/plans/${encodeURIComponent(id)}`).pipe(
+      tap(() => {
+        const plans = this.readLocal<MembershipPlan[]>(MEMBERSHIP_PLANS_STORAGE_KEY, []);
+        this.storeLocal(MEMBERSHIP_PLANS_STORAGE_KEY, plans.filter((plan) => plan.id !== id));
+      }),
     );
   }
 
   createCoupon(payload: any): Observable<Coupon> {
-    const fallback = () => {
-      const coupon: Coupon = {
-        id: `coupon_${Date.now().toString(36)}`,
-        code: String(payload.code || '').trim().toUpperCase(),
-        discountPercent: payload.discountPercent,
-        discountAmount: payload.discountAmount,
-        scope: payload.scope === 'MEMBERSHIP' ? 'MEMBERSHIP' : 'COURSE',
-        courseId: payload.courseId || null,
-        usageLimit: payload.usageLimit,
-        timesUsed: 0,
-        isActive: true,
-        createdAt: new Date().toISOString(),
-      };
-      const coupons = this.readLocal<Coupon[]>(COUPONS_STORAGE_KEY, []);
-      this.storeLocal(COUPONS_STORAGE_KEY, [coupon, ...coupons]);
-      return of(coupon);
-    };
     return this.http.post<Coupon>('/api/admin/coupons', payload).pipe(
       tap((coupon) => {
         const coupons = this.readLocal<Coupon[]>(COUPONS_STORAGE_KEY, []);
         this.storeLocal(COUPONS_STORAGE_KEY, [coupon, ...coupons.filter((item) => item.id !== coupon.id)]);
       }),
-      catchError((error) => this.isApiUnavailable(error) ? fallback() : throwError(() => error)),
+    );
+  }
+
+  updateCoupon(id: string, payload: Partial<Coupon>): Observable<Coupon> {
+    return this.http.patch<Coupon>(`/api/admin/coupons/${encodeURIComponent(id)}`, payload).pipe(
+      tap((saved) => {
+        const coupons = this.readLocal<Coupon[]>(COUPONS_STORAGE_KEY, []);
+        this.storeLocal(COUPONS_STORAGE_KEY, coupons.map((coupon) => coupon.id === saved.id ? saved : coupon));
+      }),
     );
   }
 
   deleteCoupon(id: string): Observable<any> {
-    const fallback = () => {
-      const coupons = this.readLocal<Coupon[]>(COUPONS_STORAGE_KEY, []);
-      this.storeLocal(COUPONS_STORAGE_KEY, coupons.filter((coupon) => coupon.id !== id));
-      return of({ success: true });
-    };
     return this.http.delete<any>(`/api/admin/coupons/${id}`).pipe(
       tap(() => {
         const coupons = this.readLocal<Coupon[]>(COUPONS_STORAGE_KEY, []);
         this.storeLocal(COUPONS_STORAGE_KEY, coupons.filter((coupon) => coupon.id !== id));
       }),
-      catchError((error) => this.isApiUnavailable(error) ? fallback() : throwError(() => error)),
     );
   }
 

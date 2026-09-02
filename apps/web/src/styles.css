@@ -455,6 +455,13 @@ body.dark-theme {
 .light-theme [class~="bg-[#6B21A8]"] [class~="text-white"],
 .light-theme [class~="bg-[#7E22CE]"] [class~="text-white"] { color: #ffffff !important; }
 
+.admin-action-primary,
+.light-theme .admin-action-primary,
+.dark-theme .admin-action-primary {
+  color: #ffffff !important;
+  border-radius: 0 !important;
+}
+
 .light-theme [class~="border-[#1E293B]"],
 .light-theme [class~="border-[#1E293B]/30"] { border-color: #d7deea !important; }
 .light-theme [class~="border-[#378ADD]"],

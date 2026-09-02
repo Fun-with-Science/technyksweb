@@ -1,151 +1,177 @@
-import { Component, signal, inject } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, NgZone, ViewChild, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+
+type GoogleCredentialResponse = { credential?: string };
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
-    <div class="min-h-[85vh] flex flex-col justify-center items-center px-4 py-12">
-      <div class="w-full max-w-md bg-[#121A2B] technical-border rounded p-8 shadow-2xl relative">
-        <div class="flex items-center gap-2 mb-6">
-          <span class="material-symbols-outlined text-[#E8931A]">lock</span>
-          <span class="font-['JetBrains_Mono'] text-xs uppercase text-[#378ADD] tracking-widest font-semibold">// AUTHENTICATION</span>
+    <section class="auth-page min-h-screen px-4 py-28 sm:px-6 lg:px-10">
+      <div class="mx-auto grid w-full max-w-6xl overflow-hidden border border-[#2B3852] bg-[#0A1020] shadow-[0_32px_100px_rgba(0,0,0,.42)] lg:grid-cols-[1.08fr_.92fr]">
+        <div class="relative hidden min-h-[680px] overflow-hidden border-r border-[#2B3852] bg-[#101A31] p-12 lg:flex lg:flex-col lg:justify-between">
+          <div class="absolute inset-0 opacity-20" style="background-image:linear-gradient(rgba(96,165,250,.25) 1px,transparent 1px),linear-gradient(90deg,rgba(96,165,250,.25) 1px,transparent 1px);background-size:34px 34px"></div>
+          <div class="absolute -right-28 -top-28 h-80 w-80 rounded-full bg-[#6D28D9]/20 blur-3xl"></div>
+          <div class="absolute -bottom-20 left-10 h-72 w-72 rounded-full bg-[#E8931A]/15 blur-3xl"></div>
+
+          <div class="relative z-10">
+            <a routerLink="/" class="inline-flex items-center gap-3 text-white">
+              <span class="grid h-10 w-10 place-items-center border border-[#E8931A] bg-[#E8931A]/10 font-['JetBrains_Mono'] text-sm font-bold text-[#E8931A]">T_</span>
+              <span class="font-['Hanken_Grotesk'] text-xl font-bold">Technyks Academy</span>
+            </a>
+            <p class="mt-4 max-w-md text-sm leading-6 text-[#AFC0D9]">Engineering education built for professionals who want to ship reliable, production-ready software.</p>
+          </div>
+
+          <div class="relative z-10 my-10">
+            <svg viewBox="0 0 620 360" class="w-full" role="img" aria-label="Connected learning architecture illustration">
+              <defs><linearGradient id="panel" x1="0" x2="1"><stop stop-color="#172554"/><stop offset="1" stop-color="#312E81"/></linearGradient><filter id="glow"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+              <path d="M83 286L208 205L332 265L479 143" fill="none" stroke="#334B70" stroke-width="3" stroke-dasharray="8 9"/>
+              <rect x="54" y="195" width="175" height="112" fill="url(#panel)" stroke="#60A5FA"/><rect x="218" y="92" width="186" height="122" fill="#111C35" stroke="#8B5CF6"/><rect x="405" y="181" width="157" height="104" fill="#111C35" stroke="#E8931A"/>
+              <path d="M83 226h115M83 248h82M83 270h99" stroke="#75A6E8" stroke-width="8" opacity=".65"/><path d="M249 129h122M249 154h90M249 179h110" stroke="#A78BFA" stroke-width="8" opacity=".7"/><path d="M433 214h103M433 237h72M433 260h91" stroke="#F4B55A" stroke-width="8" opacity=".7"/>
+              <circle cx="208" cy="205" r="9" fill="#60A5FA" filter="url(#glow)"/><circle cx="332" cy="265" r="9" fill="#8B5CF6" filter="url(#glow)"/><circle cx="479" cy="143" r="9" fill="#E8931A" filter="url(#glow)"/>
+              <circle cx="100" cy="112" r="37" fill="#172554" stroke="#60A5FA"/><path d="M83 112l11 11 24-27" fill="none" stroke="#60A5FA" stroke-width="7"/><circle cx="501" cy="83" r="43" fill="#2E1065" stroke="#A78BFA"/><path d="M482 90h39M489 76h25M489 104h25" stroke="#C4B5FD" stroke-width="7"/>
+            </svg>
+          </div>
+
+          <div class="relative z-10 grid grid-cols-3 border border-[#2B3852] bg-[#080D18]/70">
+            <div class="p-4"><div class="font-['JetBrains_Mono'] text-lg font-bold text-white">81+</div><div class="mt-1 text-[10px] uppercase tracking-wider text-[#8CA0BC]">Lessons</div></div>
+            <div class="border-x border-[#2B3852] p-4"><div class="font-['JetBrains_Mono'] text-lg font-bold text-white">12</div><div class="mt-1 text-[10px] uppercase tracking-wider text-[#8CA0BC]">Modules</div></div>
+            <div class="p-4"><div class="font-['JetBrains_Mono'] text-lg font-bold text-white">24/7</div><div class="mt-1 text-[10px] uppercase tracking-wider text-[#8CA0BC]">Access</div></div>
+          </div>
         </div>
 
-        <h1 class="font-['Hanken_Grotesk'] text-2xl font-bold text-white mb-2">Access Console</h1>
-        <p class="font-['Inter'] text-sm text-[#d9c3af] mb-8">Sign in to your Technyks Academy account to resume your courses.</p>
-
-        @if (errorMessage()) {
-          <div class="mb-6 p-4 bg-[#690005]/40 border border-[#ffb4ab]/30 rounded text-[#ffdad6] text-xs font-['JetBrains_Mono'] flex items-center gap-2">
-            <span class="material-symbols-outlined text-sm">error</span>
-            {{ errorMessage() }}
-          </div>
-        }
-
-        <form (ngSubmit)="onLogin()" class="flex flex-col gap-5">
-          <div>
-            <label class="block font-['JetBrains_Mono'] text-xs text-[#d9c3af] uppercase tracking-wider mb-2">Email Address</label>
-            <input
-              type="email"
-              [(ngModel)]="email"
-              name="email"
-              required
-              placeholder="architect@technyks.com"
-              class="w-full bg-[#040810] border border-[#1E293B] focus:border-[#E8931A] focus:outline-none rounded px-4 py-3 text-sm text-white font-['Inter'] transition-colors"
-            />
-          </div>
-
-          <div>
-            <div class="flex justify-between items-center mb-2">
-              <label class="block font-['JetBrains_Mono'] text-xs text-[#d9c3af] uppercase tracking-wider">Password</label>
-              <a routerLink="/auth/forgot-password" class="font-['JetBrains_Mono'] text-xs text-[#378ADD] hover:underline">Forgot password?</a>
+        <div class="flex min-h-[680px] items-center bg-[#F8FAFC] px-6 py-12 sm:px-12 lg:px-16">
+          <div class="w-full">
+            <div class="mb-9">
+              <span class="font-['JetBrains_Mono'] text-[11px] font-bold uppercase tracking-[.22em] text-[#6D28D9]">Secure learner access</span>
+              <h1 class="mt-3 font-['Hanken_Grotesk'] text-4xl font-bold tracking-tight text-[#111827]">Welcome back.</h1>
+              <p class="mt-3 text-sm leading-6 text-[#5D6B82]">Sign in to continue your courses, track progress, and access your certificates.</p>
             </div>
-            <input
-              type="password"
-              [(ngModel)]="password"
-              name="password"
-              required
-              placeholder="••••••••••••"
-              class="w-full bg-[#040810] border border-[#1E293B] focus:border-[#E8931A] focus:outline-none rounded px-4 py-3 text-sm text-white font-['Inter'] transition-colors"
-            />
-          </div>
 
-          <button
-            type="submit"
-            [disabled]="isLoading()"
-            class="w-full mt-2 font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#E8931A] py-3.5 rounded font-bold hover:bg-[#E8931A]/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            @if (isLoading()) {
-              <span class="material-symbols-outlined animate-spin text-sm">progress_activity</span> Authenticating...
-            } @else {
-              <span>Sign In to Console</span>
-              <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            @if (errorMessage()) {
+              <div class="mb-5 flex items-start gap-2 border border-[#FCA5A5] bg-[#FEF2F2] p-3 text-xs text-[#991B1B]"><span class="material-symbols-outlined text-base">error</span><span>{{ errorMessage() }}</span></div>
             }
-          </button>
-        </form>
 
-        <div class="relative my-6 text-center">
-          <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-[#1E293B]"></div></div>
-          <span class="relative bg-[#121A2B] px-4 font-['JetBrains_Mono'] text-[11px] text-[#a18d7b] uppercase">OR</span>
+            <form (ngSubmit)="onLogin()" class="space-y-5">
+              <label class="block">
+                <span class="mb-2 block font-['JetBrains_Mono'] text-[11px] font-bold uppercase tracking-wider text-[#344054]">Work or personal email</span>
+                <div class="relative"><span class="material-symbols-outlined absolute left-4 top-3.5 text-lg text-[#7C899D]">mail</span><input type="email" [(ngModel)]="email" name="email" required autocomplete="email" placeholder="you@company.com" class="h-12 w-full border border-[#CBD5E1] bg-white pl-11 pr-4 text-sm text-[#111827] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-[#6D28D9]" /></div>
+              </label>
+              <label class="block">
+                <div class="mb-2 flex items-center justify-between"><span class="font-['JetBrains_Mono'] text-[11px] font-bold uppercase tracking-wider text-[#344054]">Password</span><a routerLink="/auth/forgot-password" class="text-xs font-semibold text-[#6D28D9] hover:underline">Forgot password?</a></div>
+                <div class="relative"><span class="material-symbols-outlined absolute left-4 top-3.5 text-lg text-[#7C899D]">lock</span><input [type]="showPassword() ? 'text' : 'password'" [(ngModel)]="password" name="password" required autocomplete="current-password" placeholder="Enter your password" class="h-12 w-full border border-[#CBD5E1] bg-white pl-11 pr-12 text-sm text-[#111827] outline-none transition-colors placeholder:text-[#98A2B3] focus:border-[#6D28D9]" /><button type="button" (click)="showPassword.set(!showPassword())" class="absolute right-3 top-2.5 grid h-8 w-8 place-items-center text-[#64748B]" [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"><span class="material-symbols-outlined text-lg">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span></button></div>
+              </label>
+              <button type="submit" [disabled]="isLoading()" class="flex h-12 w-full items-center justify-center gap-2 border border-[#5B21B6] bg-[#6D28D9] font-['JetBrains_Mono'] text-xs font-bold uppercase tracking-wider !text-white transition-colors hover:bg-[#5B21B6] disabled:cursor-wait disabled:opacity-60">@if (isLoading()) {<span class="material-symbols-outlined animate-spin text-base">progress_activity</span> Signing in…} @else {Continue to academy <span class="material-symbols-outlined text-base">arrow_forward</span>}</button>
+            </form>
+
+            <div class="my-6 flex items-center gap-3"><div class="h-px flex-1 bg-[#DCE3EC]"></div><span class="font-['JetBrains_Mono'] text-[10px] uppercase tracking-widest text-[#7C899D]">or continue with</span><div class="h-px flex-1 bg-[#DCE3EC]"></div></div>
+            <div class="relative min-h-11 w-full border border-[#CBD5E1] bg-white p-1"><div #googleButton class="flex min-h-9 w-full items-center justify-center"></div>@if (googleLoading()) {<div class="absolute inset-0 grid place-items-center bg-white/90"><span class="material-symbols-outlined animate-spin text-xl text-[#6D28D9]">progress_activity</span></div>}</div>
+            @if (googleSetupMessage()) {<p class="mt-2 text-center text-[11px] text-[#B42318]">{{ googleSetupMessage() }}</p>}
+            <p class="mt-8 text-center text-xs text-[#5D6B82]">New to Technyks Academy? <a routerLink="/auth/signup" class="font-bold text-[#6D28D9] hover:underline">Create your account</a></p>
+            <p class="mt-8 text-center text-[10px] leading-5 text-[#7C899D]">By continuing, you agree to the Technyks Academy Terms and Privacy Policy.</p>
+          </div>
         </div>
-
-        <button
-          (click)="onGoogleLogin()"
-          type="button"
-          class="w-full font-['JetBrains_Mono'] text-xs text-white border border-[#1E293B] hover:border-[#378ADD] py-3 rounded flex items-center justify-center gap-3 transition-all bg-[#040810]"
-        >
-          <svg class="w-4 h-4" viewBox="0 0 24 24">
-            <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z"/>
-            <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"/>
-            <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 10.8 0 12s.7 2.3 1.9 4.7l3.7-2.9z"/>
-            <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z"/>
-          </svg>
-          Continue with Google
-        </button>
-
-        <p class="mt-8 text-center font-['Inter'] text-xs text-[#d9c3af]">
-          Don't have an account?
-          <a routerLink="/auth/signup" class="font-['JetBrains_Mono'] text-[#E8931A] hover:underline font-semibold ml-1">Create Account</a>
-        </p>
       </div>
-    </div>
-  `
+    </section>
+  `,
+  styles: [`.auth-page{background:radial-gradient(circle at 12% 18%,rgba(109,40,217,.14),transparent 30%),radial-gradient(circle at 88% 80%,rgba(232,147,26,.12),transparent 28%),#070B13}:host ::ng-deep .light-theme .auth-page{background:radial-gradient(circle at 12% 18%,rgba(109,40,217,.12),transparent 30%),radial-gradient(circle at 88% 80%,rgba(232,147,26,.10),transparent 28%),#EDF2F8!important}`],
 })
-export class LoginComponent {
+export class LoginComponent implements AfterViewInit {
+  @ViewChild('googleButton') googleButton?: ElementRef<HTMLDivElement>;
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private zone = inject(NgZone);
 
   email = '';
   password = '';
   isLoading = signal(false);
+  googleLoading = signal(false);
+  showPassword = signal(false);
   errorMessage = signal('');
+  googleSetupMessage = signal('');
 
-  onLogin() {
-    if (!this.email || !this.password) {
-      this.errorMessage.set('Please provide both email and password.');
-      return;
-    }
-
-    this.isLoading.set(true);
-    this.errorMessage.set('');
-
-    this.authService.login({ email: this.email, password: this.password }).subscribe({
-      next: () => {
-        this.isLoading.set(false);
-        this.router.navigate(['/dashboard']);
+  ngAfterViewInit() {
+    this.authService.getPublicAuthConfig().subscribe({
+      next: ({ googleClientId }) => {
+        if (!googleClientId) {
+          this.googleSetupMessage.set('Google sign-in is temporarily unavailable.');
+          return;
+        }
+        this.loadGoogleIdentity().then(() => this.renderGoogleButton(googleClientId)).catch(() => this.googleSetupMessage.set('Google sign-in could not be loaded. Please use email and password.'));
       },
-      error: (err) => {
-        this.isLoading.set(false);
-        this.errorMessage.set(err.error?.message || 'Authentication failed. Please check your credentials.');
-      }
+      error: () => this.googleSetupMessage.set('Google sign-in is temporarily unavailable.'),
     });
   }
 
-  onGoogleLogin() {
-    // Simulated Google OAuth login flow
+  onLogin() {
+    if (!this.email || !this.password) {
+      this.errorMessage.set('Enter your email address and password.');
+      return;
+    }
     this.isLoading.set(true);
-    this.authService.login({ email: 'google.architect@technyks.com', googleId: 'google_oauth_12345' }).subscribe({
-      next: () => {
+    this.errorMessage.set('');
+    this.authService.login({ email: this.email, password: this.password }).subscribe({
+      next: () => this.finishLogin(),
+      error: (error) => {
         this.isLoading.set(false);
-        this.router.navigate(['/dashboard']);
+        this.errorMessage.set(error?.error?.message || 'Sign-in failed. Check your credentials and try again.');
       },
-      error: () => {
-        // Create user if not exists
-        this.authService.signup({ email: 'google.architect@technyks.com', name: 'Senior Engineer', googleId: 'google_oauth_12345' }).subscribe({
-          next: () => {
-            this.isLoading.set(false);
-            this.router.navigate(['/dashboard']);
-          },
-          error: (err) => {
-            this.isLoading.set(false);
-            this.errorMessage.set(err.error?.message || 'Google authentication failed.');
-          }
-        });
+    });
+  }
+
+  private renderGoogleButton(clientId: string) {
+    const google = (window as any).google;
+    const container = this.googleButton?.nativeElement;
+    if (!google?.accounts?.id || !container) throw new Error('Google Identity Services unavailable');
+    google.accounts.id.initialize({ client_id: clientId, callback: (response: GoogleCredentialResponse) => this.zone.run(() => this.handleGoogleCredential(response)) });
+    google.accounts.id.renderButton(container, { type: 'standard', theme: 'outline', size: 'large', text: 'continue_with', shape: 'rectangular', logo_alignment: 'left', width: Math.max(280, Math.floor(container.clientWidth - 8)) });
+  }
+
+  private handleGoogleCredential(response: GoogleCredentialResponse) {
+    if (!response.credential) {
+      this.errorMessage.set('Google did not return a valid sign-in credential.');
+      return;
+    }
+    this.googleLoading.set(true);
+    this.errorMessage.set('');
+    this.authService.loginWithGoogle(response.credential).subscribe({
+      next: () => this.finishLogin(),
+      error: (error) => {
+        this.googleLoading.set(false);
+        this.errorMessage.set(error?.error?.message || 'Google sign-in failed. Please try again.');
+      },
+    });
+  }
+
+  private finishLogin() {
+    this.isLoading.set(false);
+    this.googleLoading.set(false);
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    this.router.navigateByUrl(returnUrl?.startsWith('/') ? returnUrl : '/dashboard');
+  }
+
+  private loadGoogleIdentity(): Promise<void> {
+    if ((window as any).google?.accounts?.id) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const existing = document.querySelector<HTMLScriptElement>('script[data-google-identity]');
+      if (existing) {
+        existing.addEventListener('load', () => resolve(), { once: true });
+        existing.addEventListener('error', () => reject(), { once: true });
+        return;
       }
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.dataset['googleIdentity'] = 'true';
+      script.onload = () => resolve();
+      script.onerror = () => reject();
+      document.head.appendChild(script);
     });
   }
 }

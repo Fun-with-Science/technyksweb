@@ -29,7 +29,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-          <button (click)="createNewCourse()" class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 w-fit">
+          <button (click)="createNewCourse()" class="admin-action-primary font-['JetBrains_Mono'] text-xs font-bold uppercase !text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-6 py-3 shadow-lg flex items-center gap-2 w-fit">
             <span class="material-symbols-outlined text-sm">add</span>
             New Course
           </button>
@@ -197,7 +197,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                     <!-- Edit / Manage Course Action Button -->
                     <a
                       [routerLink]="['/admin/courses', course.id, 'manage']"
-                      class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-4 py-2.5 rounded transition-all shadow"
+                      class="admin-action-primary font-['JetBrains_Mono'] text-xs font-bold !text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-4 py-2.5 transition-all shadow"
                     >
                       Edit / manage course
                     </a>
@@ -302,11 +302,11 @@ import { CoursesService, Course } from '../../core/services/courses.service';
             <tbody class="divide-y divide-[#1E293B]/40">
               @for (coupon of coupons(); track coupon.id) {
                 <tr>
-                  <td class="p-3 font-['JetBrains_Mono'] font-bold text-[#E8931A]">{{ coupon.code }}</td>
-                  <td class="p-3 font-['JetBrains_Mono'] text-white">{{ coupon.scope || 'COURSE' }} · ₹{{ coupon.discountAmount || 0 }}</td>
+                  <td class="p-3"><input [ngModel]="coupon.code" (ngModelChange)="updateCouponField(coupon.id, 'code', $event)" class="w-40 border border-[#1E293B] bg-[#040810] px-2 py-1.5 font-['JetBrains_Mono'] font-bold uppercase text-[#E8931A]" /></td>
+                  <td class="p-3"><div class="flex items-center gap-2"><span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b]">{{ coupon.scope }}</span>@if (coupon.discountPercent) {<input type="number" min="1" max="100" [ngModel]="coupon.discountPercent" (ngModelChange)="updateCouponField(coupon.id, 'discountPercent', $event)" class="w-20 border border-[#1E293B] bg-[#040810] px-2 py-1.5 font-['JetBrains_Mono'] text-white" /><span>%</span>} @else {<span>₹</span><input type="number" min="1" [ngModel]="coupon.discountAmount" (ngModelChange)="updateCouponField(coupon.id, 'discountAmount', $event)" class="w-24 border border-[#1E293B] bg-[#040810] px-2 py-1.5 font-['JetBrains_Mono'] text-white" />}</div></td>
                   <td class="p-3 font-['JetBrains_Mono'] text-[#378ADD]">{{ coupon.timesUsed }} / Unlimited</td>
                   <td class="p-3 text-right">
-                    <button (click)="deleteCoupon(coupon.id)" class="font-['JetBrains_Mono'] text-[11px] text-[#ffb4ab] hover:underline">Delete</button>
+                    <button (click)="saveCoupon(coupon)" [disabled]="savingCouponId() === coupon.id" class="mr-4 font-['JetBrains_Mono'] text-[11px] font-bold text-[#378ADD] hover:underline disabled:opacity-50">{{ savingCouponId() === coupon.id ? 'Saving…' : 'Save' }}</button><button (click)="deleteCoupon(coupon.id)" class="font-['JetBrains_Mono'] text-[11px] text-[#ffb4ab] hover:underline">Delete</button>
                   </td>
                 </tr>
               }
@@ -318,11 +318,11 @@ import { CoursesService, Course } from '../../core/services/courses.service';
       <!-- TAB 5: MEMBERSHIP PROGRAM -->
       @if (activeTab() === 'membership') {
         <div class="flex flex-col gap-6">
-          <div class="border-b border-[#1E293B] pb-4">
-            <h2 class="font-['Hanken_Grotesk'] text-2xl font-bold text-white">Membership Program</h2>
+          <div class="flex items-start justify-between gap-4 border-b border-[#1E293B] pb-4">
+            <div><h2 class="font-['Hanken_Grotesk'] text-2xl font-bold text-white">Membership Program</h2>
             <p class="font-['Inter'] text-xs text-[#d9c3af] mt-1">
               Edit the membership copy, price, features, and which courses each plan unlocks. Changes are stored in the database and used by the public membership page.
-            </p>
+            </p></div><button type="button" (click)="createMembershipPlan()" [disabled]="creatingMembershipPlan()" class="admin-action-primary shrink-0 bg-[#6B21A8] px-4 py-2.5 font-['JetBrains_Mono'] text-xs font-bold uppercase !text-white disabled:opacity-50">{{ creatingMembershipPlan() ? 'Creating…' : 'New plan' }}</button>
           </div>
 
           <div class="border border-[#1E293B] bg-[#040810]/60 rounded-lg p-5 flex flex-col gap-3">
@@ -386,9 +386,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                     </div>
                   }
 
-                  <button type="button" (click)="saveMembershipPlan(plan)" [disabled]="savingMembershipPlanId() === plan.id" class="self-start font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] bg-[#E8931A] hover:bg-[#f6a52a] disabled:opacity-60 px-5 py-2.5 rounded">
-                    {{ savingMembershipPlanId() === plan.id ? 'Saving...' : 'Save membership plan' }}
-                  </button>
+                  <div class="flex items-center gap-4"><button type="button" (click)="saveMembershipPlan(plan)" [disabled]="savingMembershipPlanId() === plan.id" class="self-start bg-[#E8931A] px-5 py-2.5 font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] hover:bg-[#f6a52a] disabled:opacity-60">{{ savingMembershipPlanId() === plan.id ? 'Saving...' : 'Save membership plan' }}</button><button type="button" (click)="deleteMembershipPlan(plan)" class="font-['JetBrains_Mono'] text-[11px] text-[#ffb4ab] hover:underline">Delete plan</button></div>
                 </article>
               }
             </div>
@@ -411,6 +409,8 @@ export class AdminDashboardComponent implements OnInit {
   coupons = signal<Coupon[]>([]);
   membershipPlans = signal<MembershipPlan[]>([]);
   savingMembershipPlanId = signal<string | null>(null);
+  savingCouponId = signal<string | null>(null);
+  creatingMembershipPlan = signal(false);
   publishedCourses = signal<Course[]>([]);
   isLoadingCourses = signal(true);
 
@@ -513,8 +513,12 @@ export class AdminDashboardComponent implements OnInit {
     this.savingMembershipPlanId.set(plan.id);
     this.adminService.updateMembershipPlan(plan.id, {
       name: plan.name,
+      slug: plan.slug,
       description: plan.description || '',
       price: Number(plan.price) || 0,
+      currency: plan.currency,
+      interval: plan.interval,
+      isFree: plan.isFree,
       isActive: plan.isActive,
       accessAllCourses: plan.accessAllCourses,
       featuresText: this.featuresText(plan),
@@ -527,6 +531,58 @@ export class AdminDashboardComponent implements OnInit {
       error: () => {
         this.savingMembershipPlanId.set(null);
         alert('The membership plan could not be saved. Please try again.');
+      },
+    });
+  }
+
+  createMembershipPlan() {
+    this.creatingMembershipPlan.set(true);
+    this.adminService.createMembershipPlan({
+      name: 'New Membership Plan',
+      slug: `membership-${Date.now().toString(36)}`,
+      description: 'Describe the value and access included in this plan.',
+      price: 999,
+      currency: 'INR',
+      interval: 'MONTHLY',
+      isFree: false,
+      isActive: false,
+      accessAllCourses: true,
+      features: ['All included courses'],
+      courseIds: [],
+    }).subscribe({
+      next: (plan) => {
+        this.membershipPlans.update((plans) => [...plans, plan]);
+        this.creatingMembershipPlan.set(false);
+      },
+      error: (error) => {
+        this.creatingMembershipPlan.set(false);
+        alert(error?.error?.message || 'The membership plan could not be created.');
+      },
+    });
+  }
+
+  deleteMembershipPlan(plan: MembershipPlan) {
+    if (typeof window === 'undefined' || !window.confirm(`Delete “${plan.name}”?`)) return;
+    this.adminService.deleteMembershipPlan(plan.id).subscribe({
+      next: () => this.membershipPlans.update((plans) => plans.filter((candidate) => candidate.id !== plan.id)),
+      error: (error) => alert(error?.error?.message || 'The membership plan could not be deleted.'),
+    });
+  }
+
+  updateCouponField(id: string, field: keyof Coupon, value: unknown) {
+    this.coupons.update((coupons) => coupons.map((coupon) => coupon.id === id ? { ...coupon, [field]: value } : coupon));
+  }
+
+  saveCoupon(coupon: Coupon) {
+    this.savingCouponId.set(coupon.id);
+    this.adminService.updateCoupon(coupon.id, coupon).subscribe({
+      next: (saved) => {
+        this.coupons.update((coupons) => coupons.map((candidate) => candidate.id === saved.id ? saved : candidate));
+        this.savingCouponId.set(null);
+      },
+      error: (error) => {
+        this.savingCouponId.set(null);
+        alert(error?.error?.message || 'The coupon could not be updated.');
       },
     });
   }

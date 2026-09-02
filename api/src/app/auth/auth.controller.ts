@@ -16,6 +16,16 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
+  @Get('config')
+  getPublicConfig() {
+    return this.authService.getPublicConfig();
+  }
+
+  @Post('google')
+  async googleLogin(@Body() dto: { credential: string }) {
+    return this.authService.loginWithGoogle(dto.credential);
+  }
+
   @Post('forgot-password')
   async forgotPassword(@Body() dto: { email: string }) {
     return this.authService.forgotPassword(dto.email);
