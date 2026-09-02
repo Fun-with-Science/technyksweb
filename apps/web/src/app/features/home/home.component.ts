@@ -39,16 +39,16 @@ import { SkeletonLoaderComponent } from '../../core/components/skeleton/skeleton
 
           <!-- Main Headline -->
           <h1
-            class="font-['Hanken_Grotesk'] text-5xl sm:text-7xl md:text-[86px] leading-[1.05] font-extrabold tracking-tight text-slate-900 dark:text-white"
+            class="font-['Hanken_Grotesk'] text-5xl sm:text-7xl md:text-[86px] leading-[1.05] font-extrabold tracking-tight text-slate-900 dark:!text-white"
           >
-            Learn <span class="text-[#2563EB] dark:text-[#3B82F6] dark:drop-shadow-[0_0_30px_rgba(59,130,246,0.6)]">AI.</span><br />
+            Learn <span class="text-[#2563EB] dark:!text-[#3B82F6] dark:drop-shadow-[0_0_30px_rgba(59,130,246,0.6)]">AI.</span><br />
             Think. Build.<br />
             <span class="bg-gradient-to-r from-[#A855F7] via-[#8B5CF6] to-[#3B82F6] dark:from-[#C084FC] dark:via-[#A855F7] dark:to-[#60A5FA] bg-clip-text text-transparent dark:drop-shadow-[0_0_25px_rgba(168,85,247,0.5)]">Innovate.</span>
           </h1>
 
           <!-- Subheading -->
           <p
-            class="font-['Inter'] text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed font-normal"
+            class="font-['Inter'] text-base sm:text-lg md:text-xl text-slate-600 dark:!text-slate-200 max-w-2xl leading-relaxed font-normal"
           >
             Learn AI, think for yourself, and turn powerful AI tools into new
             ideas, useful products, and real-world innovations.
@@ -58,19 +58,19 @@ import { SkeletonLoaderComponent } from '../../core/components/skeleton/skeleton
           <div class="flex flex-wrap justify-center gap-4 mt-2">
             <a
               routerLink="/courses"
-              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold text-white px-7 py-4 rounded-xl transition-all shadow-md flex items-center gap-2.5 bg-[#1D4ED8] hover:bg-[#1E40AF] hover:scale-[0.98] dark:bg-gradient-to-r dark:from-[#2563EB] dark:to-[#9333EA] dark:hover:from-[#1D4ED8] dark:hover:to-[#7E22CE] dark:shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white px-7 py-4 rounded-xl transition-all shadow-md flex items-center gap-2.5 bg-[#1D4ED8] hover:bg-[#1E40AF] hover:scale-[0.98] dark:bg-gradient-to-r dark:from-[#2563EB] dark:to-[#9333EA] dark:hover:from-[#1D4ED8] dark:hover:to-[#7E22CE] dark:shadow-[0_0_20px_rgba(59,130,246,0.4)]"
             >
-              <span class="material-symbols-outlined text-[19px]">school</span>
-              VIEW ALL COURSES
-              <span class="material-symbols-outlined text-[19px]">arrow_forward</span>
+              <span class="material-symbols-outlined text-[19px] !text-white">school</span>
+              <span class="!text-white">VIEW ALL COURSES</span>
+              <span class="material-symbols-outlined text-[19px] !text-white">arrow_forward</span>
             </a>
 
             <a
               routerLink="/membership"
-              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold px-7 py-4 rounded-xl transition-all shadow-sm flex items-center gap-2.5 border-2 border-[#2563EB] text-[#2563EB] bg-white hover:bg-blue-50/50 hover:scale-[0.98] dark:border-[#6366F1] dark:text-white dark:bg-[#0B0F19]/80 dark:hover:bg-[#1E293B] dark:shadow-[0_0_15px_rgba(99,102,241,0.25)]"
+              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold px-7 py-4 rounded-xl transition-all shadow-sm flex items-center gap-2.5 border-2 border-[#2563EB] text-[#2563EB] bg-white hover:bg-blue-50/50 hover:scale-[0.98] dark:border-[#6366F1] dark:!text-white dark:bg-[#0B0F19]/80 dark:hover:bg-[#1E293B] dark:shadow-[0_0_15px_rgba(99,102,241,0.25)]"
             >
               <span class="material-symbols-outlined text-[19px]">workspace_premium</span>
-              EXPLORE MEMBERSHIP
+              <span>EXPLORE MEMBERSHIP</span>
               <span class="material-symbols-outlined text-[19px]">arrow_forward</span>
             </a>
           </div>
@@ -79,57 +79,57 @@ import { SkeletonLoaderComponent } from '../../core/components/skeleton/skeleton
         <!-- Floating Bottom Feature Dock (4 Cards) -->
         <div class="w-full max-w-5xl mt-12 relative z-10">
           <div
-            class="rounded-2xl p-4 md:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 backdrop-blur-xl transition-all bg-white/95 border border-slate-200/70 shadow-[0_15px_35px_rgba(0,0,0,0.06)] text-slate-800 dark:bg-[#0B101E]/80 dark:border-white/10 dark:shadow-[0_15px_35px_rgba(0,0,0,0.6)] dark:text-white"
+            class="rounded-2xl p-4 md:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 backdrop-blur-xl transition-all bg-white/95 border border-slate-200/70 shadow-[0_15px_35px_rgba(0,0,0,0.06)] text-slate-800 dark:bg-[#070C18]/90 dark:border-white/15 dark:shadow-[0_20px_40px_rgba(0,0,0,0.8)] dark:!text-white"
           >
             <!-- Feature 1: Beginner Friendly -->
             <div class="flex items-center gap-3.5 p-2">
               <div
-                class="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-300 dark:border dark:border-purple-500/30 shadow-sm"
+                class="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 bg-purple-100 text-purple-600 dark:bg-purple-900/60 dark:text-purple-300 dark:border dark:border-purple-500/40 shadow-sm"
               >
                 <span class="material-symbols-outlined text-2xl">menu_book</span>
               </div>
               <div class="flex flex-col text-left">
-                <span class="font-['Hanken_Grotesk'] text-sm font-bold text-slate-900 dark:text-white">Beginner Friendly</span>
-                <span class="font-['Inter'] text-xs text-slate-500 dark:text-slate-400">Start from the basics</span>
+                <span class="font-['Hanken_Grotesk'] text-sm font-bold text-slate-900 dark:!text-white">Beginner Friendly</span>
+                <span class="font-['Inter'] text-xs text-slate-500 dark:!text-slate-300">Start from the basics</span>
               </div>
             </div>
 
             <!-- Feature 2: Hands-on Learning -->
             <div class="flex items-center gap-3.5 p-2">
               <div
-                class="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300 dark:border dark:border-blue-500/30 shadow-sm"
+                class="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 bg-blue-100 text-blue-600 dark:bg-blue-900/60 dark:text-blue-300 dark:border dark:border-blue-500/40 shadow-sm"
               >
                 <span class="material-symbols-outlined text-2xl">smart_toy</span>
               </div>
               <div class="flex flex-col text-left">
-                <span class="font-['Hanken_Grotesk'] text-sm font-bold text-slate-900 dark:text-white">Hands-on Learning</span>
-                <span class="font-['Inter'] text-xs text-slate-500 dark:text-slate-400">Real projects, real skills</span>
+                <span class="font-['Hanken_Grotesk'] text-sm font-bold text-slate-900 dark:!text-white">Hands-on Learning</span>
+                <span class="font-['Inter'] text-xs text-slate-500 dark:!text-slate-300">Real projects, real skills</span>
               </div>
             </div>
 
             <!-- Feature 3: Build & Innovate -->
             <div class="flex items-center gap-3.5 p-2">
               <div
-                class="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border dark:border-emerald-500/30 shadow-sm"
+                class="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 bg-emerald-100 text-emerald-600 dark:bg-emerald-900/60 dark:text-emerald-300 dark:border dark:border-emerald-500/40 shadow-sm"
               >
                 <span class="material-symbols-outlined text-2xl">rocket_launch</span>
               </div>
               <div class="flex flex-col text-left">
-                <span class="font-['Hanken_Grotesk'] text-sm font-bold text-slate-900 dark:text-white">Build & Innovate</span>
-                <span class="font-['Inter'] text-xs text-slate-500 dark:text-slate-400">Create your own AI tools</span>
+                <span class="font-['Hanken_Grotesk'] text-sm font-bold text-slate-900 dark:!text-white">Build & Innovate</span>
+                <span class="font-['Inter'] text-xs text-slate-500 dark:!text-slate-300">Create your own AI tools</span>
               </div>
             </div>
 
             <!-- Feature 4: Community Support -->
             <div class="flex items-center gap-3.5 p-2">
               <div
-                class="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300 dark:border dark:border-amber-500/30 shadow-sm"
+                class="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 bg-amber-100 text-amber-600 dark:bg-amber-900/60 dark:text-amber-300 dark:border dark:border-amber-500/40 shadow-sm"
               >
                 <span class="material-symbols-outlined text-2xl">star</span>
               </div>
               <div class="flex flex-col text-left">
-                <span class="font-['Hanken_Grotesk'] text-sm font-bold text-slate-900 dark:text-white">Community Support</span>
-                <span class="font-['Inter'] text-xs text-slate-500 dark:text-slate-400">Learn together, grow together</span>
+                <span class="font-['Hanken_Grotesk'] text-sm font-bold text-slate-900 dark:!text-white">Community Support</span>
+                <span class="font-['Inter'] text-xs text-slate-500 dark:!text-slate-300">Learn together, grow together</span>
               </div>
             </div>
           </div>
