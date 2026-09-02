@@ -11,6 +11,7 @@ import {
   throwError,
 } from 'rxjs';
 import { JAVASCRIPT_COURSE } from '../data/javascript-course';
+import { TYPESCRIPT_COURSE } from '../data/typescript-course';
 
 export interface Lesson {
   id: string;
@@ -153,16 +154,16 @@ export class CoursesService {
   private getAdminFallbackCourses(): Course[] {
     const stored = this.getStoredCourses();
     const archivedFallbackIds = this.getArchivedFallbackCourseIds();
-    // A static Hostinger deployment has no API process to seed the built-in
-    // course. Show it in the admin roster until it is explicitly archived in
-    // this browser. This also repairs the empty roster saved by older builds.
-    if (
-      !archivedFallbackIds.has(JAVASCRIPT_COURSE.id) &&
-      !stored.some((course) => course.id === JAVASCRIPT_COURSE.id)
-    ) {
-      return [this.normaliseCourse(JAVASCRIPT_COURSE), ...stored];
+    let result = [...stored];
+    for (const builtIn of [JAVASCRIPT_COURSE, TYPESCRIPT_COURSE]) {
+      if (
+        !archivedFallbackIds.has(builtIn.id) &&
+        !result.some((course) => course.id === builtIn.id)
+      ) {
+        result = [this.normaliseCourse(builtIn), ...result];
+      }
     }
-    return stored;
+    return result;
   }
 
   private getArchivedFallbackCourseIds(): Set<string> {
@@ -237,9 +238,14 @@ export class CoursesService {
           course.slug === slug &&
           (course.isPublished || course.status === 'LIVE'),
       );
-      return found
-        ? of(found)
-        : throwError(() => new Error('Course not found'));
+      if (found) return of(found);
+      if (slug === TYPESCRIPT_COURSE.slug || slug === TYPESCRIPT_COURSE.id) {
+        return of(this.normaliseCourse(TYPESCRIPT_COURSE));
+      }
+      if (slug === JAVASCRIPT_COURSE.slug || slug === JAVASCRIPT_COURSE.id) {
+        return of(this.normaliseCourse(JAVASCRIPT_COURSE));
+      }
+      return throwError(() => new Error('Course not found'));
     };
 
     return defer(() =>

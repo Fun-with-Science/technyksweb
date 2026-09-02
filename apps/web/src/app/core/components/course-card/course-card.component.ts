@@ -20,7 +20,7 @@ import { Course } from '../../services/courses.service';
           <span class="absolute top-3 left-3 font-['JetBrains_Mono'] text-[10px] text-[#040810] bg-[#3B82F6] px-2.5 py-1 rounded font-bold uppercase">
             {{ course.isFree ? 'Free' : 'Premium' }}
           </span>
-          <span class="absolute top-3 right-3 font-['JetBrains_Mono'] text-[10px] text-white bg-[#040810]/90 backdrop-blur-md border border-[#3B82F6]/40 px-2.5 py-1 rounded font-semibold uppercase">
+          <span class="absolute top-3 right-3 font-['JetBrains_Mono'] text-[10px] !text-white !bg-[#0f172a]/95 backdrop-blur-md border border-white/20 px-2.5 py-1 rounded font-semibold uppercase shadow-sm">
             {{ course.level }}
           </span>
         </div>

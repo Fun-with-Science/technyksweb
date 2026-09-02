@@ -22,7 +22,7 @@ import { ContactService, ContactMessage } from '../../core/services/contact.serv
       <!-- Top Udemy Instructor Header -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 border-b border-[#1E293B] pb-6">
         <div>
-          <div class="inline-flex items-center gap-2 font-['JetBrains_Mono'] text-xs text-[#3B82F6] px-3.5 py-1.5 border border-[#3B82F6]/30 bg-[#3B82F6]/10 rounded-full w-fit mb-2">
+          <div class="inline-flex items-center gap-2 font-['JetBrains_Mono'] text-xs text-[#1D4ED8] dark:text-[#3B82F6] px-3.5 py-1.5 border border-[#2563EB]/40 dark:border-[#3B82F6]/30 bg-blue-50/90 dark:bg-[#3B82F6]/10 rounded-full w-fit mb-2 font-bold">
             <span class="material-symbols-outlined text-[16px]">school</span>
             TECHNYKS INSTRUCTOR STUDIO
           </div>
@@ -457,40 +457,46 @@ import { ContactService, ContactMessage } from '../../core/services/contact.serv
           @if (contactMessages().length) {
             <div class="grid grid-cols-1 gap-4">
               @for (msg of contactMessages(); track msg.id) {
-                <div class="border border-[#1E293B] bg-[#040810]/70 rounded-xl p-5 flex flex-col gap-3 transition-all hover:border-[#3B82F6]/50 shadow-md">
+                <div class="border border-slate-200 bg-white dark:border-[#1E293B] dark:bg-[#040810]/70 rounded-xl p-5 flex flex-col gap-3 transition-all hover:border-[#3B82F6]/50 shadow-sm dark:shadow-md">
                   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div class="flex items-center gap-3">
-                      <span class="font-['Hanken_Grotesk'] text-base font-bold text-white">{{ msg.name }}</span>
-                      <a [href]="'mailto:' + msg.email" class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] hover:underline">{{ msg.email }}</a>
+                      <span class="font-['Hanken_Grotesk'] text-base font-bold text-slate-900 dark:text-white">{{ msg.name }}</span>
+                      <a [href]="'mailto:' + msg.email" class="font-['JetBrains_Mono'] text-xs text-[#2563EB] dark:text-[#3B82F6] hover:underline">{{ msg.email }}</a>
                     </div>
                     <div class="flex items-center gap-3">
                       <span
-                        [class.bg-blue-900/40]="msg.status === 'NEW'"
-                        [class.text-blue-400]="msg.status === 'NEW'"
-                        [class.border-blue-500/30]="msg.status === 'NEW'"
-                        [class.bg-emerald-900/40]="msg.status === 'RESOLVED'"
-                        [class.text-emerald-400]="msg.status === 'RESOLVED'"
-                        [class.border-emerald-500/30]="msg.status === 'RESOLVED'"
+                        [class.bg-blue-50]="msg.status === 'NEW'"
+                        [class.text-blue-700]="msg.status === 'NEW'"
+                        [class.border-blue-200]="msg.status === 'NEW'"
+                        [class.dark:bg-blue-900/40]="msg.status === 'NEW'"
+                        [class.dark:text-blue-400]="msg.status === 'NEW'"
+                        [class.dark:border-blue-500/30]="msg.status === 'NEW'"
+                        [class.bg-emerald-50]="msg.status === 'RESOLVED'"
+                        [class.text-emerald-700]="msg.status === 'RESOLVED'"
+                        [class.border-emerald-200]="msg.status === 'RESOLVED'"
+                        [class.dark:bg-emerald-900/40]="msg.status === 'RESOLVED'"
+                        [class.dark:text-emerald-400]="msg.status === 'RESOLVED'"
+                        [class.dark:border-emerald-500/30]="msg.status === 'RESOLVED'"
                         class="border px-2.5 py-0.5 rounded-full font-['JetBrains_Mono'] text-[10px] uppercase font-bold"
                       >
                         {{ msg.status }}
                       </span>
-                      <span class="font-['JetBrains_Mono'] text-[11px] text-[#a18d7b]">{{ msg.createdAt | date:'medium' }}</span>
+                      <span class="font-['JetBrains_Mono'] text-[11px] text-slate-500 dark:text-[#a18d7b]">{{ msg.createdAt | date:'medium' }}</span>
                     </div>
                   </div>
 
-                  <div class="font-['JetBrains_Mono'] text-xs font-semibold text-[#60A5FA]">
+                  <div class="font-['JetBrains_Mono'] text-xs font-semibold text-[#1D4ED8] dark:text-[#60A5FA]">
                     Subject: {{ msg.subject }}
                   </div>
 
-                  <p class="font-['Inter'] text-sm text-[#e0e3e5] leading-relaxed bg-[#121A2B]/60 border border-[#1E293B] p-4 rounded-lg">
+                  <p class="font-['Inter'] text-sm text-slate-700 dark:text-[#e0e3e5] leading-relaxed bg-slate-50 border border-slate-200 dark:bg-[#121A2B]/60 dark:border-[#1E293B] p-4 rounded-lg">
                     {{ msg.message }}
                   </p>
 
                   <div class="flex items-center justify-end gap-3 pt-2">
                     <a
                       [href]="'mailto:' + msg.email + '?subject=' + encodeUri('Re: ' + msg.subject)"
-                      class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#3B82F6] border border-[#3B82F6]/40 hover:bg-[#3B82F6]/10 px-3 py-1.5 rounded flex items-center gap-1.5 transition-colors"
+                      class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#2563EB] border border-[#2563EB]/40 bg-blue-50/50 hover:bg-blue-100/60 dark:text-[#3B82F6] dark:border-[#3B82F6]/40 dark:bg-transparent dark:hover:bg-[#3B82F6]/10 px-3 py-1.5 rounded flex items-center gap-1.5 transition-colors font-medium"
                     >
                       <span class="material-symbols-outlined text-sm">reply</span>
                       Reply via Email
@@ -498,7 +504,7 @@ import { ContactService, ContactMessage } from '../../core/services/contact.serv
 
                     <button
                       (click)="toggleMessageStatus(msg.id)"
-                      class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-slate-300 border border-slate-700 hover:bg-slate-800 px-3 py-1.5 rounded flex items-center gap-1.5 transition-colors"
+                      class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-slate-700 border border-slate-300 bg-white hover:bg-slate-100 dark:text-slate-300 dark:border-slate-700 dark:bg-transparent dark:hover:bg-slate-800 px-3 py-1.5 rounded flex items-center gap-1.5 transition-colors font-medium"
                     >
                       <span class="material-symbols-outlined text-sm">
                         {{ msg.status === 'NEW' ? 'check_circle' : 'mark_chat_unread' }}
@@ -508,7 +514,7 @@ import { ContactService, ContactMessage } from '../../core/services/contact.serv
 
                     <button
                       (click)="deleteMessage(msg.id)"
-                      class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-red-400 border border-red-500/30 hover:bg-red-500/10 px-3 py-1.5 rounded flex items-center gap-1.5 transition-colors"
+                      class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-red-600 border border-red-200 bg-red-50/50 hover:bg-red-100/60 dark:text-red-400 dark:border-red-500/30 dark:bg-transparent dark:hover:bg-red-500/10 px-3 py-1.5 rounded flex items-center gap-1.5 transition-colors font-medium"
                     >
                       <span class="material-symbols-outlined text-sm">delete</span>
                       Delete

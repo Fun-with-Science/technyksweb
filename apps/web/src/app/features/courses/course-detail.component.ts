@@ -209,16 +209,16 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                 <a
                   [routerLink]="['/checkout']"
                   [queryParams]="{ courseId: course()?.id, slug: course()?.slug }"
-                  class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#3B82F6] py-4 rounded font-bold hover:bg-[#3B82F6]/90 transition-all flex items-center justify-center gap-2 shadow-lg"
+                  class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider !text-white bg-[#1D4ED8] hover:bg-[#1E40AF] py-4 rounded font-bold transition-all flex items-center justify-center gap-2 shadow-lg"
                 >
-                  Enroll in Course Now
-                  <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                  <span class="!text-white font-bold">Enroll in Course Now</span>
+                  <span class="material-symbols-outlined text-sm !text-white">arrow_forward</span>
                 </a>
               }
 
               <a
                 routerLink="/membership"
-                class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#3B82F6] border border-[#3B82F6] py-3.5 rounded font-semibold hover:bg-[#3B82F6]/10 transition-colors"
+                class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#1D4ED8] dark:text-[#3B82F6] border-2 border-[#2563EB] dark:border-[#3B82F6] py-3.5 rounded font-bold hover:bg-blue-50 dark:hover:bg-[#3B82F6]/10 transition-colors"
               >
                 Get All Courses with Membership
               </a>
