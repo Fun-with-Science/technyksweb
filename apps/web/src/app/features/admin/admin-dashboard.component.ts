@@ -21,7 +21,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
       <!-- Top Udemy Instructor Header -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 border-b border-[#1E293B] pb-6">
         <div>
-          <div class="inline-flex items-center gap-2 font-['JetBrains_Mono'] text-xs text-[#E8931A] px-3.5 py-1.5 border border-[#E8931A]/30 bg-[#E8931A]/10 rounded-full w-fit mb-2">
+          <div class="inline-flex items-center gap-2 font-['JetBrains_Mono'] text-xs text-[#3B82F6] px-3.5 py-1.5 border border-[#3B82F6]/30 bg-[#3B82F6]/10 rounded-full w-fit mb-2">
             <span class="material-symbols-outlined text-[16px]">school</span>
             TECHNYKS INSTRUCTOR STUDIO
           </div>
@@ -29,7 +29,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-          <button (click)="createNewCourse()" class="admin-action-primary font-['JetBrains_Mono'] text-xs font-bold uppercase !text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-6 py-3 shadow-lg flex items-center gap-2 w-fit">
+          <button (click)="createNewCourse()" class="admin-action-primary font-['JetBrains_Mono'] text-xs font-bold uppercase !text-white bg-[#2563EB] hover:bg-[#1D4ED8] px-6 py-3 shadow-lg flex items-center gap-2 w-fit">
             <span class="material-symbols-outlined text-sm">add</span>
             New Course
           </button>
@@ -41,8 +41,8 @@ import { CoursesService, Course } from '../../core/services/courses.service';
         <button
           (click)="activeTab.set('courses')"
           [class.border-b-2]="activeTab() === 'courses'"
-          [class.border-[#E8931A]]="activeTab() === 'courses'"
-          [class.text-[#E8931A]]="activeTab() === 'courses'"
+          [class.border-[#3B82F6]]="activeTab() === 'courses'"
+          [class.text-[#3B82F6]]="activeTab() === 'courses'"
           [class.text-[#d9c3af]]="activeTab() !== 'courses'"
           class="pb-3 px-1 font-bold transition-colors"
         >
@@ -52,8 +52,8 @@ import { CoursesService, Course } from '../../core/services/courses.service';
         <button
           (click)="activeTab.set('revenue')"
           [class.border-b-2]="activeTab() === 'revenue'"
-          [class.border-[#E8931A]]="activeTab() === 'revenue'"
-          [class.text-[#E8931A]]="activeTab() === 'revenue'"
+          [class.border-[#3B82F6]]="activeTab() === 'revenue'"
+          [class.text-[#3B82F6]]="activeTab() === 'revenue'"
           [class.text-[#d9c3af]]="activeTab() !== 'revenue'"
           class="pb-3 px-1 font-bold transition-colors"
         >
@@ -63,8 +63,8 @@ import { CoursesService, Course } from '../../core/services/courses.service';
         <button
           (click)="activeTab.set('students')"
           [class.border-b-2]="activeTab() === 'students'"
-          [class.border-[#E8931A]]="activeTab() === 'students'"
-          [class.text-[#E8931A]]="activeTab() === 'students'"
+          [class.border-[#3B82F6]]="activeTab() === 'students'"
+          [class.text-[#3B82F6]]="activeTab() === 'students'"
           [class.text-[#d9c3af]]="activeTab() !== 'students'"
           class="pb-3 px-1 font-bold transition-colors"
         >
@@ -74,8 +74,8 @@ import { CoursesService, Course } from '../../core/services/courses.service';
         <button
           (click)="activeTab.set('coupons')"
           [class.border-b-2]="activeTab() === 'coupons'"
-          [class.border-[#E8931A]]="activeTab() === 'coupons'"
-          [class.text-[#E8931A]]="activeTab() === 'coupons'"
+          [class.border-[#3B82F6]]="activeTab() === 'coupons'"
+          [class.text-[#3B82F6]]="activeTab() === 'coupons'"
           [class.text-[#d9c3af]]="activeTab() !== 'coupons'"
           class="pb-3 px-1 font-bold transition-colors"
         >
@@ -85,8 +85,8 @@ import { CoursesService, Course } from '../../core/services/courses.service';
         <button
           (click)="activeTab.set('membership')"
           [class.border-b-2]="activeTab() === 'membership'"
-          [class.border-[#E8931A]]="activeTab() === 'membership'"
-          [class.text-[#E8931A]]="activeTab() === 'membership'"
+          [class.border-[#3B82F6]]="activeTab() === 'membership'"
+          [class.text-[#3B82F6]]="activeTab() === 'membership'"
           [class.text-[#d9c3af]]="activeTab() !== 'membership'"
           class="pb-3 px-1 font-bold transition-colors"
         >
@@ -105,7 +105,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                 type="text"
                 [(ngModel)]="searchCourseQuery"
                 placeholder="Search your courses..."
-                class="w-full bg-[#040810] border border-[#1E293B] focus:border-[#E8931A] focus:outline-none rounded px-4 py-2 text-xs text-white font-['Inter']"
+                class="w-full bg-[#040810] border border-[#1E293B] focus:border-[#3B82F6] focus:outline-none rounded px-4 py-2 text-xs text-white font-['Inter']"
               />
             </div>
 
@@ -143,7 +143,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
           } @else if (filteredCourses().length) {
             <div class="flex flex-col gap-4">
               @for (course of filteredCourses(); track course.id) {
-                <div class="bg-[#121A2B] border border-[#1E293B] hover:border-[#378ADD] rounded-lg p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-all group shadow-xl">
+                <div class="bg-[#121A2B] border border-[#1E293B] hover:border-[#3B82F6] rounded-lg p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-all group shadow-xl">
                 
                 <!-- Left: Thumbnail & Title -->
                 <div class="flex items-center gap-5 flex-grow">
@@ -152,23 +152,23 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                   </div>
 
                   <div class="flex flex-col gap-1.5">
-                    <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white group-hover:text-[#E8931A] transition-colors">
+                    <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white group-hover:text-[#3B82F6] transition-colors">
                       {{ course.title }}
                     </h3>
 
                     <div class="flex items-center gap-3 font-['JetBrains_Mono'] text-[11px]">
                       <span
-                        [class.bg-[#378ADD]/20]="course.status === 'LIVE'"
-                        [class.text-[#378ADD]]="course.status === 'LIVE'"
-                        [class.bg-[#E8931A]/20]="course.status === 'DRAFT'"
-                        [class.text-[#E8931A]]="course.status === 'DRAFT'"
+                        [class.bg-[#3B82F6]/20]="course.status === 'LIVE'"
+                        [class.text-[#3B82F6]]="course.status === 'LIVE'"
+                        [class.bg-[#3B82F6]/20]="course.status === 'DRAFT'"
+                        [class.text-[#3B82F6]]="course.status === 'DRAFT'"
                         class="px-2 py-0.5 rounded font-bold uppercase border border-current"
                       >
                         {{ course.status || 'LIVE' }}
                       </span>
                       <span class="text-[#a18d7b]">{{ course.isPublished ? 'Public' : 'Private' }}</span>
                       <span class="text-[#1E293B]">|</span>
-                      <span class="text-[#378ADD]">{{ course.isFree ? 'FREE' : '₹' + course.price.toLocaleString('en-IN') }}</span>
+                      <span class="text-[#3B82F6]">{{ course.isFree ? 'FREE' : '₹' + course.price.toLocaleString('en-IN') }}</span>
                     </div>
                   </div>
                 </div>
@@ -176,7 +176,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                 <!-- Right: Stats & Action Button (Screenshot 1 Metrics) -->
                 <div class="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-[#1E293B] pt-4 md:pt-0">
                   <div class="flex flex-col text-right font-['JetBrains_Mono']">
-                    <span class="text-sm font-bold text-[#E8931A]">₹{{ (course.earnedThisMonth || 0).toLocaleString('en-IN') }}</span>
+                    <span class="text-sm font-bold text-[#3B82F6]">₹{{ (course.earnedThisMonth || 0).toLocaleString('en-IN') }}</span>
                     <span class="text-[10px] text-[#a18d7b]">Earned this month</span>
                   </div>
 
@@ -186,9 +186,9 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                   </div>
 
                     <div class="flex flex-col text-right font-['JetBrains_Mono']">
-                      <div class="flex items-center justify-end gap-1 text-[#E8931A] text-xs font-bold">
+                      <div class="flex items-center justify-end gap-1 text-[#3B82F6] text-xs font-bold">
                         <span>{{ course.rating ?? 0 }}</span>
-                        <span class="material-symbols-outlined text-sm text-[#E8931A]">star</span>
+                        <span class="material-symbols-outlined text-sm text-[#3B82F6]">star</span>
                       </div>
                       <span class="text-[10px] text-[#a18d7b]">{{ course.reviewCount || 0 }} reviews</span>
                     </div>
@@ -197,7 +197,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                     <!-- Edit / Manage Course Action Button -->
                     <a
                       [routerLink]="['/admin/courses', course.id, 'manage']"
-                      class="admin-action-primary font-['JetBrains_Mono'] text-xs font-bold !text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-4 py-2.5 transition-all shadow"
+                      class="admin-action-primary font-['JetBrains_Mono'] text-xs font-bold !text-white bg-[#2563EB] hover:bg-[#1D4ED8] px-4 py-2.5 transition-all shadow"
                     >
                       Edit / manage course
                     </a>
@@ -214,8 +214,8 @@ import { CoursesService, Course } from '../../core/services/courses.service';
               }
             </div>
           } @else {
-            <div class="bg-[#121A2B] border border-dashed border-[#378ADD]/50 rounded-lg px-6 py-14 text-center">
-              <span class="material-symbols-outlined text-4xl text-[#E8931A] mb-3">school</span>
+            <div class="bg-[#121A2B] border border-dashed border-[#3B82F6]/50 rounded-lg px-6 py-14 text-center">
+              <span class="material-symbols-outlined text-4xl text-[#3B82F6] mb-3">school</span>
               <h2 class="font-['Hanken_Grotesk'] text-xl font-bold text-white mb-2">
                 {{ publishedCourses().length ? 'No courses match your search' : 'No courses are live yet' }}
               </h2>
@@ -232,14 +232,14 @@ import { CoursesService, Course } from '../../core/services/courses.service';
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <div class="bg-[#121A2B] technical-border p-6 rounded">
             <div class="font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Total Revenue</div>
-            <div class="font-['JetBrains_Mono'] text-2xl font-bold text-[#E8931A]">
+            <div class="font-['JetBrains_Mono'] text-2xl font-bold text-[#3B82F6]">
               ₹{{ metrics()?.totalRevenue?.toLocaleString('en-IN') || 0 }}
             </div>
           </div>
 
           <div class="bg-[#121A2B] technical-border p-6 rounded">
             <div class="font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Active Subscriptions</div>
-            <div class="font-['JetBrains_Mono'] text-2xl font-bold text-[#378ADD]">
+            <div class="font-['JetBrains_Mono'] text-2xl font-bold text-[#3B82F6]">
               {{ metrics()?.activeSubscriptions || 0 }} Users
             </div>
           </div>
@@ -277,7 +277,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                 <tr>
                   <td class="p-3 font-semibold text-white">{{ student.name }}</td>
                   <td class="p-3 font-['JetBrains_Mono'] text-[#d9c3af]">{{ student.email }}</td>
-                  <td class="p-3 font-['JetBrains_Mono'] text-[#E8931A]">{{ student.role }}</td>
+                  <td class="p-3 font-['JetBrains_Mono'] text-[#3B82F6]">{{ student.role }}</td>
                   <td class="p-3 font-['JetBrains_Mono'] text-[#a18d7b]">{{ student.createdAt | date:'mediumDate' }}</td>
                 </tr>
               }
@@ -302,11 +302,11 @@ import { CoursesService, Course } from '../../core/services/courses.service';
             <tbody class="divide-y divide-[#1E293B]/40">
               @for (coupon of coupons(); track coupon.id) {
                 <tr>
-                  <td class="p-3"><input [ngModel]="coupon.code" (ngModelChange)="updateCouponField(coupon.id, 'code', $event)" class="w-40 border border-[#1E293B] bg-[#040810] px-2 py-1.5 font-['JetBrains_Mono'] font-bold uppercase text-[#E8931A]" /></td>
+                  <td class="p-3"><input [ngModel]="coupon.code" (ngModelChange)="updateCouponField(coupon.id, 'code', $event)" class="w-40 border border-[#1E293B] bg-[#040810] px-2 py-1.5 font-['JetBrains_Mono'] font-bold uppercase text-[#3B82F6]" /></td>
                   <td class="p-3"><div class="flex items-center gap-2"><span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b]">{{ coupon.scope }}</span>@if (coupon.discountPercent) {<input type="number" min="1" max="100" [ngModel]="coupon.discountPercent" (ngModelChange)="updateCouponField(coupon.id, 'discountPercent', $event)" class="w-20 border border-[#1E293B] bg-[#040810] px-2 py-1.5 font-['JetBrains_Mono'] text-white" /><span>%</span>} @else {<span>₹</span><input type="number" min="1" [ngModel]="coupon.discountAmount" (ngModelChange)="updateCouponField(coupon.id, 'discountAmount', $event)" class="w-24 border border-[#1E293B] bg-[#040810] px-2 py-1.5 font-['JetBrains_Mono'] text-white" />}</div></td>
-                  <td class="p-3 font-['JetBrains_Mono'] text-[#378ADD]">{{ coupon.timesUsed }} / Unlimited</td>
+                  <td class="p-3 font-['JetBrains_Mono'] text-[#3B82F6]">{{ coupon.timesUsed }} / Unlimited</td>
                   <td class="p-3 text-right">
-                    <button (click)="saveCoupon(coupon)" [disabled]="savingCouponId() === coupon.id" class="mr-4 font-['JetBrains_Mono'] text-[11px] font-bold text-[#378ADD] hover:underline disabled:opacity-50">{{ savingCouponId() === coupon.id ? 'Saving…' : 'Save' }}</button><button (click)="deleteCoupon(coupon.id)" class="font-['JetBrains_Mono'] text-[11px] text-[#ffb4ab] hover:underline">Delete</button>
+                    <button (click)="saveCoupon(coupon)" [disabled]="savingCouponId() === coupon.id" class="mr-4 font-['JetBrains_Mono'] text-[11px] font-bold text-[#3B82F6] hover:underline disabled:opacity-50">{{ savingCouponId() === coupon.id ? 'Saving…' : 'Save' }}</button><button (click)="deleteCoupon(coupon.id)" class="font-['JetBrains_Mono'] text-[11px] text-[#ffb4ab] hover:underline">Delete</button>
                   </td>
                 </tr>
               }
@@ -322,7 +322,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
             <div><h2 class="font-['Hanken_Grotesk'] text-2xl font-bold text-white">Membership Program</h2>
             <p class="font-['Inter'] text-xs text-[#d9c3af] mt-1">
               Edit the membership copy, price, features, and which courses each plan unlocks. Changes are stored in the database and used by the public membership page.
-            </p></div><button type="button" (click)="createMembershipPlan()" [disabled]="creatingMembershipPlan()" class="admin-action-primary shrink-0 bg-[#6B21A8] px-4 py-2.5 font-['JetBrains_Mono'] text-xs font-bold uppercase !text-white disabled:opacity-50">{{ creatingMembershipPlan() ? 'Creating…' : 'New plan' }}</button>
+            </p></div><button type="button" (click)="createMembershipPlan()" [disabled]="creatingMembershipPlan()" class="admin-action-primary shrink-0 bg-[#2563EB] px-4 py-2.5 font-['JetBrains_Mono'] text-xs font-bold uppercase !text-white disabled:opacity-50">{{ creatingMembershipPlan() ? 'Creating…' : 'New plan' }}</button>
           </div>
 
           <div class="border border-[#1E293B] bg-[#040810]/60 rounded-lg p-5 flex flex-col gap-3">
@@ -333,7 +333,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <input type="text" [(ngModel)]="newMembershipCouponCode" placeholder="MEMBERSHIP CODE" class="bg-[#121A2B] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono'] uppercase" />
               <input type="number" min="0" [(ngModel)]="newMembershipCouponDiscount" placeholder="Discount (₹)" class="bg-[#121A2B] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']" />
-              <button type="button" (click)="createMembershipCoupon()" class="font-['JetBrains_Mono'] text-xs font-bold text-[#040810] bg-[#E8931A] py-2 rounded">Save membership coupon</button>
+              <button type="button" (click)="createMembershipCoupon()" class="font-['JetBrains_Mono'] text-xs font-bold text-[#040810] bg-[#3B82F6] py-2 rounded">Save membership coupon</button>
             </div>
           </div>
 
@@ -343,11 +343,11 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                 <article class="border border-[#1E293B] bg-[#040810]/60 rounded-lg p-6 flex flex-col gap-4">
                   <div class="flex items-start justify-between gap-4">
                     <div>
-                      <span class="font-['JetBrains_Mono'] text-[10px] uppercase text-[#E8931A]">{{ plan.interval }} · {{ plan.slug }}</span>
+                      <span class="font-['JetBrains_Mono'] text-[10px] uppercase text-[#3B82F6]">{{ plan.interval }} · {{ plan.slug }}</span>
                       <h3 class="font-['Hanken_Grotesk'] text-xl font-bold text-white mt-1">{{ plan.name }}</h3>
                     </div>
                     <label class="inline-flex items-center gap-2 font-['JetBrains_Mono'] text-[10px] uppercase text-[#d9c3af]">
-                      <input type="checkbox" [checked]="plan.isActive" (change)="updateMembershipPlanField(plan.id, 'isActive', $any($event.target).checked)" class="rounded bg-[#040810] border-[#1E293B] text-[#E8931A] focus:ring-0" />
+                      <input type="checkbox" [checked]="plan.isActive" (change)="updateMembershipPlanField(plan.id, 'isActive', $any($event.target).checked)" class="rounded bg-[#040810] border-[#1E293B] text-[#3B82F6] focus:ring-0" />
                       Active
                     </label>
                   </div>
@@ -362,7 +362,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
 
                   <div class="grid grid-cols-2 gap-3">
                     <label class="font-['Inter'] text-xs text-[#a18d7b]">Price (₹)
-                      <input type="number" min="0" [ngModel]="plan.price" (ngModelChange)="updateMembershipPlanField(plan.id, 'price', $event)" class="mt-1 w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-sm text-[#E8931A]" />
+                      <input type="number" min="0" [ngModel]="plan.price" (ngModelChange)="updateMembershipPlanField(plan.id, 'price', $event)" class="mt-1 w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-sm text-[#3B82F6]" />
                     </label>
                     <label class="font-['Inter'] text-xs text-[#a18d7b]">Features (one per line)
                       <textarea rows="3" [ngModel]="featuresText(plan)" (ngModelChange)="updateMembershipPlanField(plan.id, 'featuresText', $event)" class="mt-1 w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-sm text-white"></textarea>
@@ -370,7 +370,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                   </div>
 
                   <label class="inline-flex items-center gap-2 font-['Inter'] text-xs text-[#d9c3af]">
-                    <input type="checkbox" [checked]="plan.accessAllCourses" (change)="updateMembershipPlanField(plan.id, 'accessAllCourses', $any($event.target).checked)" class="rounded bg-[#040810] border-[#1E293B] text-[#E8931A] focus:ring-0" />
+                    <input type="checkbox" [checked]="plan.accessAllCourses" (change)="updateMembershipPlanField(plan.id, 'accessAllCourses', $any($event.target).checked)" class="rounded bg-[#040810] border-[#1E293B] text-[#3B82F6] focus:ring-0" />
                     Unlock all published courses
                   </label>
 
@@ -379,19 +379,19 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                       <span class="font-['JetBrains_Mono'] text-[10px] uppercase text-[#a18d7b]">Selected course access</span>
                       @for (course of publishedCourses(); track course.id) {
                         <label class="inline-flex items-center gap-2 font-['Inter'] text-xs text-[#d9c3af]">
-                          <input type="checkbox" [checked]="hasPlanCourse(plan, course.id)" (change)="toggleMembershipCourse(plan.id, course.id, $any($event.target).checked)" class="rounded bg-[#040810] border-[#1E293B] text-[#378ADD] focus:ring-0" />
+                          <input type="checkbox" [checked]="hasPlanCourse(plan, course.id)" (change)="toggleMembershipCourse(plan.id, course.id, $any($event.target).checked)" class="rounded bg-[#040810] border-[#1E293B] text-[#3B82F6] focus:ring-0" />
                           {{ course.title }}
                         </label>
                       }
                     </div>
                   }
 
-                  <div class="flex items-center gap-4"><button type="button" (click)="saveMembershipPlan(plan)" [disabled]="savingMembershipPlanId() === plan.id" class="self-start bg-[#E8931A] px-5 py-2.5 font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] hover:bg-[#f6a52a] disabled:opacity-60">{{ savingMembershipPlanId() === plan.id ? 'Saving...' : 'Save membership plan' }}</button><button type="button" (click)="deleteMembershipPlan(plan)" class="font-['JetBrains_Mono'] text-[11px] text-[#ffb4ab] hover:underline">Delete plan</button></div>
+                  <div class="flex items-center gap-4"><button type="button" (click)="saveMembershipPlan(plan)" [disabled]="savingMembershipPlanId() === plan.id" class="self-start bg-[#3B82F6] px-5 py-2.5 font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] hover:bg-[#2563eb] disabled:opacity-60">{{ savingMembershipPlanId() === plan.id ? 'Saving...' : 'Save membership plan' }}</button><button type="button" (click)="deleteMembershipPlan(plan)" class="font-['JetBrains_Mono'] text-[11px] text-[#ffb4ab] hover:underline">Delete plan</button></div>
                 </article>
               }
             </div>
           } @else {
-            <div class="border border-dashed border-[#378ADD]/50 rounded-lg px-6 py-14 text-center font-['Inter'] text-sm text-[#a18d7b]">Membership plans are not available yet.</div>
+            <div class="border border-dashed border-[#3B82F6]/50 rounded-lg px-6 py-14 text-center font-['Inter'] text-sm text-[#a18d7b]">Membership plans are not available yet.</div>
           }
         </div>
       }

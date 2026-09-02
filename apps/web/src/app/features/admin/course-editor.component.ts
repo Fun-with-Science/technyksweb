@@ -33,10 +33,10 @@ import {
             {{ course()?.title || 'Loading Course...' }}
           </h1>
           <span
-            [class.bg-[#378ADD]/20]="course()?.status === 'LIVE'"
-            [class.text-[#378ADD]]="course()?.status === 'LIVE'"
-            [class.bg-[#E8931A]/20]="course()?.status === 'DRAFT'"
-            [class.text-[#E8931A]]="course()?.status === 'DRAFT'"
+            [class.bg-[#3B82F6]/20]="course()?.status === 'LIVE'"
+            [class.text-[#3B82F6]]="course()?.status === 'LIVE'"
+            [class.bg-[#3B82F6]/20]="course()?.status === 'DRAFT'"
+            [class.text-[#3B82F6]]="course()?.status === 'DRAFT'"
             class="font-['JetBrains_Mono'] text-[10px] uppercase font-bold px-2.5 py-0.5 rounded border border-current"
           >
             {{ course()?.status || 'DRAFT' }}
@@ -50,8 +50,8 @@ import {
           <!-- LIVE / DRAFT Status Toggle Button -->
           <button
             (click)="togglePublishStatus()"
-            [class.bg-[#378ADD]]="course()?.status === 'LIVE'"
-            [class.bg-[#E8931A]]="course()?.status !== 'LIVE'"
+            [class.bg-[#3B82F6]]="course()?.status === 'LIVE'"
+            [class.bg-[#3B82F6]]="course()?.status !== 'LIVE'"
             class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] px-4 py-2 rounded transition-all shadow flex items-center gap-1.5"
           >
             <span class="material-symbols-outlined text-sm">
@@ -60,11 +60,11 @@ import {
             {{ course()?.status === 'LIVE' ? 'Course is LIVE (Public)' : 'Make Course LIVE (Public)' }}
           </button>
 
-          <a [routerLink]="['/courses', course()?.slug]" target="_blank" class="font-['JetBrains_Mono'] text-xs text-[#378ADD] hover:underline flex items-center gap-1">
+          <a [routerLink]="['/courses', course()?.slug]" target="_blank" class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] hover:underline flex items-center gap-1">
             Preview Student View <span class="material-symbols-outlined text-sm">open_in_new</span>
           </a>
 
-          <button (click)="saveAllChanges()" [disabled]="isSaving()" class="admin-action-primary font-['JetBrains_Mono'] text-xs font-bold uppercase !text-white bg-[#6B21A8] hover:bg-[#7E22CE] px-5 py-2 transition-all shadow-lg flex items-center gap-1 disabled:opacity-60 disabled:cursor-wait">
+          <button (click)="saveAllChanges()" [disabled]="isSaving()" class="admin-action-primary font-['JetBrains_Mono'] text-xs font-bold uppercase !text-white bg-[#2563EB] hover:bg-[#1D4ED8] px-5 py-2 transition-all shadow-lg flex items-center gap-1 disabled:opacity-60 disabled:cursor-wait">
             <span class="material-symbols-outlined text-sm" [class.animate-spin]="isSaving()">{{ isSaving() ? 'progress_activity' : 'save' }}</span>
             {{ isSaving() ? 'Saving…' : 'Save Changes' }}
           </button>
@@ -90,9 +90,9 @@ import {
               <button
                 (click)="activeTab.set('curriculum')"
                 [class.bg-[#121A2B]]="activeTab() === 'curriculum'"
-                [class.text-[#E8931A]]="activeTab() === 'curriculum'"
+                [class.text-[#3B82F6]]="activeTab() === 'curriculum'"
                 [class.border-l-4]="activeTab() === 'curriculum'"
-                [class.border-[#E8931A]]="activeTab() === 'curriculum'"
+                [class.border-[#3B82F6]]="activeTab() === 'curriculum'"
                 [class.text-[#d9c3af]]="activeTab() !== 'curriculum'"
                 class="text-left px-4 py-2.5 rounded hover:bg-[#121A2B]/60 transition-all font-medium flex items-center justify-between"
               >
@@ -103,9 +103,9 @@ import {
               <button
                 (click)="activeTab.set('landing')"
                 [class.bg-[#121A2B]]="activeTab() === 'landing'"
-                [class.text-[#E8931A]]="activeTab() === 'landing'"
+                [class.text-[#3B82F6]]="activeTab() === 'landing'"
                 [class.border-l-4]="activeTab() === 'landing'"
-                [class.border-[#E8931A]]="activeTab() === 'landing'"
+                [class.border-[#3B82F6]]="activeTab() === 'landing'"
                 [class.text-[#d9c3af]]="activeTab() !== 'landing'"
                 class="text-left px-4 py-2.5 rounded hover:bg-[#121A2B]/60 transition-all font-medium flex items-center justify-between"
               >
@@ -121,7 +121,7 @@ import {
               <button
                 (click)="activeTab.set('pricing')"
                 [class.bg-[#121A2B]]="activeTab() === 'pricing'"
-                [class.text-[#E8931A]]="activeTab() === 'pricing'"
+                [class.text-[#3B82F6]]="activeTab() === 'pricing'"
                 [class.text-[#d9c3af]]="activeTab() !== 'pricing'"
                 class="text-left px-4 py-2.5 rounded hover:bg-[#121A2B]/60 transition-all font-medium flex items-center justify-between"
               >
@@ -132,9 +132,9 @@ import {
               <button
                 (click)="activeTab.set('promotions')"
                 [class.bg-[#121A2B]]="activeTab() === 'promotions'"
-                [class.text-[#E8931A]]="activeTab() === 'promotions'"
+                [class.text-[#3B82F6]]="activeTab() === 'promotions'"
                 [class.border-l-4]="activeTab() === 'promotions'"
-                [class.border-[#E8931A]]="activeTab() === 'promotions'"
+                [class.border-[#3B82F6]]="activeTab() === 'promotions'"
                 [class.text-[#d9c3af]]="activeTab() !== 'promotions'"
                 class="text-left px-4 py-2.5 rounded hover:bg-[#121A2B]/60 transition-all font-medium flex items-center justify-between"
               >
@@ -144,9 +144,9 @@ import {
               <button
                 (click)="openStudentsTab()"
                 [class.bg-[#121A2B]]="activeTab() === 'students'"
-                [class.text-[#E8931A]]="activeTab() === 'students'"
+                [class.text-[#3B82F6]]="activeTab() === 'students'"
                 [class.border-l-4]="activeTab() === 'students'"
-                [class.border-[#E8931A]]="activeTab() === 'students'"
+                [class.border-[#3B82F6]]="activeTab() === 'students'"
                 [class.text-[#d9c3af]]="activeTab() !== 'students'"
                 class="text-left px-4 py-2.5 rounded hover:bg-[#121A2B]/60 transition-all font-medium flex items-center justify-between"
               >
@@ -182,7 +182,7 @@ import {
                     Create your course in sections, each focused on a single learning objective. Add video lectures and preview toggles, then attach a Bunny ID or a protected YouTube reference for each lesson.
                   </p>
                 </div>
-                <button (click)="addSection()" class="font-['JetBrains_Mono'] text-xs text-[#378ADD] border border-[#378ADD]/40 hover:bg-[#378ADD]/10 px-4 py-2 rounded flex items-center gap-1">
+                <button (click)="addSection()" class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] border border-[#3B82F6]/40 hover:bg-[#3B82F6]/10 px-4 py-2 rounded flex items-center gap-1">
                   <span class="material-symbols-outlined text-sm">add</span> Add Section
                 </button>
               </div>
@@ -193,12 +193,12 @@ import {
                   <div class="border border-[#1E293B] bg-[#040810]/50 rounded-lg p-5">
                     <div class="flex items-center justify-between mb-4 border-b border-[#1E293B]/60 pb-3">
                       <div class="flex items-center gap-3 flex-grow max-w-xl">
-                        <span class="font-['JetBrains_Mono'] text-xs font-bold text-[#E8931A]">Section {{ sIdx + 1 }}:</span>
+                        <span class="font-['JetBrains_Mono'] text-xs font-bold text-[#3B82F6]">Section {{ sIdx + 1 }}:</span>
                         <input
                           type="text"
                           [(ngModel)]="module.title"
                           placeholder="Section Title..."
-                          class="bg-[#121A2B] border border-[#1E293B] focus:border-[#E8931A] focus:outline-none rounded px-3 py-1.5 text-xs text-white font-['Hanken_Grotesk'] font-bold flex-grow"
+                          class="bg-[#121A2B] border border-[#1E293B] focus:border-[#3B82F6] focus:outline-none rounded px-3 py-1.5 text-xs text-white font-['Hanken_Grotesk'] font-bold flex-grow"
                         />
                       </div>
                       <button (click)="deleteSection(sIdx)" class="text-[#ffb4ab] hover:underline font-['JetBrains_Mono'] text-xs">
@@ -211,7 +211,7 @@ import {
                       @for (lesson of module.lessons; track lesson.id; let lIdx = $index) {
                         <div class="bg-[#121A2B] border border-[#1E293B] rounded p-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
                           <div class="flex items-center gap-3 flex-grow w-full md:w-auto">
-                            <span class="material-symbols-outlined text-[#378ADD] text-base">play_circle</span>
+                            <span class="material-symbols-outlined text-[#3B82F6] text-base">play_circle</span>
                             <div class="flex flex-col flex-grow">
                               <input
                                 type="text"
@@ -225,7 +225,7 @@ import {
                                   type="text"
                                   [(ngModel)]="lesson.videoAssetRef"
                                   placeholder="youtube:VIDEO_ID or Bunny video ID"
-                                  class="bg-[#040810] border border-[#1E293B] rounded px-2 py-0.5 text-[10px] text-[#378ADD] font-['JetBrains_Mono']"
+                                  class="bg-[#040810] border border-[#1E293B] rounded px-2 py-0.5 text-[10px] text-[#3B82F6] font-['JetBrains_Mono']"
                                 />
                                 <span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b] ml-1">Minutes:</span>
                                 <input
@@ -244,7 +244,7 @@ import {
                               <input
                                 type="checkbox"
                                 [(ngModel)]="lesson.isFreePreview"
-                                class="rounded bg-[#040810] border-[#1E293B] text-[#E8931A] focus:ring-0"
+                                class="rounded bg-[#040810] border-[#1E293B] text-[#3B82F6] focus:ring-0"
                               />
                               <span>(Preview enabled)</span>
                             </label>
@@ -257,7 +257,7 @@ import {
                       }
 
                       <!-- Add Lecture Button -->
-                      <button (click)="addLesson(sIdx)" class="w-fit font-['JetBrains_Mono'] text-xs text-[#E8931A] hover:underline flex items-center gap-1 mt-2">
+                      <button (click)="addLesson(sIdx)" class="w-fit font-['JetBrains_Mono'] text-xs text-[#3B82F6] hover:underline flex items-center gap-1 mt-2">
                         <span class="material-symbols-outlined text-sm">add_circle</span> + Curriculum Item (Lecture)
                       </button>
                     </div>
@@ -313,11 +313,11 @@ import {
                 <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)] gap-6 items-stretch">
                   <div class="relative aspect-[16/9] bg-[#040810] border border-[#1E293B] rounded-xl overflow-hidden flex items-center justify-center shadow-inner">
                     @if (course()?.thumbnail) {<img [src]="course()?.thumbnail" [alt]="course()?.title" class="w-full h-full object-cover" />} @else {<div class="text-center text-[#a18d7b]"><span class="material-symbols-outlined text-5xl">image</span><p class="text-xs mt-2">No course image</p></div>}
-                    @if (isUploadingImage()) {<div class="absolute inset-0 bg-[#040810]/85 backdrop-blur-sm grid place-items-center"><div class="text-center"><span class="material-symbols-outlined text-3xl text-[#E8931A] animate-spin">progress_activity</span><p class="font-['JetBrains_Mono'] text-[11px] text-white mt-2">Uploading image…</p></div></div>}
+                    @if (isUploadingImage()) {<div class="absolute inset-0 bg-[#040810]/85 backdrop-blur-sm grid place-items-center"><div class="text-center"><span class="material-symbols-outlined text-3xl text-[#3B82F6] animate-spin">progress_activity</span><p class="font-['JetBrains_Mono'] text-[11px] text-white mt-2">Uploading image…</p></div></div>}
                   </div>
                   <div class="rounded-xl border border-[#1E293B] bg-[#040810]/45 p-5 flex flex-col justify-between gap-4">
-                    <div><p class="font-['Inter'] text-xs text-[#d9c3af] leading-relaxed">Use a clean 16:9 image. Recommended size: <strong class="text-white">750 × 422 px</strong>. JPG, PNG, WebP, or GIF up to 10 MB.</p><p class="font-['JetBrains_Mono'] text-[10px] text-[#378ADD] mt-3">Uploads are stored securely and saved to this course automatically.</p></div>
-                    <label [class.pointer-events-none]="isUploadingImage()" class="w-full text-center font-['JetBrains_Mono'] text-xs font-bold text-[#040810] bg-[#E8931A] hover:bg-[#f6a52a] px-4 py-3 rounded-lg cursor-pointer transition-colors disabled:opacity-60">{{ course()?.thumbnail ? 'Replace image' : 'Upload image' }}<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden" (change)="handleThumbnailFile($event)" /></label>
+                    <div><p class="font-['Inter'] text-xs text-[#d9c3af] leading-relaxed">Use a clean 16:9 image. Recommended size: <strong class="text-white">750 × 422 px</strong>. JPG, PNG, WebP, or GIF up to 10 MB.</p><p class="font-['JetBrains_Mono'] text-[10px] text-[#3B82F6] mt-3">Uploads are stored securely and saved to this course automatically.</p></div>
+                    <label [class.pointer-events-none]="isUploadingImage()" class="w-full text-center font-['JetBrains_Mono'] text-xs font-bold text-[#040810] bg-[#3B82F6] hover:bg-[#2563eb] px-4 py-3 rounded-lg cursor-pointer transition-colors disabled:opacity-60">{{ course()?.thumbnail ? 'Replace image' : 'Upload image' }}<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" class="hidden" (change)="handleThumbnailFile($event)" /></label>
                   </div>
                 </div>
               </div>
@@ -328,12 +328,12 @@ import {
                 <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)] gap-6 items-stretch">
                   <div class="relative aspect-video bg-black border border-[#1E293B] rounded-xl overflow-hidden grid place-items-center">
                     @if (isDirectPromoVideo(course()?.promoVideoUrl)) {<video [src]="course()?.promoVideoUrl" controls class="w-full h-full object-contain"></video>} @else if (promoEmbedUrl()) {<iframe [src]="promoEmbedUrl()" title="Course promotional video preview" class="w-full h-full border-0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>} @else {<div class="text-center text-[#a18d7b]"><span class="material-symbols-outlined text-5xl">smart_display</span><p class="text-xs mt-2">No promotional video</p></div>}
-                    @if (isUploadingVideo()) {<div class="absolute inset-0 bg-[#040810]/90 backdrop-blur-sm grid place-items-center"><div class="text-center"><span class="material-symbols-outlined text-3xl text-[#E8931A] animate-spin">progress_activity</span><p class="font-['JetBrains_Mono'] text-[11px] text-white mt-2">Uploading video…</p></div></div>}
+                    @if (isUploadingVideo()) {<div class="absolute inset-0 bg-[#040810]/90 backdrop-blur-sm grid place-items-center"><div class="text-center"><span class="material-symbols-outlined text-3xl text-[#3B82F6] animate-spin">progress_activity</span><p class="font-['JetBrains_Mono'] text-[11px] text-white mt-2">Uploading video…</p></div></div>}
                   </div>
                   <div class="rounded-xl border border-[#1E293B] bg-[#040810]/45 p-5 flex flex-col gap-4">
                     <p class="font-['Inter'] text-xs text-[#d9c3af] leading-relaxed">Upload an MP4, WebM, OGG, or MOV intro up to 250 MB, or paste a YouTube/Vimeo URL.</p>
-                    <input type="url" [ngModel]="course()?.promoVideoUrl" (ngModelChange)="updateCourseField('promoVideoUrl', $event)" placeholder="https://youtube.com/watch?v=…" class="w-full bg-[#040810] border border-[#1E293B] focus:border-[#378ADD] outline-none rounded-lg px-3 py-2.5 text-xs text-white" />
-                    <div class="grid grid-cols-2 gap-2"><label [class.pointer-events-none]="isUploadingVideo()" class="text-center font-['JetBrains_Mono'] text-[11px] font-bold text-[#040810] bg-[#E8931A] px-3 py-3 cursor-pointer">Upload video<input type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" class="hidden" (change)="handlePromoVideoFile($event)" /></label><button type="button" (click)="saveAllChanges()" [disabled]="isSaving()" class="admin-action-primary font-['JetBrains_Mono'] text-[11px] font-bold !text-white bg-[#6B21A8] disabled:opacity-50">Save URL</button></div>
+                    <input type="url" [ngModel]="course()?.promoVideoUrl" (ngModelChange)="updateCourseField('promoVideoUrl', $event)" placeholder="https://youtube.com/watch?v=…" class="w-full bg-[#040810] border border-[#1E293B] focus:border-[#3B82F6] outline-none rounded-lg px-3 py-2.5 text-xs text-white" />
+                    <div class="grid grid-cols-2 gap-2"><label [class.pointer-events-none]="isUploadingVideo()" class="text-center font-['JetBrains_Mono'] text-[11px] font-bold text-[#040810] bg-[#3B82F6] px-3 py-3 cursor-pointer">Upload video<input type="file" accept="video/mp4,video/webm,video/ogg,video/quicktime" class="hidden" (change)="handlePromoVideoFile($event)" /></label><button type="button" (click)="saveAllChanges()" [disabled]="isSaving()" class="admin-action-primary font-['JetBrains_Mono'] text-[11px] font-bold !text-white bg-[#2563EB] disabled:opacity-50">Save URL</button></div>
                   </div>
                 </div>
               </div>
@@ -345,7 +345,7 @@ import {
                     <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white">Student reviews</h3>
                     <p class="font-['Inter'] text-xs text-[#a18d7b] mt-1">Real reviews from enrolled students appear here automatically.</p>
                   </div>
-                  <span class="font-['JetBrains_Mono'] text-xs text-[#E8931A]">{{ course()?.reviewCount || 0 }} reviews</span>
+                  <span class="font-['JetBrains_Mono'] text-xs text-[#3B82F6]">{{ course()?.reviewCount || 0 }} reviews</span>
                 </div>
                 @if (course()?.reviews?.length) {
                   <div class="flex flex-col gap-3">
@@ -353,7 +353,7 @@ import {
                       <article class="border border-[#1E293B] bg-[#040810]/60 rounded-lg p-4">
                         <div class="flex items-center justify-between gap-4 mb-2">
                           <span class="font-['Hanken_Grotesk'] text-sm font-bold text-white">{{ review.user.name }}</span>
-                          <span class="font-['JetBrains_Mono'] text-sm text-[#E8931A]">{{ '★'.repeat(review.rating) }}{{ '☆'.repeat(5 - review.rating) }}</span>
+                          <span class="font-['JetBrains_Mono'] text-sm text-[#3B82F6]">{{ '★'.repeat(review.rating) }}{{ '☆'.repeat(5 - review.rating) }}</span>
                         </div>
                         <p class="font-['Inter'] text-xs text-[#d9c3af] leading-relaxed">{{ review.comment }}</p>
                       </article>
@@ -384,9 +384,9 @@ import {
                     type="text"
                     readonly
                     [value]="referralUrl"
-                    class="bg-[#121A2B] border border-[#1E293B] rounded px-3 py-2 text-xs text-[#378ADD] font-['JetBrains_Mono'] flex-grow"
+                    class="bg-[#121A2B] border border-[#1E293B] rounded px-3 py-2 text-xs text-[#3B82F6] font-['JetBrains_Mono'] flex-grow"
                   />
-                  <button (click)="copyReferralLink()" class="font-['JetBrains_Mono'] text-xs font-bold text-[#040810] bg-[#E8931A] px-5 py-2 rounded hover:bg-[#E8931A]/90 transition-colors">
+                  <button (click)="copyReferralLink()" class="font-['JetBrains_Mono'] text-xs font-bold text-[#040810] bg-[#3B82F6] px-5 py-2 rounded hover:bg-[#3B82F6]/90 transition-colors">
                     {{ copiedLink ? 'Copied!' : 'Copy' }}
                   </button>
                 </div>
@@ -398,7 +398,7 @@ import {
                   <div>
                     <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white">Monthly Coupons</h3>
                   </div>
-                  <button (click)="showCouponForm = !showCouponForm" class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#378ADD] px-4 py-2 rounded hover:bg-[#378ADD]/90 transition-colors">
+                  <button (click)="showCouponForm = !showCouponForm" class="font-['JetBrains_Mono'] text-xs font-bold text-white bg-[#3B82F6] px-4 py-2 rounded hover:bg-[#3B82F6]/90 transition-colors">
                     Create Coupon
                   </button>
                 </div>
@@ -417,7 +417,7 @@ import {
                       placeholder="Discount Amount (₹)"
                       class="bg-[#121A2B] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']"
                     />
-                    <button (click)="createCoupon()" class="font-['JetBrains_Mono'] text-xs font-bold text-[#040810] bg-[#E8931A] py-2 rounded">
+                    <button (click)="createCoupon()" class="font-['JetBrains_Mono'] text-xs font-bold text-[#040810] bg-[#3B82F6] py-2 rounded">
                       Save & Activate
                     </button>
                   </div>
@@ -431,13 +431,13 @@ import {
             <div class="flex flex-col gap-6">
               <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b border-[#1E293B] pb-5">
                 <div>
-                  <span class="font-['JetBrains_Mono'] text-[10px] uppercase tracking-[0.2em] text-[#378ADD]">Course audience</span>
+                  <span class="font-['JetBrains_Mono'] text-[10px] uppercase tracking-[0.2em] text-[#3B82F6]">Course audience</span>
                   <h2 class="font-['Hanken_Grotesk'] text-2xl font-bold text-white mt-1">Enrolled students</h2>
                   <p class="font-['Inter'] text-xs text-[#a18d7b] mt-1">Enrollment date, latest activity, and curriculum progress for this course.</p>
                 </div>
                 <div class="relative w-full lg:w-72">
                   <span class="material-symbols-outlined absolute left-3 top-2.5 text-base text-[#a18d7b]">search</span>
-                  <input [(ngModel)]="studentSearch" (ngModelChange)="scheduleStudentSearch()" placeholder="Search students" class="w-full bg-[#040810] border border-[#1E293B] focus:border-[#378ADD] outline-none rounded-lg pl-10 pr-3 py-2.5 text-xs text-white" />
+                  <input [(ngModel)]="studentSearch" (ngModelChange)="scheduleStudentSearch()" placeholder="Search students" class="w-full bg-[#040810] border border-[#1E293B] focus:border-[#3B82F6] outline-none rounded-lg pl-10 pr-3 py-2.5 text-xs text-white" />
                 </div>
               </div>
 
@@ -457,19 +457,19 @@ import {
                       @for (student of courseStudents(); track student.id) {
                         <tr class="bg-[#121A2B] hover:bg-[#172033] transition-colors">
                           <td class="px-5 py-4">
-                            <div class="flex items-center gap-3"><span class="w-9 h-9 rounded-full bg-[#378ADD]/15 text-[#378ADD] grid place-items-center font-bold">{{ student.name.charAt(0).toUpperCase() }}</span><div><div class="text-sm font-semibold text-white">{{ student.name }}</div><div class="text-[11px] text-[#a18d7b]">{{ student.email }}</div></div></div>
+                            <div class="flex items-center gap-3"><span class="w-9 h-9 rounded-full bg-[#3B82F6]/15 text-[#3B82F6] grid place-items-center font-bold">{{ student.name.charAt(0).toUpperCase() }}</span><div><div class="text-sm font-semibold text-white">{{ student.name }}</div><div class="text-[11px] text-[#a18d7b]">{{ student.email }}</div></div></div>
                           </td>
                           <td class="px-5 py-4 text-xs text-[#d9c3af]">{{ student.enrolledAt | date:'mediumDate' }}</td>
                           <td class="px-5 py-4 text-xs text-[#d9c3af]">{{ student.lastVisited | date:'medium' }}</td>
-                          <td class="px-5 py-4"><div class="flex items-center gap-3"><div class="h-2 w-28 rounded-full bg-[#040810] overflow-hidden"><div class="h-full bg-[#E8931A] rounded-full" [style.width.%]="student.progressPercent"></div></div><span class="text-xs text-white">{{ student.progressPercent | number:'1.0-0' }}%</span></div></td>
-                          <td class="px-5 py-4 font-['JetBrains_Mono'] text-xs text-[#378ADD]">{{ student.completedLessons }} lessons</td>
+                          <td class="px-5 py-4"><div class="flex items-center gap-3"><div class="h-2 w-28 rounded-full bg-[#040810] overflow-hidden"><div class="h-full bg-[#3B82F6] rounded-full" [style.width.%]="student.progressPercent"></div></div><span class="text-xs text-white">{{ student.progressPercent | number:'1.0-0' }}%</span></div></td>
+                          <td class="px-5 py-4 font-['JetBrains_Mono'] text-xs text-[#3B82F6]">{{ student.completedLessons }} lessons</td>
                         </tr>
                       }
                     </tbody>
                   </table>
                 </div>
               } @else {
-                <div class="rounded-xl border border-dashed border-[#378ADD]/40 bg-[#040810]/40 py-16 text-center"><span class="material-symbols-outlined text-4xl text-[#378ADD]">group_off</span><h3 class="text-lg font-bold text-white mt-3">No enrolled students yet</h3><p class="text-xs text-[#a18d7b] mt-1">Students will appear here after a completed enrollment.</p></div>
+                <div class="rounded-xl border border-dashed border-[#3B82F6]/40 bg-[#040810]/40 py-16 text-center"><span class="material-symbols-outlined text-4xl text-[#3B82F6]">group_off</span><h3 class="text-lg font-bold text-white mt-3">No enrolled students yet</h3><p class="text-xs text-[#a18d7b] mt-1">Students will appear here after a completed enrollment.</p></div>
               }
             </div>
           }
@@ -487,7 +487,7 @@ import {
                   type="checkbox"
                   [checked]="course()?.isFree"
                   (change)="toggleFreeCourse($event)"
-                  class="mt-0.5 rounded bg-[#040810] border-[#1E293B] text-[#E8931A] focus:ring-0"
+                  class="mt-0.5 rounded bg-[#040810] border-[#1E293B] text-[#3B82F6] focus:ring-0"
                 />
                 <span>
                   <span class="block font-['Hanken_Grotesk'] text-sm font-bold text-white">Make this a free course</span>
@@ -502,11 +502,11 @@ import {
                   type="number"
                   [ngModel]="course()?.price"
                   (ngModelChange)="updateCourseField('price', $event)"
-                  class="w-full bg-[#040810] border border-[#1E293B] rounded px-4 py-2.5 text-sm text-[#E8931A] font-['JetBrains_Mono'] font-bold"
+                  class="w-full bg-[#040810] border border-[#1E293B] rounded px-4 py-2.5 text-sm text-[#3B82F6] font-['JetBrains_Mono'] font-bold"
                 />
                 </div>
               } @else {
-                <div class="border border-[#E8931A]/40 bg-[#E8931A]/10 rounded-lg p-4 font-['JetBrains_Mono'] text-xs text-[#E8931A]">
+                <div class="border border-[#3B82F6]/40 bg-[#3B82F6]/10 rounded-lg p-4 font-['JetBrains_Mono'] text-xs text-[#3B82F6]">
                   This course is free. Its price will be saved as ₹0.
                 </div>
               }

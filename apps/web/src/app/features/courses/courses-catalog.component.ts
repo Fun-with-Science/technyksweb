@@ -12,7 +12,7 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
     <div class="px-5 sm:px-8 xl:px-12 pt-24 pb-20 max-w-[1400px] mx-auto">
       <div class="mb-10">
         <div
-          class="font-['JetBrains_Mono'] text-[11px] uppercase tracking-[0.22em] text-[#378ADD] mb-4"
+          class="font-['JetBrains_Mono'] text-[11px] uppercase tracking-[0.22em] text-[#3B82F6] mb-4"
         >
           Technyks Academy / Course catalog
         </div>
@@ -36,7 +36,7 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
             class="flex items-center gap-3 text-xs font-['JetBrains_Mono'] text-[#a18d7b]"
           >
             <span
-              class="w-2 h-2 rounded-full bg-[#E8931A] shadow-[0_0_12px_#E8931A]"
+              class="w-2 h-2 rounded-full bg-[#3B82F6] shadow-[0_0_12px_#3B82F6]"
             ></span>
             {{ courses().length }} courses available
           </div>
@@ -50,12 +50,12 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
           @for (level of levels; track level) {
             <button
               (click)="selectedLevel.set(level)"
-              [class.bg-[#E8931A]]="selectedLevel() === level"
+              [class.bg-[#3B82F6]]="selectedLevel() === level"
               [class.text-[#040810]]="selectedLevel() === level"
               [class.font-bold]="selectedLevel() === level"
               [class.bg-[#121A2B]]="selectedLevel() !== level"
               [class.text-[#d9c3af]]="selectedLevel() !== level"
-              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider px-4 py-2 rounded border border-[#1E293B] hover:border-[#378ADD] transition-colors"
+              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider px-4 py-2 rounded border border-[#1E293B] hover:border-[#3B82F6] transition-colors"
             >
               {{ level }}
             </button>
@@ -63,7 +63,7 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
         </div>
 
         <div
-          class="font-['JetBrains_Mono'] text-xs text-[#378ADD] uppercase tracking-wider"
+          class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] uppercase tracking-wider"
         >
           Showing {{ filteredCourses().length }} courses
         </div>
@@ -93,9 +93,9 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
         </div>
       } @else {
         <div
-          class="border border-dashed border-[#378ADD]/50 rounded-lg px-6 py-16 text-center"
+          class="border border-dashed border-[#3B82F6]/50 rounded-lg px-6 py-16 text-center"
         >
-          <span class="material-symbols-outlined text-4xl text-[#E8931A] mb-3"
+          <span class="material-symbols-outlined text-4xl text-[#3B82F6] mb-3"
             >school</span
           >
           <h2

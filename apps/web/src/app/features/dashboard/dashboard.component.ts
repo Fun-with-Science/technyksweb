@@ -13,7 +13,7 @@ import { AuthService } from '../../core/services/auth.service';
       <!-- Welcome Header -->
       <div class="mb-10 border-b border-[#1E293B] pb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <div class="inline-flex items-center gap-2 font-['JetBrains_Mono'] text-xs text-[#378ADD] px-3.5 py-1.5 border border-[#378ADD]/30 bg-[#378ADD]/10 rounded-full w-fit mb-3">
+          <div class="inline-flex items-center gap-2 font-['JetBrains_Mono'] text-xs text-[#3B82F6] px-3.5 py-1.5 border border-[#3B82F6]/30 bg-[#3B82F6]/10 rounded-full w-fit mb-3">
             <span class="material-symbols-outlined text-[16px]">dashboard</span>
             STUDENT DASHBOARD
           </div>
@@ -25,7 +25,7 @@ import { AuthService } from '../../core/services/auth.service';
           </p>
         </div>
 
-        <a routerLink="/courses" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#E8931A] px-5 py-3 rounded font-bold hover:bg-[#E8931A]/90 transition-colors flex items-center gap-2 shadow-md">
+        <a routerLink="/courses" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#3B82F6] px-5 py-3 rounded font-bold hover:bg-[#3B82F6]/90 transition-colors flex items-center gap-2 shadow-md">
           <span class="material-symbols-outlined text-sm">add</span>
           Browse More Courses
         </a>
@@ -39,7 +39,7 @@ import { AuthService } from '../../core/services/auth.service';
           </div>
           <div class="bg-[#121A2B] technical-border rounded p-5">
             <p class="font-['JetBrains_Mono'] text-[11px] tracking-wider text-[#a18d7b]">AVERAGE PROGRESS</p>
-            <p class="font-['Hanken_Grotesk'] text-3xl font-bold text-[#E8931A] mt-2">{{ averageProgress() }}%</p>
+            <p class="font-['Hanken_Grotesk'] text-3xl font-bold text-[#3B82F6] mt-2">{{ averageProgress() }}%</p>
           </div>
           <div class="bg-[#121A2B] technical-border rounded p-5">
             <p class="font-['JetBrains_Mono'] text-[11px] tracking-wider text-[#a18d7b]">COMPLETED COURSES</p>
@@ -61,12 +61,12 @@ import { AuthService } from '../../core/services/auth.service';
         </div>
       } @else if (enrollments().length === 0) {
         <div class="bg-[#121A2B] technical-border rounded p-12 text-center max-w-2xl mx-auto">
-          <span class="material-symbols-outlined text-4xl text-[#378ADD] mb-3">school</span>
+          <span class="material-symbols-outlined text-4xl text-[#3B82F6] mb-3">school</span>
           <h3 class="font-['Hanken_Grotesk'] text-xl font-bold text-white mb-2">No Enrolled Courses Yet</h3>
           <p class="font-['Inter'] text-sm text-[#d9c3af] mb-6">
             You haven't enrolled in any architecture courses yet. Explore our course catalog or join the Pro Membership!
           </p>
-          <a routerLink="/courses" class="inline-flex font-['JetBrains_Mono'] text-xs uppercase text-[#040810] bg-[#E8931A] px-6 py-3 rounded font-bold hover:bg-[#E8931A]/90 transition-colors">
+          <a routerLink="/courses" class="inline-flex font-['JetBrains_Mono'] text-xs uppercase text-[#040810] bg-[#3B82F6] px-6 py-3 rounded font-bold hover:bg-[#3B82F6]/90 transition-colors">
             Explore Architecture Catalog
           </a>
         </div>
@@ -76,10 +76,10 @@ import { AuthService } from '../../core/services/auth.service';
             <div class="bg-[#121A2B] technical-border rounded p-6 flex flex-col justify-between shadow-xl">
               <div>
                 <div class="flex justify-between items-start mb-4">
-                  <span class="font-['JetBrains_Mono'] text-[11px] text-[#378ADD] bg-[#378ADD]/10 px-2.5 py-1 border border-[#378ADD]/30 rounded">
+                  <span class="font-['JetBrains_Mono'] text-[11px] text-[#3B82F6] bg-[#3B82F6]/10 px-2.5 py-1 border border-[#3B82F6]/30 rounded">
                     {{ getProgressPercent(enrollment) === 100 ? 'COMPLETED' : 'IN PROGRESS' }}
                   </span>
-                  <span class="font-['JetBrains_Mono'] text-xs text-[#E8931A] font-bold">
+                  <span class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] font-bold">
                     {{ getProgressPercent(enrollment) }}% COMPLETE
                   </span>
                 </div>
@@ -99,7 +99,7 @@ import { AuthService } from '../../core/services/auth.service';
                   </div>
                   <div class="h-3 w-full bg-[#040810] border border-[#1E293B] rounded p-0.5" role="progressbar" [attr.aria-valuenow]="getProgressPercent(enrollment)" aria-valuemin="0" aria-valuemax="100">
                     <div
-                      class="h-full bg-[#E8931A] rounded-sm transition-all duration-500"
+                      class="h-full bg-[#3B82F6] rounded-sm transition-all duration-500"
                       [style.width.%]="getProgressPercent(enrollment)"
                     ></div>
                   </div>
@@ -113,7 +113,7 @@ import { AuthService } from '../../core/services/auth.service';
               <div class="pt-4 border-t border-[#1E293B] flex items-center justify-between">
                 <a
                   [routerLink]="['/courses', enrollment.course.slug, 'watch', getResumeLessonId(enrollment)]"
-                  class="font-['JetBrains_Mono'] text-xs uppercase font-bold text-[#040810] bg-[#E8931A] px-5 py-2.5 rounded hover:bg-[#E8931A]/90 transition-colors flex items-center gap-1.5"
+                  class="font-['JetBrains_Mono'] text-xs uppercase font-bold text-[#040810] bg-[#3B82F6] px-5 py-2.5 rounded hover:bg-[#3B82F6]/90 transition-colors flex items-center gap-1.5"
                 >
                   <span class="material-symbols-outlined text-sm">play_arrow</span>
                   {{ getProgressPercent(enrollment) === 100 ? 'Review Course' : 'Continue Learning' }}
@@ -122,7 +122,7 @@ import { AuthService } from '../../core/services/auth.service';
                 @if (getProgressPercent(enrollment) === 100) {
                   <button
                     (click)="downloadCertificate(enrollment.course.id)"
-                    class="font-['JetBrains_Mono'] text-xs font-bold text-[#378ADD] hover:underline flex items-center gap-1"
+                    class="font-['JetBrains_Mono'] text-xs font-bold text-[#3B82F6] hover:underline flex items-center gap-1"
                   >
                     <span class="material-symbols-outlined text-sm">workspace_premium</span>
                     Certificate

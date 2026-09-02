@@ -16,7 +16,7 @@ declare var Razorpay: any;
   template: `
     <div class="px-6 md:px-16 pt-24 pb-20 max-w-5xl mx-auto">
       <div class="mb-8">
-        <span class="font-['JetBrains_Mono'] text-xs uppercase text-[#378ADD] tracking-widest font-semibold">// SECURE CHECKOUT</span>
+        <span class="font-['JetBrains_Mono'] text-xs uppercase text-[#3B82F6] tracking-widest font-semibold">// SECURE CHECKOUT</span>
         <h1 class="font-['Hanken_Grotesk'] text-3xl font-bold text-white mt-1">Complete Your Enrollment</h1>
       </div>
 
@@ -39,25 +39,25 @@ declare var Razorpay: any;
 
           <!-- Coupon Code Input -->
           <div class="bg-[#121A2B] technical-border rounded p-6">
-            <h3 class="font-['JetBrains_Mono'] text-xs uppercase text-[#E8931A] font-bold mb-4">// COUPON CODE</h3>
+            <h3 class="font-['JetBrains_Mono'] text-xs uppercase text-[#3B82F6] font-bold mb-4">// COUPON CODE</h3>
             <div class="flex gap-3">
               <input
                 type="text"
                 [(ngModel)]="couponCode"
                 placeholder="Enter code (e.g. TECHNYKS50)"
-                class="flex-grow bg-[#040810] border border-[#1E293B] focus:border-[#E8931A] focus:outline-none rounded px-4 py-2.5 text-xs text-white font-['JetBrains_Mono'] uppercase"
+                class="flex-grow bg-[#040810] border border-[#1E293B] focus:border-[#3B82F6] focus:outline-none rounded px-4 py-2.5 text-xs text-white font-['JetBrains_Mono'] uppercase"
               />
               <button
                 (click)="applyCoupon()"
                 [disabled]="isApplyingCoupon()"
-                class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] bg-[#E8931A] px-5 py-2.5 rounded hover:bg-[#E8931A]/90 transition-colors"
+                class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] bg-[#3B82F6] px-5 py-2.5 rounded hover:bg-[#3B82F6]/90 transition-colors"
               >
                 Apply
               </button>
             </div>
 
             @if (couponSuccess()) {
-              <div class="mt-3 text-xs font-['JetBrains_Mono'] text-[#378ADD] flex items-center gap-1.5">
+              <div class="mt-3 text-xs font-['JetBrains_Mono'] text-[#3B82F6] flex items-center gap-1.5">
                 <span class="material-symbols-outlined text-sm">check_circle</span>
                 Coupon {{ couponResult()?.code }} applied! Discount: ₹{{ couponResult()?.calculatedDiscount }}
               </div>
@@ -73,19 +73,19 @@ declare var Razorpay: any;
 
           <!-- Payment Provider Options -->
           <div class="bg-[#121A2B] technical-border rounded p-6">
-            <h3 class="font-['JetBrains_Mono'] text-xs uppercase text-[#378ADD] font-bold mb-4">// PAYMENT METHOD</h3>
+            <h3 class="font-['JetBrains_Mono'] text-xs uppercase text-[#3B82F6] font-bold mb-4">// PAYMENT METHOD</h3>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
               <!-- Razorpay Option (India) -->
               <div
                 (click)="selectedProvider.set('RAZORPAY')"
-                [class.border-[#E8931A]]="selectedProvider() === 'RAZORPAY'"
-                [class.bg-[#E8931A]/5]="selectedProvider() === 'RAZORPAY'"
+                [class.border-[#3B82F6]]="selectedProvider() === 'RAZORPAY'"
+                [class.bg-[#3B82F6]/5]="selectedProvider() === 'RAZORPAY'"
                 class="p-4 technical-border rounded cursor-pointer transition-all flex flex-col justify-between"
               >
                 <div class="flex justify-between items-center mb-2">
                   <span class="font-['Hanken_Grotesk'] text-sm font-bold text-white">Razorpay (India)</span>
-                  <span class="font-['JetBrains_Mono'] text-[10px] text-[#E8931A] font-bold">UPI / CARDS</span>
+                  <span class="font-['JetBrains_Mono'] text-[10px] text-[#3B82F6] font-bold">UPI / CARDS</span>
                 </div>
                 <p class="font-['Inter'] text-xs text-[#d9c3af]">UPI, GPay, PhonePe, Cards, Netbanking + RBI Autopay</p>
               </div>
@@ -93,13 +93,13 @@ declare var Razorpay: any;
               <!-- Lemon Squeezy Option (Global) -->
               <div
                 (click)="selectedProvider.set('LEMON_SQUEEZY')"
-                [class.border-[#E8931A]]="selectedProvider() === 'LEMON_SQUEEZY'"
-                [class.bg-[#E8931A]/5]="selectedProvider() === 'LEMON_SQUEEZY'"
+                [class.border-[#3B82F6]]="selectedProvider() === 'LEMON_SQUEEZY'"
+                [class.bg-[#3B82F6]/5]="selectedProvider() === 'LEMON_SQUEEZY'"
                 class="p-4 technical-border rounded cursor-pointer transition-all flex flex-col justify-between"
               >
                 <div class="flex justify-between items-center mb-2">
                   <span class="font-['Hanken_Grotesk'] text-sm font-bold text-white">Lemon Squeezy</span>
-                  <span class="font-['JetBrains_Mono'] text-[10px] text-[#378ADD] font-bold">GLOBAL / VAT</span>
+                  <span class="font-['JetBrains_Mono'] text-[10px] text-[#3B82F6] font-bold">GLOBAL / VAT</span>
                 </div>
                 <p class="font-['Inter'] text-xs text-[#d9c3af]">International Cards, Apple Pay, Merchant of Record</p>
               </div>
@@ -108,7 +108,7 @@ declare var Razorpay: any;
             <!-- RBI Compliance Note for Razorpay -->
             @if (selectedProvider() === 'RAZORPAY') {
               <div class="p-3 bg-[#040810] border border-[#1E293B] rounded text-[11px] font-['JetBrains_Mono'] text-[#d9c3af]">
-                🛡️ <span class="text-[#E8931A]">RBI Compliance:</span> Recurring subscriptions include pre-debit notices 24 hours prior to each billing cycle via SMS/Email.
+                🛡️ <span class="text-[#3B82F6]">RBI Compliance:</span> Recurring subscriptions include pre-debit notices 24 hours prior to each billing cycle via SMS/Email.
               </div>
             }
           </div>
@@ -126,7 +126,7 @@ declare var Razorpay: any;
               </div>
 
               @if (couponResult() && couponResult()?.calculatedDiscount! > 0) {
-                <div class="flex justify-between text-[#378ADD]">
+                <div class="flex justify-between text-[#3B82F6]">
                   <span>Discount ({{ couponResult()?.code }}):</span>
                   <span>-₹{{ couponResult()?.calculatedDiscount?.toLocaleString('en-IN') }}</span>
                 </div>
@@ -140,14 +140,14 @@ declare var Razorpay: any;
 
             <div class="flex justify-between items-baseline mb-6 font-['JetBrains_Mono']">
               <span class="text-xs uppercase text-[#a18d7b]">Total Payable:</span>
-              <span class="text-2xl font-bold text-[#E8931A]">₹{{ finalAmount().toLocaleString('en-IN') }}</span>
+              <span class="text-2xl font-bold text-[#3B82F6]">₹{{ finalAmount().toLocaleString('en-IN') }}</span>
             </div>
           </div>
 
           <button
             (click)="onProceedToPayment()"
             [disabled]="isProcessing()"
-            class="w-full font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#E8931A] py-4 rounded font-bold hover:bg-[#E8931A]/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg"
+            class="w-full font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#3B82F6] py-4 rounded font-bold hover:bg-[#3B82F6]/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg"
           >
             @if (isProcessing()) {
               <span class="material-symbols-outlined animate-spin text-sm">progress_activity</span> Processing Order...

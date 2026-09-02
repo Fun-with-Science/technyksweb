@@ -26,8 +26,8 @@ import { AuthService } from '../../core/services/auth.service';
       <main class="watch-main min-w-0 flex-1 p-3 sm:p-4 md:p-5 lg:p-7 flex flex-col gap-4">
         @if (isLoading()) {
           <div class="watch-card w-full aspect-video rounded flex flex-col items-center justify-center">
-            <span class="material-symbols-outlined animate-spin text-4xl text-[#E8931A] mb-2">progress_activity</span>
-            <span class="font-['JetBrains_Mono'] text-xs text-[#378ADD]">Verifying protected lesson playback...</span>
+            <span class="material-symbols-outlined animate-spin text-4xl text-[#3B82F6] mb-2">progress_activity</span>
+            <span class="font-['JetBrains_Mono'] text-xs text-[#3B82F6]">Verifying protected lesson playback...</span>
           </div>
         } @else if (playbackData()?.videoAvailable && safeEmbedUrl()) {
           <div class="watch-player w-full aspect-video rounded overflow-hidden shadow-2xl relative">
@@ -52,8 +52,8 @@ import { AuthService } from '../../core/services/auth.service';
 
             <button
               (click)="markAsCompleted()"
-              [class.bg-[#378ADD]]="isCurrentLessonCompleted()"
-              [class.bg-[#E8931A]]="!isCurrentLessonCompleted()"
+              [class.bg-[#3B82F6]]="isCurrentLessonCompleted()"
+              [class.bg-[#3B82F6]]="!isCurrentLessonCompleted()"
               [disabled]="isCurrentLessonCompleted()"
               [attr.aria-label]="isCurrentLessonCompleted() ? 'Lesson completed' : 'Mark lesson as completed'"
               class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] px-5 py-3 rounded hover:opacity-90 transition-all flex items-center gap-2 shadow-md"
@@ -69,7 +69,7 @@ import { AuthService } from '../../core/services/auth.service';
           }
         } @else if (playbackData()) {
           <div class="watch-card w-full aspect-video rounded flex flex-col items-center justify-center p-5 sm:p-8 text-center">
-            <span class="material-symbols-outlined text-4xl text-[#E8931A] mb-2">video_settings</span>
+            <span class="material-symbols-outlined text-4xl text-[#3B82F6] mb-2">video_settings</span>
             <h3 class="watch-heading font-['Hanken_Grotesk'] text-lg font-bold mb-2">Video not connected yet</h3>
             <p class="watch-muted font-['Inter'] text-sm max-w-md">
               This lesson does not have a playable video source yet. Add a Bunny Stream video ID or a YouTube Membership video reference in the curriculum.
@@ -84,7 +84,7 @@ import { AuthService } from '../../core/services/auth.service';
             <p class="watch-muted font-['Inter'] text-sm max-w-md mb-6">
               {{ playbackError() || 'This is paid token-gated content. Please enroll in this course or join Membership to stream this lesson.' }}
             </p>
-            <a routerLink="/courses" class="font-['JetBrains_Mono'] text-xs uppercase text-[#040810] bg-[#E8931A] px-6 py-3 rounded font-bold">
+            <a routerLink="/courses" class="font-['JetBrains_Mono'] text-xs uppercase text-[#040810] bg-[#3B82F6] px-6 py-3 rounded font-bold">
               Enroll in Course
             </a>
           </div>
@@ -103,7 +103,7 @@ import { AuthService } from '../../core/services/auth.service';
             <button
               type="button"
               (click)="toggleAllModules()"
-              class="watch-accent font-['JetBrains_Mono'] text-[11px] uppercase hover:text-[#E8931A] transition-colors"
+              class="watch-accent font-['JetBrains_Mono'] text-[11px] uppercase hover:text-[#3B82F6] transition-colors"
             >
               {{ allModulesExpanded() ? 'Collapse all' : 'Expand all' }}
             </button>
@@ -120,7 +120,7 @@ import { AuthService } from '../../core/services/auth.service';
                 class="watch-section-header w-full p-3.5 flex items-center justify-between gap-3 text-left transition-colors"
               >
                 <span class="flex items-center gap-2 min-w-0">
-                  <span class="material-symbols-outlined text-base text-[#E8931A]">
+                  <span class="material-symbols-outlined text-base text-[#3B82F6]">
                     {{ isModuleExpanded(module.id) ? 'expand_less' : 'expand_more' }}
                   </span>
                   <span class="watch-heading font-['Hanken_Grotesk'] text-xs font-bold truncate">{{ module.title }}</span>
@@ -135,14 +135,14 @@ import { AuthService } from '../../core/services/auth.service';
                   @for (lesson of module.lessons; track lesson.id) {
                     <a
                       [routerLink]="['/courses', course()?.slug, 'watch', lesson.id]"
-                      [class.bg-[#378ADD]/15]="lesson.id === currentLessonId()"
+                      [class.bg-[#3B82F6]/15]="lesson.id === currentLessonId()"
                       [class.watch-lesson-active]="lesson.id === currentLessonId()"
                       [class.watch-lesson-completed]="isLessonCompleted(lesson.id)"
                       [attr.aria-current]="lesson.id === currentLessonId() ? 'page' : null"
-                      class="watch-lesson-link p-3.5 flex items-center justify-between gap-3 text-xs font-['Inter'] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#E8931A]"
+                      class="watch-lesson-link p-3.5 flex items-center justify-between gap-3 text-xs font-['Inter'] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#3B82F6]"
                     >
                       <span class="flex items-center gap-2.5 min-w-0">
-                        <span class="material-symbols-outlined text-sm text-[#378ADD]">
+                        <span class="material-symbols-outlined text-sm text-[#3B82F6]">
                           {{ isLessonCompleted(lesson.id) ? 'check_circle' : (lesson.id === currentLessonId() ? 'play_circle' : (lesson.isFreePreview ? 'lock_open' : 'ondemand_video')) }}
                         </span>
                         <span class="watch-lesson-title line-clamp-2">{{ lesson.title }}</span>

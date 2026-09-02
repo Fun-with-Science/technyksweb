@@ -16,7 +16,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
     @if (isLoading()) {
       <div class="min-h-[70vh] flex items-center justify-center">
         <span
-          class="material-symbols-outlined animate-spin text-3xl text-[#E8931A]"
+          class="material-symbols-outlined animate-spin text-3xl text-[#3B82F6]"
           >progress_activity</span
         >
       </div>
@@ -27,10 +27,10 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
         >
           <a
             routerLink="/courses"
-            class="hover:text-[#E8931A] transition-colors"
+            class="hover:text-[#3B82F6] transition-colors"
             >Courses</a
           >
-          <span class="mx-2 text-[#378ADD]">/</span>
+          <span class="mx-2 text-[#3B82F6]">/</span>
                   <span>{{ course()?.level }} course</span>
         </div>
 
@@ -43,12 +43,12 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
             <div class="lg:col-span-2">
               <div class="flex items-center gap-3 mb-4">
                 <span
-                  class="font-['JetBrains_Mono'] text-xs text-[#040810] bg-[#E8931A] px-3 py-1 rounded font-bold uppercase"
+                  class="font-['JetBrains_Mono'] text-xs text-[#040810] bg-[#3B82F6] px-3 py-1 rounded font-bold uppercase"
                 >
                   {{ course()?.isFree ? 'Free course' : 'Premium course' }}
                 </span>
                 <span
-                  class="font-['JetBrains_Mono'] text-xs text-[#E8931A] font-bold uppercase"
+                  class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] font-bold uppercase"
                 >
                   {{ course()?.level }} LEVEL
                 </span>
@@ -71,14 +71,14 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
               >
                 <div class="flex items-center gap-2">
                   <span
-                    class="material-symbols-outlined text-[#378ADD] text-base"
+                    class="material-symbols-outlined text-[#3B82F6] text-base"
                     >schedule</span
                   >
                   {{ getTotalDurationMinutes() }} Minutes Total
                 </div>
                 <div class="flex items-center gap-2">
                   <span
-                    class="material-symbols-outlined text-[#378ADD] text-base"
+                    class="material-symbols-outlined text-[#3B82F6] text-base"
                     >layers</span
                   >
                   {{ getTotalModules() }} Sections ·
@@ -86,14 +86,14 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                 </div>
                 <div class="flex items-center gap-2">
                   <span
-                    class="material-symbols-outlined text-[#378ADD] text-base"
+                    class="material-symbols-outlined text-[#3B82F6] text-base"
                     >verified</span
                   >
                   Certificate Included
                 </div>
                 <div class="flex items-center gap-2">
                   <span
-                    class="material-symbols-outlined text-[#E8931A] text-base"
+                    class="material-symbols-outlined text-[#3B82F6] text-base"
                     >star</span
                   >
                   {{ (course()?.rating || 0) | number: '1.1-1' }}
@@ -125,7 +125,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                     <button
                       type="button"
                       (click)="playPromo()"
-                      class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/25 hover:bg-black/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#E8931A]"
+                      class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/25 hover:bg-black/40 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#3B82F6]"
                       aria-label="Play course preview"
                     >
                       <span class="w-16 h-16 rounded-full bg-white text-[#111827] flex items-center justify-center shadow-2xl transition-transform group-hover:scale-105">
@@ -153,7 +153,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                 }
               </div>
               <div
-                class="font-['JetBrains_Mono'] text-xs text-[#378ADD] uppercase tracking-widest font-semibold"
+                class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] uppercase tracking-widest font-semibold"
               >
                 // INSTANT ACCESS
               </div>
@@ -161,11 +161,11 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
               <div class="flex items-baseline justify-between gap-4">
                 @if (course()?.isFree) {
                   <span
-                    class="font-['JetBrains_Mono'] text-3xl font-bold text-[#E8931A]"
+                    class="font-['JetBrains_Mono'] text-3xl font-bold text-[#3B82F6]"
                     >FREE</span
                   >
                   <span
-                    class="font-['JetBrains_Mono'] text-xs text-[#E8931A] font-semibold text-right"
+                    class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] font-semibold text-right"
                     >LOGGED-IN STUDENTS ONLY</span
                   >
                 } @else {
@@ -174,7 +174,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                     >₹{{ course()?.price?.toLocaleString('en-IN') }}</span
                   >
                   <span
-                    class="font-['JetBrains_Mono'] text-xs text-[#E8931A] font-semibold"
+                    class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] font-semibold"
                     >ONE-TIME OR MEMBERSHIP</span
                   >
                 }
@@ -184,7 +184,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                 @if (isEnrolled()) {
                   <a
                     [routerLink]="['/courses', course()?.slug, 'watch', getFirstLessonId()]"
-                    class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#378ADD] py-4 rounded font-bold hover:bg-[#378ADD]/90 transition-all flex items-center justify-center gap-2 shadow-lg"
+                    class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#3B82F6] py-4 rounded font-bold hover:bg-[#3B82F6]/90 transition-all flex items-center justify-center gap-2 shadow-lg"
                   >
                     Start learning
                     <span class="material-symbols-outlined text-sm">play_arrow</span>
@@ -194,7 +194,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                     type="button"
                     (click)="enrollInFreeCourse()"
                     [disabled]="isEnrolling()"
-                    class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#E8931A] py-4 rounded font-bold hover:bg-[#E8931A]/90 transition-all flex items-center justify-center gap-2 shadow-lg disabled:opacity-60"
+                    class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#3B82F6] py-4 rounded font-bold hover:bg-[#3B82F6]/90 transition-all flex items-center justify-center gap-2 shadow-lg disabled:opacity-60"
                   >
                     {{ isEnrolling() ? 'Enrolling...' : 'Enroll for free' }}
                     <span class="material-symbols-outlined text-sm">arrow_forward</span>
@@ -209,7 +209,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                 <a
                   [routerLink]="['/checkout']"
                   [queryParams]="{ courseId: course()?.id, slug: course()?.slug }"
-                  class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#E8931A] py-4 rounded font-bold hover:bg-[#E8931A]/90 transition-all flex items-center justify-center gap-2 shadow-lg"
+                  class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#3B82F6] py-4 rounded font-bold hover:bg-[#3B82F6]/90 transition-all flex items-center justify-center gap-2 shadow-lg"
                 >
                   Enroll in Course Now
                   <span class="material-symbols-outlined text-sm">arrow_forward</span>
@@ -218,7 +218,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
 
               <a
                 routerLink="/membership"
-                class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#378ADD] border border-[#378ADD] py-3.5 rounded font-semibold hover:bg-[#378ADD]/10 transition-colors"
+                class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#3B82F6] border border-[#3B82F6] py-3.5 rounded font-semibold hover:bg-[#3B82F6]/10 transition-colors"
               >
                 Get All Courses with Membership
               </a>
@@ -244,7 +244,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                 <h2
                   class="font-['Hanken_Grotesk'] text-2xl font-bold text-white flex items-center gap-2"
                 >
-                  <span class="material-symbols-outlined text-[#E8931A]"
+                  <span class="material-symbols-outlined text-[#3B82F6]"
                     >account_tree</span
                   >
                   Course content
@@ -258,7 +258,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
               <button
                 type="button"
                 (click)="toggleAllModules()"
-                class="font-['JetBrains_Mono'] text-xs text-[#378ADD] hover:text-[#E8931A] transition-colors text-left sm:text-right"
+                class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] hover:text-[#3B82F6] transition-colors text-left sm:text-right"
               >
                 {{
                   allModulesExpanded()
@@ -280,7 +280,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                   >
                     <span class="flex items-center gap-3 min-w-0">
                       <span
-                        class="material-symbols-outlined text-[#E8931A] text-lg"
+                        class="material-symbols-outlined text-[#3B82F6] text-lg"
                         >{{
                           isModuleExpanded(module.id)
                             ? 'expand_less'
@@ -293,7 +293,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                       >
                     </span>
                     <span
-                      class="font-['JetBrains_Mono'] text-xs text-[#378ADD] whitespace-nowrap"
+                      class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] whitespace-nowrap"
                     >
                       {{ module.lessons ? module.lessons.length : 0 }} lectures
                       · {{ getModuleDurationMinutes(module) }}m
@@ -309,7 +309,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                         >
                           <div class="flex items-center gap-3 min-w-0">
                             <span
-                              class="material-symbols-outlined text-[#378ADD] text-sm"
+                              class="material-symbols-outlined text-[#3B82F6] text-sm"
                               >{{ lesson.isFreePreview ? 'play_circle' : 'lock' }}</span
                             >
                             <span
@@ -321,7 +321,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                           <div class="flex items-center gap-3 shrink-0">
                             @if (lesson.isFreePreview) {
                               <span
-                                class="font-['JetBrains_Mono'] text-[10px] text-[#E8931A] border border-[#E8931A]/40 px-2 py-0.5 rounded uppercase font-semibold"
+                                class="font-['JetBrains_Mono'] text-[10px] text-[#3B82F6] border border-[#3B82F6]/40 px-2 py-0.5 rounded uppercase font-semibold"
                               >
                                 WATCH PREVIEW
                               </span>
@@ -345,13 +345,13 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
           <div class="flex flex-col gap-8">
             <div class="bg-[#121A2B] technical-border rounded p-6">
               <h3
-                class="font-['JetBrains_Mono'] text-xs uppercase text-[#E8931A] tracking-wider font-bold mb-4"
+                class="font-['JetBrains_Mono'] text-xs uppercase text-[#3B82F6] tracking-wider font-bold mb-4"
               >
                 // THIS COURSE INCLUDES
               </h3>
               <div class="flex items-center gap-4 mb-4">
                 <div
-                  class="w-12 h-12 rounded-full bg-[#E8931A] text-[#040810] font-bold text-xl flex items-center justify-center font-['Hanken_Grotesk']"
+                  class="w-12 h-12 rounded-full bg-[#3B82F6] text-[#040810] font-bold text-xl flex items-center justify-center font-['Hanken_Grotesk']"
                 >
                   {{ getInstructorInitials() }}
                 </div>
@@ -381,7 +381,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                 </div>
                 <div class="flex items-center justify-between gap-3">
                   <span>Certificate</span
-                  ><span class="text-[#E8931A]">Included</span>
+                  ><span class="text-[#3B82F6]">Included</span>
                 </div>
               </div>
             </div>
@@ -394,7 +394,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
             <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
               <div>
                 <h2 class="font-['Hanken_Grotesk'] text-2xl font-bold text-white flex items-center gap-2">
-                  <span class="material-symbols-outlined text-[#E8931A]">reviews</span>
+                  <span class="material-symbols-outlined text-[#3B82F6]">reviews</span>
                   Student reviews
                 </h2>
                 <p class="font-['Inter'] text-sm text-[#a18d7b] mt-2">
@@ -409,7 +409,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                   <article class="bg-[#121A2B] technical-border rounded p-5">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                       <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-[#E8931A] text-[#040810] font-bold flex items-center justify-center">
+                        <div class="w-9 h-9 rounded-full bg-[#3B82F6] text-[#040810] font-bold flex items-center justify-center">
                           {{ review.user.name.charAt(0).toUpperCase() }}
                         </div>
                         <div>
@@ -417,7 +417,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                           <div class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b]">{{ review.createdAt | date: 'mediumDate' }}</div>
                         </div>
                       </div>
-                      <div class="font-['JetBrains_Mono'] text-sm text-[#E8931A]" [attr.aria-label]="review.rating + ' out of 5 stars'">
+                      <div class="font-['JetBrains_Mono'] text-sm text-[#3B82F6]" [attr.aria-label]="review.rating + ' out of 5 stars'">
                         {{ '★'.repeat(review.rating) }}{{ '☆'.repeat(5 - review.rating) }}
                       </div>
                     </div>
@@ -426,7 +426,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                 }
               </div>
             } @else {
-              <div class="bg-[#121A2B] border border-dashed border-[#378ADD]/50 rounded p-6 font-['Inter'] text-sm text-[#a18d7b]">
+              <div class="bg-[#121A2B] border border-dashed border-[#3B82F6]/50 rounded p-6 font-['Inter'] text-sm text-[#a18d7b]">
                 No reviews yet. Be the first enrolled student to share your experience.
               </div>
             }
@@ -440,9 +440,9 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                       type="button"
                       (click)="reviewRating = star"
                       [attr.aria-label]="star + ' stars'"
-                      [class.text-[#E8931A]]="star <= reviewRating"
+                      [class.text-[#3B82F6]]="star <= reviewRating"
                       [class.text-[#a18d7b]]="star > reviewRating"
-                      class="text-2xl leading-none hover:text-[#E8931A] transition-colors"
+                      class="text-2xl leading-none hover:text-[#3B82F6] transition-colors"
                     >★</button>
                   }
                   <span class="font-['JetBrains_Mono'] text-xs text-[#a18d7b] ml-2">{{ reviewRating }}/5</span>
@@ -452,24 +452,24 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                   rows="4"
                   maxlength="2000"
                   placeholder="What did you think about this course?"
-                  class="w-full bg-[#040810] border border-[#1E293B] focus:border-[#E8931A] focus:outline-none rounded px-4 py-3 text-sm text-white font-['Inter'] mb-4"
+                  class="w-full bg-[#040810] border border-[#1E293B] focus:border-[#3B82F6] focus:outline-none rounded px-4 py-3 text-sm text-white font-['Inter'] mb-4"
                 ></textarea>
                 <div class="flex flex-wrap items-center gap-4">
                   <button
                     type="button"
                     (click)="submitReview()"
                     [disabled]="isSubmittingReview() || reviewRating === 0 || reviewComment.trim().length < 10"
-                    class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] bg-[#E8931A] px-5 py-3 rounded hover:bg-[#f6a52a] disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] bg-[#3B82F6] px-5 py-3 rounded hover:bg-[#2563eb] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {{ isSubmittingReview() ? 'Saving...' : 'Publish review' }}
                   </button>
                   @if (reviewMessage()) {
-                    <span class="font-['Inter'] text-xs text-[#378ADD]">{{ reviewMessage() }}</span>
+                    <span class="font-['Inter'] text-xs text-[#3B82F6]">{{ reviewMessage() }}</span>
                   }
                 </div>
               } @else if (!authService.isAuthenticated()) {
                 <p class="font-['Inter'] text-sm text-[#d9c3af]">
-                  <a routerLink="/auth/login" [queryParams]="{ returnUrl: router.url }" class="text-[#378ADD] hover:underline">Sign in</a>
+                  <a routerLink="/auth/login" [queryParams]="{ returnUrl: router.url }" class="text-[#3B82F6] hover:underline">Sign in</a>
                   and enroll to leave a course review.
                 </p>
               } @else {
