@@ -43,9 +43,12 @@ import {
           </span>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3">
           @if (saveMessage()) {
-            <span class="hidden lg:flex items-center gap-1.5 font-['JetBrains_Mono'] text-[11px] text-[#86efac]"><span class="material-symbols-outlined text-sm">check_circle</span>{{ saveMessage() }}</span>
+            <span class="flex items-center gap-1.5 font-['JetBrains_Mono'] text-xs font-bold text-emerald-400 bg-emerald-950/70 border border-emerald-500/50 px-3.5 py-1.5 rounded-lg shadow-sm animate-in fade-in duration-200">
+              <span class="material-symbols-outlined text-sm">check_circle</span>
+              {{ saveMessage() }}
+            </span>
           }
           <!-- LIVE / DRAFT Status Toggle Button -->
           <button
@@ -855,7 +858,8 @@ export class CourseEditorComponent implements OnInit {
         this.modules.set(saved.modules || []);
         this.promoEmbedUrl.set(this.toPromoEmbedUrl(saved.promoVideoUrl));
         this.isSaving.set(false);
-        this.showSavedMessage('All changes saved');
+        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        this.showSavedMessage(`Course & curriculum saved at ${timeStr}! Live in store.`);
       },
       error: (error) => {
         this.isSaving.set(false);
@@ -866,7 +870,7 @@ export class CourseEditorComponent implements OnInit {
 
   private showSavedMessage(message: string) {
     this.saveMessage.set(message);
-    setTimeout(() => this.saveMessage.set(''), 2500);
+    setTimeout(() => this.saveMessage.set(''), 6000);
   }
 
   deleteCurrentCourse() {

@@ -9,74 +9,78 @@ import { ThemeService } from '../../services/theme.service';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <nav class="fixed top-0 w-full z-50 bg-[#121A2B]/85 backdrop-blur-xl border-b border-[#1E293B] flex justify-between items-center h-16 px-4 md:px-12 max-w-full">
+    <nav class="fixed top-0 w-full z-50 transition-colors duration-200 border-b flex justify-between items-center h-16 px-4 md:px-12 max-w-full backdrop-blur-xl bg-white/90 border-slate-200/80 text-slate-800 dark:bg-[#040810]/90 dark:border-white/10 dark:text-white">
       <div class="flex items-center gap-8">
-        <a routerLink="/" class="font-['Hanken_Grotesk'] text-xl font-bold text-white tracking-tighter hover:text-[#3B82F6] transition-colors">
-          Technyks <span class="text-[#3B82F6]">Academy</span>
+        <a routerLink="/" class="font-['Hanken_Grotesk'] text-xl font-bold tracking-tight transition-colors flex items-center gap-1.5">
+          <span class="text-slate-900 dark:text-white">Technyks</span>
+          <span class="text-[#2563EB] dark:text-[#3B82F6]">Academy</span>
         </a>
         
         <div class="hidden md:flex gap-6 items-center ml-4">
-          <a routerLink="/" routerLinkActive="text-[#3B82F6] font-bold border-b-2 border-[#3B82F6] pb-1" [routerLinkActiveOptions]="{exact: true}" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#d9c3af] hover:text-[#3B82F6] transition-colors">
+          <a routerLink="/" routerLinkActive="text-[#2563EB] dark:text-[#3B82F6] font-bold border-b-2 border-[#2563EB] dark:border-[#3B82F6]" [routerLinkActiveOptions]="{exact: true}" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-slate-600 hover:text-[#2563EB] dark:text-slate-300 dark:hover:text-[#3B82F6] pb-1 transition-colors">
             Home
           </a>
 
-          <a routerLink="/courses" routerLinkActive="text-[#3B82F6] font-bold border-b-2 border-[#3B82F6] pb-1" [routerLinkActiveOptions]="{exact: false}" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#d9c3af] hover:text-[#3B82F6] transition-colors">
+          <a routerLink="/courses" routerLinkActive="text-[#2563EB] dark:text-[#3B82F6] font-bold border-b-2 border-[#2563EB] dark:border-[#3B82F6]" [routerLinkActiveOptions]="{exact: false}" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-slate-600 hover:text-[#2563EB] dark:text-slate-300 dark:hover:text-[#3B82F6] pb-1 transition-colors">
             Courses
           </a>
           
-          <a routerLink="/membership" routerLinkActive="text-[#3B82F6] font-bold border-b-2 border-[#3B82F6] pb-1" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#d9c3af] hover:text-[#3B82F6] transition-colors">
+          <a routerLink="/membership" routerLinkActive="text-[#2563EB] dark:text-[#3B82F6] font-bold border-b-2 border-[#2563EB] dark:border-[#3B82F6]" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-slate-600 hover:text-[#2563EB] dark:text-slate-300 dark:hover:text-[#3B82F6] pb-1 transition-colors">
             Membership
           </a>
           
-          <a routerLink="/contact" routerLinkActive="text-[#3B82F6] font-bold border-b-2 border-[#3B82F6] pb-1" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#d9c3af] hover:text-[#3B82F6] transition-colors">
+          <a routerLink="/contact" routerLinkActive="text-[#2563EB] dark:text-[#3B82F6] font-bold border-b-2 border-[#2563EB] dark:border-[#3B82F6]" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-slate-600 hover:text-[#2563EB] dark:text-slate-300 dark:hover:text-[#3B82F6] pb-1 transition-colors">
             Contact
           </a>
           
-          @if (authService.isAdmin()) {
-            <a routerLink="/admin" routerLinkActive="text-[#3B82F6] font-bold border-b-2 border-[#3B82F6] pb-1" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#3B82F6] hover:underline transition-colors flex items-center gap-1">
-              <span class="material-symbols-outlined text-sm">admin_panel_settings</span>
-              Admin
-            </a>
-          }
+          <a routerLink="/admin" routerLinkActive="text-[#2563EB] dark:text-[#3B82F6] font-bold border-b-2 border-[#2563EB] dark:border-[#3B82F6]" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-slate-600 hover:text-[#2563EB] dark:text-slate-300 dark:hover:text-[#3B82F6] pb-1 transition-colors flex items-center gap-1">
+            <span class="material-symbols-outlined text-[16px]">headphones</span>
+            Admin
+          </a>
         </div>
       </div>
 
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-3 md:gap-4">
+        <!-- Theme Toggle Button -->
         <button
           type="button"
-          class="theme-toggle inline-grid h-9 w-9 place-items-center transition-colors"
+          class="inline-grid h-9 w-9 place-items-center rounded-full border border-slate-200 text-slate-600 hover:text-[#2563EB] hover:border-[#2563EB] bg-white transition-all dark:border-white/15 dark:text-slate-300 dark:bg-[#0b101d] dark:hover:text-white dark:hover:border-white/30 shadow-sm"
           (click)="themeService.toggle()"
           [attr.aria-label]="themeService.isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
           [title]="themeService.isDarkMode() ? 'Switch to light mode' : 'Switch to dark mode'"
         >
-          <span class="material-symbols-outlined text-[19px]" aria-hidden="true">{{ themeService.isDarkMode() ? 'light_mode' : 'dark_mode' }}</span>
+          <span class="material-symbols-outlined text-[18px]" aria-hidden="true">{{ themeService.isDarkMode() ? 'dark_mode' : 'light_mode' }}</span>
         </button>
 
+        <!-- Profile Avatar Button -->
+        <a
+          routerLink="/dashboard"
+          class="inline-grid h-9 w-9 place-items-center rounded-full border border-slate-200 text-slate-600 hover:text-[#2563EB] hover:border-[#2563EB] bg-white transition-all dark:border-white/15 dark:text-slate-300 dark:bg-[#0b101d] dark:hover:text-white dark:hover:border-white/30 shadow-sm"
+          [attr.aria-label]="'Open dashboard for ' + (authService.currentUser()?.name || 'your account')"
+          [title]="authService.currentUser()?.name || 'Open your dashboard'"
+        >
+          <span class="material-symbols-outlined text-[19px]">account_circle</span>
+        </a>
+
+        <!-- Auth Button (LOGOUT / LOGIN) -->
         @if (authService.isAuthenticated()) {
-          <div class="flex items-center gap-3">
-            <a
-              routerLink="/dashboard"
-              class="profile-link"
-              [attr.aria-label]="'Open dashboard for ' + (authService.currentUser()?.name || 'your account')"
-              [title]="authService.currentUser()?.name || 'Open your dashboard'"
-            >
-              <span class="material-symbols-outlined text-[20px]">account_circle</span>
-            </a>
-            <button (click)="authService.logout()" class="font-['JetBrains_Mono'] text-xs uppercase text-[#ffb4ab] border border-[#ffb4ab]/40 hover:bg-[#ffb4ab]/10 px-3 py-1.5 rounded transition-colors">
-              Logout
-            </button>
-          </div>
+          <button
+            (click)="authService.logout()"
+            class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold text-white px-5 py-2.5 rounded-full transition-all shadow-md bg-[#1D4ED8] hover:bg-[#1E40AF] dark:bg-gradient-to-r dark:from-[#9333EA] dark:to-[#2563EB] dark:hover:from-[#7E22CE] dark:hover:to-[#1D4ED8] dark:shadow-[0_0_15px_rgba(147,51,234,0.4)]"
+          >
+            Logout
+          </button>
         } @else {
-          <a routerLink="/auth/login" class="hidden md:inline-block font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#3B82F6] border border-[#3B82F6] px-4 py-2 rounded hover:bg-[#3B82F6]/10 transition-colors">
+          <a
+            routerLink="/auth/login"
+            class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold text-white px-5 py-2.5 rounded-full transition-all shadow-md bg-[#1D4ED8] hover:bg-[#1E40AF] dark:bg-gradient-to-r dark:from-[#9333EA] dark:to-[#2563EB] dark:hover:from-[#7E22CE] dark:hover:to-[#1D4ED8] dark:shadow-[0_0_15px_rgba(147,51,234,0.4)]"
+          >
             Login
-          </a>
-          <a routerLink="/auth/signup" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#3B82F6] px-4 py-2 rounded font-bold hover:bg-[#3B82F6]/90 transition-colors shadow-md">
-            Start Learning
           </a>
         }
         
         <!-- Mobile Menu Toggle Button -->
-        <button (click)="toggleMobileMenu()" class="md:hidden text-[#e0e3e5] focus:outline-none p-1">
+        <button (click)="toggleMobileMenu()" class="md:hidden text-slate-700 dark:text-slate-200 focus:outline-none p-1">
           <span class="material-symbols-outlined">{{ isMobileMenuOpen() ? 'close' : 'menu' }}</span>
         </button>
       </div>
@@ -84,33 +88,37 @@ import { ThemeService } from '../../services/theme.service';
 
     <!-- Mobile Dropdown Navigation -->
     @if (isMobileMenuOpen()) {
-      <div class="md:hidden fixed top-16 left-0 w-full bg-[#121A2B] border-b border-[#1E293B] z-40 p-6 flex flex-col gap-4 animate-in slide-in-from-top-2 duration-200">
-        <a routerLink="/" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-[#d9c3af] hover:text-[#3B82F6] py-2 border-b border-[#1E293B]/50">
+      <div class="md:hidden fixed top-16 left-0 w-full bg-white dark:bg-[#121A2B] border-b border-slate-200 dark:border-[#1E293B] z-40 p-6 flex flex-col gap-4 animate-in slide-in-from-top-2 duration-200 shadow-xl">
+        <a routerLink="/" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-slate-700 dark:text-[#d9c3af] hover:text-[#2563EB] py-2 border-b border-slate-100 dark:border-[#1E293B]/50">
           Home
         </a>
-
-        <a routerLink="/courses" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-[#d9c3af] hover:text-[#3B82F6] py-2 border-b border-[#1E293B]/50">
+        <a routerLink="/courses" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-slate-700 dark:text-[#d9c3af] hover:text-[#2563EB] py-2 border-b border-slate-100 dark:border-[#1E293B]/50">
           Courses
         </a>
-        <a routerLink="/membership" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-[#d9c3af] hover:text-[#3B82F6] py-2 border-b border-[#1E293B]/50">
+        <a routerLink="/membership" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-slate-700 dark:text-[#d9c3af] hover:text-[#2563EB] py-2 border-b border-slate-100 dark:border-[#1E293B]/50">
           Membership
         </a>
-        <a routerLink="/contact" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-[#d9c3af] hover:text-[#3B82F6] py-2 border-b border-[#1E293B]/50">
+        <a routerLink="/contact" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-slate-700 dark:text-[#d9c3af] hover:text-[#2563EB] py-2 border-b border-slate-100 dark:border-[#1E293B]/50">
           Contact
         </a>
+        <a routerLink="/admin" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-slate-700 dark:text-[#d9c3af] hover:text-[#2563EB] py-2 border-b border-slate-100 dark:border-[#1E293B]/50 flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">headphones</span>
+          Admin
+        </a>
+
         @if (authService.isAuthenticated()) {
           <div class="pt-2 flex flex-col gap-3">
-            <a routerLink="/dashboard" (click)="closeMobileMenu()" class="profile-link w-full rounded font-['JetBrains_Mono'] text-xs uppercase gap-2 py-2.5">
+            <a routerLink="/dashboard" (click)="closeMobileMenu()" class="text-slate-700 dark:text-slate-200 font-['JetBrains_Mono'] text-xs uppercase flex items-center gap-2 py-2">
               <span class="material-symbols-outlined text-[20px]">account_circle</span>
               My dashboard
             </a>
-            <button (click)="authService.logout(); closeMobileMenu()" class="text-center font-['JetBrains_Mono'] text-xs uppercase text-[#ffb4ab] border border-[#ffb4ab]/40 py-2.5 rounded">
+            <button (click)="authService.logout(); closeMobileMenu()" class="text-center font-['JetBrains_Mono'] text-xs uppercase text-red-500 border border-red-300 dark:border-red-500/40 py-2.5 rounded-full">
               Logout
             </button>
           </div>
         } @else {
           <div class="flex flex-col gap-3 pt-2">
-            <a routerLink="/auth/login" (click)="closeMobileMenu()" class="text-center font-['JetBrains_Mono'] text-xs uppercase text-[#3B82F6] border border-[#3B82F6] py-2.5 rounded">
+            <a routerLink="/auth/login" (click)="closeMobileMenu()" class="text-center font-['JetBrains_Mono'] text-xs uppercase text-white bg-[#1D4ED8] py-2.5 rounded-full">
               Login
             </a>
           </div>

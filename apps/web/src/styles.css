@@ -90,43 +90,33 @@ body.dark-theme {
 }
 
 .hero-background {
-  background-image: url('/assets/hero-coding-workspace.png');
+  background-image: url('/assets/hero-light-reference.jpg');
   opacity: 1;
   background-position: center;
   background-size: cover;
-  filter: saturate(.9) contrast(.96) brightness(.94);
-  transform: scale(1.03);
+  transform: scale(1.02);
 }
 
 .hero-overlay {
-  background: rgba(0, 0, 0, .7);
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.78) 45%, rgba(255, 255, 255, 0.25) 100%);
 }
 
-/* Keep the full-bleed coding scene visible in light mode while the layered
-   tint protects the centered headline and calls to action from low contrast. */
 .light-theme .hero-background {
+  background-image: url('/assets/hero-light-reference.jpg');
   opacity: 1;
-  filter: saturate(.86) contrast(.96) brightness(.98);
 }
 
 .light-theme .hero-overlay {
-  background: rgba(255, 255, 255, .7);
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.78) 45%, rgba(255, 255, 255, 0.2) 100%);
 }
 
 .dark-theme .hero-background {
+  background-image: url('/assets/hero-dark-reference.jpg');
   opacity: 1;
-  filter: saturate(.94) contrast(.98) brightness(.82);
 }
 
 .dark-theme .hero-overlay {
-  background: rgba(0, 0, 0, .7);
-}
-
-/* The hero keeps the image at full strength while the theme supplies a
-   dedicated 70% readability layer above it. */
-.light-theme .hero-content h1,
-.light-theme .hero-content p {
-  color: #172033 !important;
+  background: radial-gradient(ellipse at center, rgba(4, 7, 17, 0.94) 0%, rgba(4, 7, 17, 0.75) 45%, rgba(4, 7, 17, 0.3) 100%);
 }
 
 .typing-caret {

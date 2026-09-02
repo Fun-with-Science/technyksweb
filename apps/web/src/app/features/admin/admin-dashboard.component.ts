@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
@@ -10,6 +10,7 @@ import {
   MembershipPlan,
 } from '../../core/services/admin.service';
 import { CoursesService, Course } from '../../core/services/courses.service';
+import { ContactService, ContactMessage } from '../../core/services/contact.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -37,14 +38,14 @@ import { CoursesService, Course } from '../../core/services/courses.service';
       </div>
 
       <!-- Navigation Tabs -->
-      <div class="flex gap-6 border-b border-[#1E293B] mb-8 font-['JetBrains_Mono'] text-xs uppercase">
+      <div class="flex gap-6 border-b border-[#1E293B] mb-8 font-['JetBrains_Mono'] text-xs uppercase overflow-x-auto">
         <button
           (click)="activeTab.set('courses')"
           [class.border-b-2]="activeTab() === 'courses'"
           [class.border-[#3B82F6]]="activeTab() === 'courses'"
           [class.text-[#3B82F6]]="activeTab() === 'courses'"
           [class.text-[#d9c3af]]="activeTab() !== 'courses'"
-          class="pb-3 px-1 font-bold transition-colors"
+          class="pb-3 px-1 font-bold transition-colors shrink-0"
         >
           Courses (Udemy Roster)
         </button>
@@ -55,7 +56,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
           [class.border-[#3B82F6]]="activeTab() === 'revenue'"
           [class.text-[#3B82F6]]="activeTab() === 'revenue'"
           [class.text-[#d9c3af]]="activeTab() !== 'revenue'"
-          class="pb-3 px-1 font-bold transition-colors"
+          class="pb-3 px-1 font-bold transition-colors shrink-0"
         >
           Analytics & Revenue
         </button>
@@ -66,7 +67,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
           [class.border-[#3B82F6]]="activeTab() === 'students'"
           [class.text-[#3B82F6]]="activeTab() === 'students'"
           [class.text-[#d9c3af]]="activeTab() !== 'students'"
-          class="pb-3 px-1 font-bold transition-colors"
+          class="pb-3 px-1 font-bold transition-colors shrink-0"
         >
           Students
         </button>
@@ -77,7 +78,7 @@ import { CoursesService, Course } from '../../core/services/courses.service';
           [class.border-[#3B82F6]]="activeTab() === 'coupons'"
           [class.text-[#3B82F6]]="activeTab() === 'coupons'"
           [class.text-[#d9c3af]]="activeTab() !== 'coupons'"
-          class="pb-3 px-1 font-bold transition-colors"
+          class="pb-3 px-1 font-bold transition-colors shrink-0"
         >
           Coupons
         </button>
@@ -88,9 +89,25 @@ import { CoursesService, Course } from '../../core/services/courses.service';
           [class.border-[#3B82F6]]="activeTab() === 'membership'"
           [class.text-[#3B82F6]]="activeTab() === 'membership'"
           [class.text-[#d9c3af]]="activeTab() !== 'membership'"
-          class="pb-3 px-1 font-bold transition-colors"
+          class="pb-3 px-1 font-bold transition-colors shrink-0"
         >
           Membership Program
+        </button>
+
+        <button
+          (click)="activeTab.set('support')"
+          [class.border-b-2]="activeTab() === 'support'"
+          [class.border-[#3B82F6]]="activeTab() === 'support'"
+          [class.text-[#3B82F6]]="activeTab() === 'support'"
+          [class.text-[#d9c3af]]="activeTab() !== 'support'"
+          class="pb-3 px-1 font-bold transition-colors shrink-0 flex items-center gap-2"
+        >
+          <span>Support & Messages</span>
+          @if (unreadMessagesCount() > 0) {
+            <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-[#3B82F6] text-[#040810] font-extrabold">
+              {{ unreadMessagesCount() }}
+            </span>
+          }
         </button>
       </div>
 
@@ -306,7 +323,13 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                   <td class="p-3"><div class="flex items-center gap-2"><span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b]">{{ coupon.scope }}</span>@if (coupon.discountPercent) {<input type="number" min="1" max="100" [ngModel]="coupon.discountPercent" (ngModelChange)="updateCouponField(coupon.id, 'discountPercent', $event)" class="w-20 border border-[#1E293B] bg-[#040810] px-2 py-1.5 font-['JetBrains_Mono'] text-white" /><span>%</span>} @else {<span>₹</span><input type="number" min="1" [ngModel]="coupon.discountAmount" (ngModelChange)="updateCouponField(coupon.id, 'discountAmount', $event)" class="w-24 border border-[#1E293B] bg-[#040810] px-2 py-1.5 font-['JetBrains_Mono'] text-white" />}</div></td>
                   <td class="p-3 font-['JetBrains_Mono'] text-[#3B82F6]">{{ coupon.timesUsed }} / Unlimited</td>
                   <td class="p-3 text-right">
-                    <button (click)="saveCoupon(coupon)" [disabled]="savingCouponId() === coupon.id" class="mr-4 font-['JetBrains_Mono'] text-[11px] font-bold text-[#3B82F6] hover:underline disabled:opacity-50">{{ savingCouponId() === coupon.id ? 'Saving…' : 'Save' }}</button><button (click)="deleteCoupon(coupon.id)" class="font-['JetBrains_Mono'] text-[11px] text-[#ffb4ab] hover:underline">Delete</button>
+                    <button (click)="saveCoupon(coupon)" [disabled]="savingCouponId() === coupon.id" class="mr-4 font-['JetBrains_Mono'] text-[11px] font-bold text-[#3B82F6] hover:underline disabled:opacity-50">
+                      {{ savingCouponId() === coupon.id ? 'Saving…' : (lastSavedCouponId() === coupon.id ? '✓ Saved!' : 'Save') }}
+                    </button>
+                    <button (click)="deleteCoupon(coupon.id)" class="font-['JetBrains_Mono'] text-[11px] text-[#ffb4ab] hover:underline">Delete</button>
+                    @if (lastSavedCouponId() === coupon.id) {
+                      <div class="text-[10px] font-['JetBrains_Mono'] text-emerald-400 mt-1">✓ Saved at {{ lastSavedTime() }}</div>
+                    }
                   </td>
                 </tr>
               }
@@ -333,7 +356,13 @@ import { CoursesService, Course } from '../../core/services/courses.service';
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <input type="text" [(ngModel)]="newMembershipCouponCode" placeholder="MEMBERSHIP CODE" class="bg-[#121A2B] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono'] uppercase" />
               <input type="number" min="0" [(ngModel)]="newMembershipCouponDiscount" placeholder="Discount (₹)" class="bg-[#121A2B] border border-[#1E293B] rounded px-3 py-2 text-xs text-white font-['JetBrains_Mono']" />
-              <button type="button" (click)="createMembershipCoupon()" class="font-['JetBrains_Mono'] text-xs font-bold text-[#040810] bg-[#3B82F6] py-2 rounded">Save membership coupon</button>
+              <button type="button" (click)="createMembershipCoupon()" class="font-['JetBrains_Mono'] text-xs font-bold text-[#040810] bg-[#3B82F6] hover:bg-[#2563EB] py-2 rounded transition-colors">Save membership coupon</button>
+              @if (membershipCouponFeedback()) {
+                <div class="sm:col-span-3 text-xs font-['JetBrains_Mono'] text-emerald-400 flex items-center gap-1.5 animate-in fade-in duration-200">
+                  <span class="material-symbols-outlined text-sm">check_circle</span>
+                  {{ membershipCouponFeedback() }}
+                </div>
+              }
             </div>
           </div>
 
@@ -386,12 +415,112 @@ import { CoursesService, Course } from '../../core/services/courses.service';
                     </div>
                   }
 
-                  <div class="flex items-center gap-4"><button type="button" (click)="saveMembershipPlan(plan)" [disabled]="savingMembershipPlanId() === plan.id" class="self-start bg-[#3B82F6] px-5 py-2.5 font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] hover:bg-[#2563eb] disabled:opacity-60">{{ savingMembershipPlanId() === plan.id ? 'Saving...' : 'Save membership plan' }}</button><button type="button" (click)="deleteMembershipPlan(plan)" class="font-['JetBrains_Mono'] text-[11px] text-[#ffb4ab] hover:underline">Delete plan</button></div>
+                  <div class="flex flex-col gap-2">
+                    <div class="flex items-center gap-4">
+                      <button type="button" (click)="saveMembershipPlan(plan)" [disabled]="savingMembershipPlanId() === plan.id" class="self-start bg-[#3B82F6] px-5 py-2.5 font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] hover:bg-[#2563eb] disabled:opacity-60 transition-all flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-sm">{{ savingMembershipPlanId() === plan.id ? 'progress_activity' : (lastSavedPlanId() === plan.id ? 'check_circle' : 'save') }}</span>
+                        {{ savingMembershipPlanId() === plan.id ? 'Saving...' : (lastSavedPlanId() === plan.id ? 'Saved!' : 'Save membership plan') }}
+                      </button>
+                      <button type="button" (click)="deleteMembershipPlan(plan)" class="font-['JetBrains_Mono'] text-[11px] text-[#ffb4ab] hover:underline">Delete plan</button>
+                    </div>
+                    @if (lastSavedPlanId() === plan.id) {
+                      <div class="text-xs font-['JetBrains_Mono'] text-emerald-400 flex items-center gap-1.5 animate-in fade-in duration-200">
+                        <span class="material-symbols-outlined text-sm">check_circle</span>
+                        Plan saved successfully at {{ lastSavedTime() }}! Changes are live on the website.
+                      </div>
+                    }
+                  </div>
                 </article>
               }
             </div>
           } @else {
             <div class="border border-dashed border-[#3B82F6]/50 rounded-lg px-6 py-14 text-center font-['Inter'] text-sm text-[#a18d7b]">Membership plans are not available yet.</div>
+          }
+        </div>
+      }
+
+      <!-- TAB 6: SUPPORT & CONTACT INQUIRIES -->
+      @if (activeTab() === 'support') {
+        <div class="flex flex-col gap-6">
+          <div class="flex items-start justify-between gap-4 border-b border-[#1E293B] pb-4">
+            <div>
+              <h2 class="font-['Hanken_Grotesk'] text-2xl font-bold text-white">Customer Support & Inquiries</h2>
+              <p class="font-['Inter'] text-xs text-[#d9c3af] mt-1">
+                Messages sent by students and prospective learners through the Contact form.
+              </p>
+            </div>
+            <div class="font-['JetBrains_Mono'] text-xs text-[#a18d7b] bg-[#121A2B] px-3.5 py-1.5 rounded border border-[#1E293B]">
+              Total Messages: {{ contactMessages().length }}
+            </div>
+          </div>
+
+          @if (contactMessages().length) {
+            <div class="grid grid-cols-1 gap-4">
+              @for (msg of contactMessages(); track msg.id) {
+                <div class="border border-[#1E293B] bg-[#040810]/70 rounded-xl p-5 flex flex-col gap-3 transition-all hover:border-[#3B82F6]/50 shadow-md">
+                  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div class="flex items-center gap-3">
+                      <span class="font-['Hanken_Grotesk'] text-base font-bold text-white">{{ msg.name }}</span>
+                      <a [href]="'mailto:' + msg.email" class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] hover:underline">{{ msg.email }}</a>
+                    </div>
+                    <div class="flex items-center gap-3">
+                      <span
+                        [class.bg-blue-900/40]="msg.status === 'NEW'"
+                        [class.text-blue-400]="msg.status === 'NEW'"
+                        [class.border-blue-500/30]="msg.status === 'NEW'"
+                        [class.bg-emerald-900/40]="msg.status === 'RESOLVED'"
+                        [class.text-emerald-400]="msg.status === 'RESOLVED'"
+                        [class.border-emerald-500/30]="msg.status === 'RESOLVED'"
+                        class="border px-2.5 py-0.5 rounded-full font-['JetBrains_Mono'] text-[10px] uppercase font-bold"
+                      >
+                        {{ msg.status }}
+                      </span>
+                      <span class="font-['JetBrains_Mono'] text-[11px] text-[#a18d7b]">{{ msg.createdAt | date:'medium' }}</span>
+                    </div>
+                  </div>
+
+                  <div class="font-['JetBrains_Mono'] text-xs font-semibold text-[#60A5FA]">
+                    Subject: {{ msg.subject }}
+                  </div>
+
+                  <p class="font-['Inter'] text-sm text-[#e0e3e5] leading-relaxed bg-[#121A2B]/60 border border-[#1E293B] p-4 rounded-lg">
+                    {{ msg.message }}
+                  </p>
+
+                  <div class="flex items-center justify-end gap-3 pt-2">
+                    <a
+                      [href]="'mailto:' + msg.email + '?subject=' + encodeUri('Re: ' + msg.subject)"
+                      class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#3B82F6] border border-[#3B82F6]/40 hover:bg-[#3B82F6]/10 px-3 py-1.5 rounded flex items-center gap-1.5 transition-colors"
+                    >
+                      <span class="material-symbols-outlined text-sm">reply</span>
+                      Reply via Email
+                    </a>
+
+                    <button
+                      (click)="toggleMessageStatus(msg.id)"
+                      class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-slate-300 border border-slate-700 hover:bg-slate-800 px-3 py-1.5 rounded flex items-center gap-1.5 transition-colors"
+                    >
+                      <span class="material-symbols-outlined text-sm">
+                        {{ msg.status === 'NEW' ? 'check_circle' : 'mark_chat_unread' }}
+                      </span>
+                      {{ msg.status === 'NEW' ? 'Mark Resolved' : 'Mark as New' }}
+                    </button>
+
+                    <button
+                      (click)="deleteMessage(msg.id)"
+                      class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-red-400 border border-red-500/30 hover:bg-red-500/10 px-3 py-1.5 rounded flex items-center gap-1.5 transition-colors"
+                    >
+                      <span class="material-symbols-outlined text-sm">delete</span>
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="border border-dashed border-[#1E293B] rounded-lg p-12 text-center font-['Inter'] text-sm text-[#a18d7b]">
+              No contact inquiries received yet. Any messages submitted via the Contact page will appear here instantly.
+            </div>
           }
         </div>
       }
@@ -401,15 +530,23 @@ import { CoursesService, Course } from '../../core/services/courses.service';
 export class AdminDashboardComponent implements OnInit {
   private adminService = inject(AdminService);
   private coursesService = inject(CoursesService);
+  private contactService = inject(ContactService);
   private router = inject(Router);
 
-  activeTab = signal<'courses' | 'revenue' | 'students' | 'coupons' | 'membership'>('courses');
+  activeTab = signal<'courses' | 'revenue' | 'students' | 'coupons' | 'membership' | 'support'>('courses');
   metrics = signal<RevenueMetrics | null>(null);
   students = signal<Student[]>([]);
   coupons = signal<Coupon[]>([]);
   membershipPlans = signal<MembershipPlan[]>([]);
+  contactMessages = signal<ContactMessage[]>([]);
+  unreadMessagesCount = computed(() => this.contactMessages().filter((m) => m.status === 'NEW').length);
+  
   savingMembershipPlanId = signal<string | null>(null);
   savingCouponId = signal<string | null>(null);
+  lastSavedPlanId = signal<string | null>(null);
+  lastSavedCouponId = signal<string | null>(null);
+  lastSavedTime = signal<string>('');
+  membershipCouponFeedback = signal<string>('');
   creatingMembershipPlan = signal(false);
   publishedCourses = signal<Course[]>([]);
   isLoadingCourses = signal(true);
@@ -427,6 +564,7 @@ export class AdminDashboardComponent implements OnInit {
       .subscribe((data) => this.students.set(data));
     this.adminService.getCoupons().subscribe((data) => this.coupons.set(data));
     this.adminService.getMembershipPlans().subscribe((data) => this.membershipPlans.set(data));
+    this.contactService.messages$.subscribe((messages) => this.contactMessages.set(messages));
   }
 
   loadCourses() {
@@ -527,6 +665,13 @@ export class AdminDashboardComponent implements OnInit {
       next: (saved) => {
         this.membershipPlans.update((plans) => plans.map((candidate) => candidate.id === saved.id ? saved : candidate));
         this.savingMembershipPlanId.set(null);
+        this.lastSavedPlanId.set(saved.id);
+        this.lastSavedTime.set(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+        setTimeout(() => {
+          if (this.lastSavedPlanId() === saved.id) {
+            this.lastSavedPlanId.set(null);
+          }
+        }, 6000);
       },
       error: () => {
         this.savingMembershipPlanId.set(null);
@@ -579,6 +724,13 @@ export class AdminDashboardComponent implements OnInit {
       next: (saved) => {
         this.coupons.update((coupons) => coupons.map((candidate) => candidate.id === saved.id ? saved : candidate));
         this.savingCouponId.set(null);
+        this.lastSavedCouponId.set(saved.id);
+        this.lastSavedTime.set(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+        setTimeout(() => {
+          if (this.lastSavedCouponId() === saved.id) {
+            this.lastSavedCouponId.set(null);
+          }
+        }, 6000);
       },
       error: (error) => {
         this.savingCouponId.set(null);
@@ -598,9 +750,24 @@ export class AdminDashboardComponent implements OnInit {
       next: (coupon) => {
         this.coupons.update((coupons) => [coupon, ...coupons]);
         this.newMembershipCouponCode = '';
+        this.membershipCouponFeedback.set(`Coupon "${coupon.code}" created and activated successfully!`);
+        setTimeout(() => this.membershipCouponFeedback.set(''), 6000);
       },
       error: (error) => alert(error?.error?.message || 'The membership coupon could not be created.'),
     });
+  }
+
+  toggleMessageStatus(id: string) {
+    this.contactService.toggleMessageStatus(id).subscribe();
+  }
+
+  deleteMessage(id: string) {
+    if (typeof window !== 'undefined' && !window.confirm('Delete this inquiry?')) return;
+    this.contactService.deleteMessage(id).subscribe();
+  }
+
+  encodeUri(str: string): string {
+    return encodeURIComponent(str);
   }
 
   private createdTime(course: Course): number {

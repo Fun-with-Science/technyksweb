@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CoursesService, Course } from '../../core/services/courses.service';
 import { CourseCardComponent } from '../../core/components/course-card/course-card.component';
+import { SkeletonLoaderComponent } from '../../core/components/skeleton/skeleton-loader.component';
 
 @Component({
   selector: 'app-courses-catalog',
   standalone: true,
-  imports: [CommonModule, RouterModule, CourseCardComponent],
+  imports: [CommonModule, RouterModule, CourseCardComponent, SkeletonLoaderComponent],
   template: `
     <div class="px-5 sm:px-8 xl:px-12 pt-24 pb-20 max-w-[1400px] mx-auto">
       <div class="mb-10">
@@ -71,18 +72,8 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
 
       @if (isLoading()) {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          @for (i of [1, 2, 3, 4]; track i) {
-            <div
-              class="bg-[#121A2B] border border-[#1E293B] rounded-lg overflow-hidden animate-pulse"
-            >
-              <div class="aspect-video bg-[#1E293B]"></div>
-              <div class="p-5">
-                <div class="h-4 bg-[#1E293B] rounded w-1/3 mb-4"></div>
-                <div class="h-6 bg-[#1E293B] rounded w-4/5 mb-3"></div>
-                <div class="h-10 bg-[#1E293B] rounded w-full mb-5"></div>
-                <div class="h-4 bg-[#1E293B] rounded w-2/5"></div>
-              </div>
-            </div>
+          @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
+            <app-skeleton-loader type="card" />
           }
         </div>
       } @else if (filteredCourses().length) {

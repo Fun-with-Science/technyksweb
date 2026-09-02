@@ -3,62 +3,135 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Course, CoursesService } from '../../core/services/courses.service';
 import { CourseCardComponent } from '../../core/components/course-card/course-card.component';
+import { SkeletonLoaderComponent } from '../../core/components/skeleton/skeleton-loader.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, CourseCardComponent],
+  imports: [CommonModule, RouterModule, CourseCardComponent, SkeletonLoaderComponent],
   template: `
     <div class="flex flex-col gap-24 pb-20 pt-16">
-      <!-- Hero Section -->
+      <!-- Hero Section (Matches Reference Screenshots in Light & Dark Mode) -->
       <section
-        class="hero-section min-h-[75vh] flex flex-col justify-center items-center px-6 md:px-16 relative overflow-hidden text-center"
+        class="hero-section min-h-[85vh] flex flex-col justify-between items-center px-4 sm:px-8 md:px-16 pt-12 pb-8 relative overflow-hidden text-center"
       >
         <div
-          class="hero-background absolute inset-0 bg-cover bg-center pointer-events-none"
+          class="hero-background absolute inset-0 pointer-events-none"
           aria-hidden="true"
         ></div>
         <div
           class="hero-overlay absolute inset-0 pointer-events-none"
           aria-hidden="true"
         ></div>
+
+        <!-- Main Center Hero Content -->
         <div
-          class="hero-content max-w-4xl relative z-10 grid justify-items-center gap-8 mt-12 md:mt-0"
+          class="hero-content max-w-4xl w-full relative z-10 flex flex-col items-center gap-6 my-auto"
         >
-          <h1
-            class="font-['Hanken_Grotesk'] text-4xl sm:text-6xl md:text-[72px] leading-[1.1] font-bold text-white tracking-tight"
+          <!-- Welcome Badge -->
+          <div
+            class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-blue-200/90 bg-white/90 shadow-sm text-xs font-['JetBrains_Mono'] tracking-wider uppercase transition-all dark:border-[#A855F7]/80 dark:bg-[#070b16]/90 dark:shadow-[0_0_18px_rgba(168,85,247,0.35)]"
           >
-            Learn <span class="text-[#3B82F6]">{{ typedTopic() }}</span><span class="typing-caret" aria-hidden="true">|</span><br />
-            <span class="text-[#3B82F6]">Think. Build. Innovate.</span>
+            <span class="material-symbols-outlined text-[#2563EB] dark:text-[#C084FC] text-[16px]">auto_awesome</span>
+            <span class="text-slate-700 dark:text-slate-200 font-semibold">WELCOME TO</span>
+            <span class="text-[#2563EB] dark:text-[#C084FC] font-bold">TECHNYKS ACADEMY</span>
+          </div>
+
+          <!-- Main Headline -->
+          <h1
+            class="font-['Hanken_Grotesk'] text-5xl sm:text-7xl md:text-[86px] leading-[1.05] font-extrabold tracking-tight text-slate-900 dark:text-white"
+          >
+            Learn <span class="text-[#2563EB] dark:text-[#3B82F6] dark:drop-shadow-[0_0_30px_rgba(59,130,246,0.6)]">AI.</span><br />
+            Think. Build.<br />
+            <span class="bg-gradient-to-r from-[#A855F7] via-[#8B5CF6] to-[#3B82F6] dark:from-[#C084FC] dark:via-[#A855F7] dark:to-[#60A5FA] bg-clip-text text-transparent dark:drop-shadow-[0_0_25px_rgba(168,85,247,0.5)]">Innovate.</span>
           </h1>
 
+          <!-- Subheading -->
           <p
-            class="font-['Inter'] text-lg text-[#d9c3af] max-w-2xl leading-relaxed"
+            class="font-['Inter'] text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed font-normal"
           >
             Learn AI, think for yourself, and turn powerful AI tools into new
             ideas, useful products, and real-world innovations.
           </p>
 
+          <!-- Action Buttons -->
           <div class="flex flex-wrap justify-center gap-4 mt-2">
             <a
               routerLink="/courses"
-              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#3B82F6] px-8 py-4 rounded font-bold hover:scale-[0.98] transition-all flex items-center gap-2 shadow-lg"
+              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold text-white px-7 py-4 rounded-xl transition-all shadow-md flex items-center gap-2.5 bg-[#1D4ED8] hover:bg-[#1E40AF] hover:scale-[0.98] dark:bg-gradient-to-r dark:from-[#2563EB] dark:to-[#9333EA] dark:hover:from-[#1D4ED8] dark:hover:to-[#7E22CE] dark:shadow-[0_0_20px_rgba(59,130,246,0.4)]"
             >
-              View All Courses
-              <span class="material-symbols-outlined text-[18px]"
-                >arrow_forward</span
-              >
+              <span class="material-symbols-outlined text-[19px]">school</span>
+              VIEW ALL COURSES
+              <span class="material-symbols-outlined text-[19px]">arrow_forward</span>
             </a>
 
             <a
               routerLink="/membership"
-              class="hero-membership-button font-['JetBrains_Mono'] text-xs uppercase tracking-wider px-8 py-4 rounded flex items-center gap-2"
+              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold px-7 py-4 rounded-xl transition-all shadow-sm flex items-center gap-2.5 border-2 border-[#2563EB] text-[#2563EB] bg-white hover:bg-blue-50/50 hover:scale-[0.98] dark:border-[#6366F1] dark:text-white dark:bg-[#0B0F19]/80 dark:hover:bg-[#1E293B] dark:shadow-[0_0_15px_rgba(99,102,241,0.25)]"
             >
-              <span class="material-symbols-outlined text-[18px]"
-                >workspace_premium</span
-              >
-              Explore Membership
+              <span class="material-symbols-outlined text-[19px]">workspace_premium</span>
+              EXPLORE MEMBERSHIP
+              <span class="material-symbols-outlined text-[19px]">arrow_forward</span>
             </a>
+          </div>
+        </div>
+
+        <!-- Floating Bottom Feature Dock (4 Cards) -->
+        <div class="w-full max-w-5xl mt-12 relative z-10">
+          <div
+            class="rounded-2xl p-4 md:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 backdrop-blur-xl transition-all bg-white/95 border border-slate-200/70 shadow-[0_15px_35px_rgba(0,0,0,0.06)] text-slate-800 dark:bg-[#0B101E]/80 dark:border-white/10 dark:shadow-[0_15px_35px_rgba(0,0,0,0.6)] dark:text-white"
+          >
+            <!-- Feature 1: Beginner Friendly -->
+            <div class="flex items-center gap-3.5 p-2">
+              <div
+                class="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-300 dark:border dark:border-purple-500/30 shadow-sm"
+              >
+                <span class="material-symbols-outlined text-2xl">menu_book</span>
+              </div>
+              <div class="flex flex-col text-left">
+                <span class="font-['Hanken_Grotesk'] text-sm font-bold text-slate-900 dark:text-white">Beginner Friendly</span>
+                <span class="font-['Inter'] text-xs text-slate-500 dark:text-slate-400">Start from the basics</span>
+              </div>
+            </div>
+
+            <!-- Feature 2: Hands-on Learning -->
+            <div class="flex items-center gap-3.5 p-2">
+              <div
+                class="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300 dark:border dark:border-blue-500/30 shadow-sm"
+              >
+                <span class="material-symbols-outlined text-2xl">smart_toy</span>
+              </div>
+              <div class="flex flex-col text-left">
+                <span class="font-['Hanken_Grotesk'] text-sm font-bold text-slate-900 dark:text-white">Hands-on Learning</span>
+                <span class="font-['Inter'] text-xs text-slate-500 dark:text-slate-400">Real projects, real skills</span>
+              </div>
+            </div>
+
+            <!-- Feature 3: Build & Innovate -->
+            <div class="flex items-center gap-3.5 p-2">
+              <div
+                class="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border dark:border-emerald-500/30 shadow-sm"
+              >
+                <span class="material-symbols-outlined text-2xl">rocket_launch</span>
+              </div>
+              <div class="flex flex-col text-left">
+                <span class="font-['Hanken_Grotesk'] text-sm font-bold text-slate-900 dark:text-white">Build & Innovate</span>
+                <span class="font-['Inter'] text-xs text-slate-500 dark:text-slate-400">Create your own AI tools</span>
+              </div>
+            </div>
+
+            <!-- Feature 4: Community Support -->
+            <div class="flex items-center gap-3.5 p-2">
+              <div
+                class="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-300 dark:border dark:border-amber-500/30 shadow-sm"
+              >
+                <span class="material-symbols-outlined text-2xl">star</span>
+              </div>
+              <div class="flex flex-col text-left">
+                <span class="font-['Hanken_Grotesk'] text-sm font-bold text-slate-900 dark:text-white">Community Support</span>
+                <span class="font-['Inter'] text-xs text-slate-500 dark:text-slate-400">Learn together, grow together</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -150,16 +223,7 @@ import { CourseCardComponent } from '../../core/components/course-card/course-ca
         @if (isLoading()) {
           <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             @for (placeholder of [1, 2, 3]; track placeholder) {
-              <div
-                class="bg-[#121A2B] border border-[#1E293B] rounded-lg overflow-hidden animate-pulse"
-              >
-                <div class="aspect-video bg-[#1E293B]"></div>
-                <div class="p-5">
-                  <div class="h-5 bg-[#1E293B] rounded w-4/5 mb-4"></div>
-                  <div class="h-12 bg-[#1E293B] rounded w-full mb-5"></div>
-                  <div class="h-4 bg-[#1E293B] rounded w-2/5"></div>
-                </div>
-              </div>
+              <app-skeleton-loader type="card" />
             }
           </div>
         } @else if (featuredCourses().length) {
