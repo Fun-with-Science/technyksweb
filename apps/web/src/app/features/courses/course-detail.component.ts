@@ -23,19 +23,19 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
     } @else if (course()) {
       <div class="pt-20 pb-20">
         <div
-          class="max-w-6xl mx-auto px-6 md:px-16 pt-6 pb-4 font-['JetBrains_Mono'] text-[11px] text-[#a18d7b] uppercase tracking-wider"
+          class="max-w-6xl mx-auto px-6 md:px-16 pt-6 pb-4 font-['JetBrains_Mono'] text-[11px] text-slate-500 dark:text-[#a18d7b] uppercase tracking-wider"
         >
           <a
             routerLink="/courses"
-            class="hover:text-[#3B82F6] transition-colors"
+            class="hover:text-[#2563EB] dark:hover:text-[#3B82F6] transition-colors"
             >Courses</a
           >
-          <span class="mx-2 text-[#3B82F6]">/</span>
-                  <span>{{ course()?.level }} course</span>
+          <span class="mx-2 text-[#2563EB] dark:text-[#3B82F6]">/</span>
+          <span>{{ course()?.level }} course</span>
         </div>
 
         <section
-          class="bg-[#121A2B] border-y border-[#1E293B] px-6 md:px-16 py-12"
+          class="bg-white dark:bg-[#121A2B] border-y border-slate-200 dark:border-[#1E293B] px-6 md:px-16 py-12 transition-colors"
         >
           <div
             class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-12 items-center"
@@ -43,42 +43,42 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
             <div class="lg:col-span-2">
               <div class="flex items-center gap-3 mb-4">
                 <span
-                  class="font-['JetBrains_Mono'] text-xs text-[#040810] bg-[#3B82F6] px-3 py-1 rounded font-bold uppercase"
+                  class="font-['JetBrains_Mono'] text-xs text-white dark:text-[#040810] bg-[#2563EB] dark:bg-[#3B82F6] px-3 py-1 rounded font-bold uppercase shadow-sm"
                 >
                   {{ course()?.isFree ? 'Free course' : 'Premium course' }}
                 </span>
                 <span
-                  class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] font-bold uppercase"
+                  class="font-['JetBrains_Mono'] text-xs text-[#2563EB] dark:text-[#3B82F6] font-bold uppercase"
                 >
                   {{ course()?.level }} LEVEL
                 </span>
               </div>
 
               <h1
-                class="font-['Hanken_Grotesk'] text-3xl md:text-5xl font-bold text-white mb-4 leading-tight"
+                class="font-['Hanken_Grotesk'] text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 leading-tight"
               >
                 {{ course()?.title }}
               </h1>
 
               <p
-                class="font-['Inter'] text-lg text-[#d9c3af] mb-8 leading-relaxed"
+                class="font-['Inter'] text-lg text-slate-600 dark:text-[#d9c3af] mb-8 leading-relaxed"
               >
                 {{ course()?.subtitle }}
               </p>
 
               <div
-                class="flex flex-wrap items-center gap-6 font-['JetBrains_Mono'] text-xs text-[#a18d7b]"
+                class="flex flex-wrap items-center gap-6 font-['JetBrains_Mono'] text-xs text-slate-600 dark:text-[#a18d7b]"
               >
                 <div class="flex items-center gap-2">
                   <span
-                    class="material-symbols-outlined text-[#3B82F6] text-base"
+                    class="material-symbols-outlined text-[#2563EB] dark:text-[#3B82F6] text-base"
                     >schedule</span
                   >
                   {{ getTotalDurationMinutes() }} Minutes Total
                 </div>
                 <div class="flex items-center gap-2">
                   <span
-                    class="material-symbols-outlined text-[#3B82F6] text-base"
+                    class="material-symbols-outlined text-[#2563EB] dark:text-[#3B82F6] text-base"
                     >layers</span
                   >
                   {{ getTotalModules() }} Sections ·
@@ -86,14 +86,14 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                 </div>
                 <div class="flex items-center gap-2">
                   <span
-                    class="material-symbols-outlined text-[#3B82F6] text-base"
+                    class="material-symbols-outlined text-[#2563EB] dark:text-[#3B82F6] text-base"
                     >verified</span
                   >
                   Certificate Included
                 </div>
                 <div class="flex items-center gap-2">
                   <span
-                    class="material-symbols-outlined text-[#3B82F6] text-base"
+                    class="material-symbols-outlined text-amber-500 dark:text-[#3B82F6] text-base"
                     >star</span
                   >
                   {{ (course()?.rating || 0) | number: '1.1-1' }}
@@ -104,10 +104,10 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
 
             <!-- Enrollment Card -->
             <div
-              class="bg-[#040810] technical-border rounded p-8 flex flex-col gap-6 shadow-2xl"
+              class="bg-slate-50 dark:bg-[#040810] border border-slate-200 dark:border-[#1E293B] rounded-xl p-8 flex flex-col gap-6 shadow-xl"
             >
               <div
-                class="relative aspect-video overflow-hidden rounded border border-[#334155] -mx-2 -mt-2 bg-[#0B1120] shadow-xl group"
+                class="relative aspect-video overflow-hidden rounded-lg border border-slate-200 dark:border-[#334155] -mx-2 -mt-2 bg-slate-900 shadow-lg group"
               >
                 @if (!promoPlaying()) {
                   @if (course()?.thumbnail) {
@@ -153,7 +153,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                 }
               </div>
               <div
-                class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] uppercase tracking-widest font-semibold"
+                class="font-['JetBrains_Mono'] text-xs text-[#2563EB] dark:text-[#3B82F6] uppercase tracking-widest font-bold"
               >
                 // INSTANT ACCESS
               </div>
@@ -161,20 +161,20 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
               <div class="flex items-baseline justify-between gap-4">
                 @if (course()?.isFree) {
                   <span
-                    class="font-['JetBrains_Mono'] text-3xl font-bold text-[#3B82F6]"
+                    class="font-['JetBrains_Mono'] text-3xl font-bold text-[#2563EB] dark:text-[#3B82F6]"
                     >FREE</span
                   >
                   <span
-                    class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] font-semibold text-right"
+                    class="font-['JetBrains_Mono'] text-xs text-[#2563EB] dark:text-[#3B82F6] font-semibold text-right"
                     >LOGGED-IN STUDENTS ONLY</span
                   >
                 } @else {
                   <span
-                    class="font-['JetBrains_Mono'] text-3xl font-bold text-white"
+                    class="font-['JetBrains_Mono'] text-3xl font-bold text-slate-900 dark:text-white"
                     >₹{{ course()?.price?.toLocaleString('en-IN') }}</span
                   >
                   <span
-                    class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] font-semibold"
+                    class="font-['JetBrains_Mono'] text-xs text-[#2563EB] dark:text-[#3B82F6] font-semibold"
                     >ONE-TIME OR MEMBERSHIP</span
                   >
                 }
@@ -184,24 +184,24 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                 @if (isEnrolled()) {
                   <a
                     [routerLink]="['/courses', course()?.slug, 'watch', getFirstLessonId()]"
-                    class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#3B82F6] py-4 rounded font-bold hover:bg-[#3B82F6]/90 transition-all flex items-center justify-center gap-2 shadow-lg"
+                    class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white bg-[#2563EB] hover:bg-[#1D4ED8] py-4 rounded-lg transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
                   >
-                    Start learning
-                    <span class="material-symbols-outlined text-sm">play_arrow</span>
+                    <span>Start learning</span>
+                    <span class="material-symbols-outlined text-sm !text-white">play_arrow</span>
                   </a>
                 } @else {
                   <button
                     type="button"
                     (click)="enrollInFreeCourse()"
                     [disabled]="isEnrolling()"
-                    class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#040810] bg-[#3B82F6] py-4 rounded font-bold hover:bg-[#3B82F6]/90 transition-all flex items-center justify-center gap-2 shadow-lg disabled:opacity-60"
+                    class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white bg-[#2563EB] hover:bg-[#1D4ED8] py-4 rounded-lg transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg disabled:opacity-60"
                   >
-                    {{ isEnrolling() ? 'Enrolling...' : 'Enroll for free' }}
-                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                    <span>{{ isEnrolling() ? 'Enrolling...' : 'Enroll for free' }}</span>
+                    <span class="material-symbols-outlined text-sm !text-white">arrow_forward</span>
                   </button>
                 }
                 @if (enrollmentMessage()) {
-                  <p class="font-['Inter'] text-xs text-[#d9c3af] text-center">
+                  <p class="font-['Inter'] text-xs text-slate-600 dark:text-[#d9c3af] text-center">
                     {{ enrollmentMessage() }}
                   </p>
                 }
@@ -209,7 +209,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                 <a
                   [routerLink]="['/checkout']"
                   [queryParams]="{ courseId: course()?.id, slug: course()?.slug }"
-                  class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider !text-white bg-[#1D4ED8] hover:bg-[#1E40AF] py-4 rounded font-bold transition-all flex items-center justify-center gap-2 shadow-lg"
+                  class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white bg-[#2563EB] hover:bg-[#1D4ED8] py-4 rounded-lg transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
                 >
                   <span class="!text-white font-bold">Enroll in Course Now</span>
                   <span class="material-symbols-outlined text-sm !text-white">arrow_forward</span>
@@ -218,13 +218,14 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
 
               <a
                 routerLink="/membership"
-                class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#1D4ED8] dark:text-[#3B82F6] border-2 border-[#2563EB] dark:border-[#3B82F6] py-3.5 rounded font-bold hover:bg-blue-50 dark:hover:bg-[#3B82F6]/10 transition-colors"
+                class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold bg-white hover:bg-slate-100 text-slate-800 hover:text-[#2563EB] border-2 border-slate-300 hover:border-[#2563EB] dark:bg-transparent dark:hover:bg-[#3B82F6]/10 dark:text-[#60A5FA] dark:border-[#3B82F6]/50 dark:hover:border-[#3B82F6] py-3.5 rounded-lg transition-all shadow-sm flex items-center justify-center gap-2"
               >
-                Get All Courses with Membership
+                <span class="material-symbols-outlined text-base text-[#2563EB] dark:text-[#3B82F6]">workspace_premium</span>
+                <span>Get All Courses with Membership</span>
               </a>
 
               <div
-                class="text-center font-['Inter'] text-xs text-[#a18d7b] pt-2 border-t border-[#1E293B]"
+                class="text-center font-['Inter'] text-xs text-slate-500 dark:text-[#a18d7b] pt-2 border-t border-slate-200 dark:border-[#1E293B]"
               >
                 Instant lifetime access • 30-day money-back guarantee
               </div>
@@ -242,14 +243,14 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
             >
               <div>
                 <h2
-                  class="font-['Hanken_Grotesk'] text-2xl font-bold text-white flex items-center gap-2"
+                  class="font-['Hanken_Grotesk'] text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2"
                 >
-                  <span class="material-symbols-outlined text-[#3B82F6]"
+                  <span class="material-symbols-outlined text-[#2563EB] dark:text-[#3B82F6]"
                     >account_tree</span
                   >
                   Course content
                 </h2>
-                <p class="font-['Inter'] text-sm text-[#a18d7b] mt-2">
+                <p class="font-['Inter'] text-sm text-slate-600 dark:text-[#a18d7b] mt-2">
                   {{ getTotalModules() }} sections ·
                   {{ getTotalLessons() }} lessons ·
                   {{ getTotalDurationMinutes() }} minutes of curriculum
@@ -258,7 +259,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
               <button
                 type="button"
                 (click)="toggleAllModules()"
-                class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] hover:text-[#3B82F6] transition-colors text-left sm:text-right"
+                class="font-['JetBrains_Mono'] text-xs font-semibold text-[#2563EB] hover:text-[#1D4ED8] dark:text-[#3B82F6] dark:hover:text-[#60A5FA] transition-colors text-left sm:text-right hover:underline"
               >
                 {{
                   allModulesExpanded()
@@ -271,16 +272,16 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
             <div class="flex flex-col gap-4">
               @for (module of course()?.modules; track module.id) {
                 <div
-                  class="bg-[#121A2B] technical-border rounded overflow-hidden"
+                  class="bg-white dark:bg-[#121A2B] border border-slate-200 dark:border-[#1E293B] rounded-xl shadow-sm overflow-hidden"
                 >
                   <button
                     type="button"
                     (click)="toggleModule(module.id)"
-                    class="w-full p-5 bg-[#191c1e]/50 flex items-center justify-between gap-4 border-b border-[#1E293B] text-left hover:bg-[#1d242b] transition-colors"
+                    class="w-full p-5 bg-slate-100/90 hover:bg-slate-200/80 dark:bg-[#162032] dark:hover:bg-[#1c2940] flex items-center justify-between gap-4 border-b border-slate-200 dark:border-[#1E293B] text-left transition-colors"
                   >
                     <span class="flex items-center gap-3 min-w-0">
                       <span
-                        class="material-symbols-outlined text-[#3B82F6] text-lg"
+                        class="material-symbols-outlined text-[#2563EB] dark:text-[#3B82F6] text-lg shrink-0"
                         >{{
                           isModuleExpanded(module.id)
                             ? 'expand_less'
@@ -288,12 +289,12 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                         }}</span
                       >
                       <span
-                        class="font-['Hanken_Grotesk'] text-base font-bold text-white truncate"
+                        class="font-['Hanken_Grotesk'] text-base font-bold text-slate-900 dark:text-white truncate"
                         >{{ module.title }}</span
                       >
                     </span>
                     <span
-                      class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] whitespace-nowrap"
+                      class="font-['JetBrains_Mono'] text-xs text-[#1D4ED8] dark:text-[#60A5FA] font-semibold bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/60 px-2.5 py-1 rounded-md whitespace-nowrap shrink-0"
                     >
                       {{ module.lessons ? module.lessons.length : 0 }} lectures
                       · {{ getModuleDurationMinutes(module) }}m
@@ -301,19 +302,19 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                   </button>
 
                   @if (isModuleExpanded(module.id)) {
-                    <div class="divide-y divide-[#1E293B]/40">
+                    <div class="divide-y divide-slate-200 dark:divide-[#1E293B]/60 bg-white dark:bg-[#121A2B]">
                       @for (lesson of module.lessons; track lesson.id) {
                         <a
                           [routerLink]="['/courses', course()?.slug, 'watch', lesson.id]"
-                          class="p-4 flex items-center justify-between gap-4 hover:bg-[#040810]/40 transition-colors"
+                          class="p-4 flex items-center justify-between gap-4 hover:bg-blue-50/60 dark:hover:bg-[#1E293B]/40 transition-colors"
                         >
                           <div class="flex items-center gap-3 min-w-0">
                             <span
-                              class="material-symbols-outlined text-[#3B82F6] text-sm"
+                              class="material-symbols-outlined text-[#2563EB] dark:text-[#3B82F6] text-sm shrink-0"
                               >{{ lesson.isFreePreview ? 'play_circle' : 'lock' }}</span
                             >
                             <span
-                              class="font-['Inter'] text-sm text-[#e0e3e5] truncate"
+                              class="font-['Inter'] text-sm text-slate-800 dark:text-[#e0e3e5] font-medium truncate"
                               >{{ lesson.title }}</span
                             >
                           </div>
@@ -321,13 +322,13 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                           <div class="flex items-center gap-3 shrink-0">
                             @if (lesson.isFreePreview) {
                               <span
-                                class="font-['JetBrains_Mono'] text-[10px] text-[#3B82F6] border border-[#3B82F6]/40 px-2 py-0.5 rounded uppercase font-semibold"
+                                class="font-['JetBrains_Mono'] text-[10px] text-[#1D4ED8] dark:text-[#93C5FD] bg-blue-100 dark:bg-blue-900/40 border border-blue-300 dark:border-blue-700/60 px-2 py-0.5 rounded uppercase font-bold tracking-wider"
                               >
                                 WATCH PREVIEW
                               </span>
                             }
                             <span
-                              class="font-['JetBrains_Mono'] text-xs text-[#a18d7b]"
+                              class="font-['JetBrains_Mono'] text-xs text-slate-600 dark:text-[#a18d7b] font-medium"
                             >
                               {{ Math.round(lesson.duration / 60) }}m
                             </span>
@@ -343,45 +344,45 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
 
           <!-- Sidebar: Instructor & Details -->
           <div class="flex flex-col gap-8">
-            <div class="bg-[#121A2B] technical-border rounded p-6">
+            <div class="bg-white dark:bg-[#121A2B] border border-slate-200 dark:border-[#1E293B] rounded-xl shadow-sm p-6">
               <h3
-                class="font-['JetBrains_Mono'] text-xs uppercase text-[#3B82F6] tracking-wider font-bold mb-4"
+                class="font-['JetBrains_Mono'] text-xs uppercase text-[#2563EB] dark:text-[#3B82F6] tracking-wider font-bold mb-4"
               >
                 // THIS COURSE INCLUDES
               </h3>
               <div class="flex items-center gap-4 mb-4">
                 <div
-                  class="w-12 h-12 rounded-full bg-[#3B82F6] text-[#040810] font-bold text-xl flex items-center justify-center font-['Hanken_Grotesk']"
+                  class="w-12 h-12 rounded-full bg-[#2563EB] dark:bg-[#3B82F6] text-white dark:text-[#040810] font-bold text-xl flex items-center justify-center font-['Hanken_Grotesk'] shadow-sm"
                 >
                   {{ getInstructorInitials() }}
                 </div>
                 <div>
                   <h4
-                    class="font-['Hanken_Grotesk'] text-base font-bold text-white"
+                    class="font-['Hanken_Grotesk'] text-base font-bold text-slate-900 dark:text-white"
                   >
                     Technyks Architect
                   </h4>
-                  <p class="font-['Inter'] text-xs text-[#d9c3af]">
+                  <p class="font-['Inter'] text-xs text-slate-600 dark:text-[#d9c3af]">
                     Production engineering curriculum
                   </p>
                 </div>
               </div>
               <div
-                class="flex flex-col gap-3 pt-4 border-t border-[#1E293B] font-['Inter'] text-sm text-[#d9c3af]"
+                class="flex flex-col gap-3 pt-4 border-t border-slate-200 dark:border-[#1E293B] font-['Inter'] text-sm text-slate-700 dark:text-[#d9c3af]"
               >
                 <div class="flex items-center justify-between gap-3">
-                  <span>On-demand lessons</span
-                  ><span class="text-white">{{ getTotalLessons() }}</span>
+                  <span class="text-slate-600 dark:text-slate-400">On-demand lessons</span
+                  ><span class="text-slate-900 dark:text-white font-semibold">{{ getTotalLessons() }}</span>
                 </div>
                 <div class="flex items-center justify-between gap-3">
-                  <span>Full curriculum</span
-                  ><span class="text-white"
+                  <span class="text-slate-600 dark:text-slate-400">Full curriculum</span
+                  ><span class="text-slate-900 dark:text-white font-semibold"
                     >{{ getTotalModules() }} sections</span
                   >
                 </div>
                 <div class="flex items-center justify-between gap-3">
-                  <span>Certificate</span
-                  ><span class="text-[#3B82F6]">Included</span>
+                  <span class="text-slate-600 dark:text-slate-400">Certificate</span
+                  ><span class="text-[#2563EB] dark:text-[#3B82F6] font-semibold">Included</span>
                 </div>
               </div>
             </div>
@@ -393,11 +394,11 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
           <div class="max-w-3xl">
             <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
               <div>
-                <h2 class="font-['Hanken_Grotesk'] text-2xl font-bold text-white flex items-center gap-2">
-                  <span class="material-symbols-outlined text-[#3B82F6]">reviews</span>
+                <h2 class="font-['Hanken_Grotesk'] text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[#2563EB] dark:text-[#3B82F6]">reviews</span>
                   Student reviews
                 </h2>
-                <p class="font-['Inter'] text-sm text-[#a18d7b] mt-2">
+                <p class="font-['Inter'] text-sm text-slate-600 dark:text-[#a18d7b] mt-2">
                   {{ (course()?.rating || 0) | number: '1.1-1' }} average rating · {{ course()?.reviewCount || 0 }} reviews
                 </p>
               </div>
@@ -406,74 +407,76 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
             @if (course()?.reviews?.length) {
               <div class="flex flex-col gap-3">
                 @for (review of course()?.reviews; track review.id) {
-                  <article class="bg-[#121A2B] technical-border rounded p-5">
+                  <article class="bg-white dark:bg-[#121A2B] border border-slate-200 dark:border-[#1E293B] rounded-xl shadow-sm p-5">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                       <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-[#3B82F6] text-[#040810] font-bold flex items-center justify-center">
+                        <div class="w-9 h-9 rounded-full bg-[#2563EB] dark:bg-[#3B82F6] text-white dark:text-[#040810] font-bold flex items-center justify-center text-sm shadow-sm">
                           {{ review.user.name.charAt(0).toUpperCase() }}
                         </div>
                         <div>
-                          <div class="font-['Hanken_Grotesk'] text-sm font-bold text-white">{{ review.user.name }}</div>
-                          <div class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b]">{{ review.createdAt | date: 'mediumDate' }}</div>
+                          <div class="font-['Hanken_Grotesk'] text-sm font-bold text-slate-900 dark:text-white">{{ review.user.name }}</div>
+                          <div class="font-['JetBrains_Mono'] text-[10px] text-slate-500 dark:text-[#a18d7b]">{{ review.createdAt | date: 'mediumDate' }}</div>
                         </div>
                       </div>
-                      <div class="font-['JetBrains_Mono'] text-sm text-[#3B82F6]" [attr.aria-label]="review.rating + ' out of 5 stars'">
+                      <div class="font-['JetBrains_Mono'] text-sm text-amber-500 dark:text-[#3B82F6]" [attr.aria-label]="review.rating + ' out of 5 stars'">
                         {{ '★'.repeat(review.rating) }}{{ '☆'.repeat(5 - review.rating) }}
                       </div>
                     </div>
-                    <p class="font-['Inter'] text-sm text-[#d9c3af] leading-relaxed">{{ review.comment }}</p>
+                    <p class="font-['Inter'] text-sm text-slate-700 dark:text-[#d9c3af] leading-relaxed">{{ review.comment }}</p>
                   </article>
                 }
               </div>
             } @else {
-              <div class="bg-[#121A2B] border border-dashed border-[#3B82F6]/50 rounded p-6 font-['Inter'] text-sm text-[#a18d7b]">
+              <div class="bg-white dark:bg-[#121A2B] border border-dashed border-slate-300 dark:border-[#3B82F6]/50 rounded-xl p-6 font-['Inter'] text-sm text-slate-600 dark:text-[#a18d7b]">
                 No reviews yet. Be the first enrolled student to share your experience.
               </div>
             }
 
-            <div class="bg-[#121A2B] technical-border rounded p-6 mt-6">
+            <div class="bg-white dark:bg-[#121A2B] border border-slate-200 dark:border-[#1E293B] rounded-xl shadow-sm p-6 mt-6">
               @if (authService.isAuthenticated() && isEnrolled()) {
-                <h3 class="font-['Hanken_Grotesk'] text-lg font-bold text-white mb-4">Share your review</h3>
+                <h3 class="font-['Hanken_Grotesk'] text-lg font-bold text-slate-900 dark:text-white mb-4">Share your review</h3>
                 <div class="flex items-center gap-2 mb-4" role="radiogroup" aria-label="Course rating">
                   @for (star of [1, 2, 3, 4, 5]; track star) {
                     <button
                       type="button"
                       (click)="reviewRating = star"
                       [attr.aria-label]="star + ' stars'"
-                      [class.text-[#3B82F6]]="star <= reviewRating"
-                      [class.text-[#a18d7b]]="star > reviewRating"
-                      class="text-2xl leading-none hover:text-[#3B82F6] transition-colors"
+                      [class.text-amber-500]="star <= reviewRating"
+                      [class.text-slate-300]="star > reviewRating"
+                      [class.dark:text-[#3B82F6]]="star <= reviewRating"
+                      [class.dark:text-[#a18d7b]]="star > reviewRating"
+                      class="text-2xl leading-none hover:text-amber-500 dark:hover:text-[#3B82F6] transition-colors"
                     >★</button>
                   }
-                  <span class="font-['JetBrains_Mono'] text-xs text-[#a18d7b] ml-2">{{ reviewRating }}/5</span>
+                  <span class="font-['JetBrains_Mono'] text-xs text-slate-600 dark:text-[#a18d7b] ml-2">{{ reviewRating }}/5</span>
                 </div>
                 <textarea
                   [(ngModel)]="reviewComment"
                   rows="4"
                   maxlength="2000"
                   placeholder="What did you think about this course?"
-                  class="w-full bg-[#040810] border border-[#1E293B] focus:border-[#3B82F6] focus:outline-none rounded px-4 py-3 text-sm text-white font-['Inter'] mb-4"
+                  class="w-full bg-slate-50 dark:bg-[#040810] border border-slate-300 dark:border-[#1E293B] focus:border-[#2563EB] dark:focus:border-[#3B82F6] focus:bg-white focus:outline-none rounded-lg px-4 py-3 text-sm text-slate-900 dark:text-white font-['Inter'] mb-4"
                 ></textarea>
                 <div class="flex flex-wrap items-center gap-4">
                   <button
                     type="button"
                     (click)="submitReview()"
                     [disabled]="isSubmittingReview() || reviewRating === 0 || reviewComment.trim().length < 10"
-                    class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] bg-[#3B82F6] px-5 py-3 rounded hover:bg-[#2563eb] disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="font-['JetBrains_Mono'] text-xs font-bold uppercase !text-white bg-[#2563EB] hover:bg-[#1D4ED8] px-5 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-all"
                   >
                     {{ isSubmittingReview() ? 'Saving...' : 'Publish review' }}
                   </button>
                   @if (reviewMessage()) {
-                    <span class="font-['Inter'] text-xs text-[#3B82F6]">{{ reviewMessage() }}</span>
+                    <span class="font-['Inter'] text-xs text-[#2563EB] dark:text-[#3B82F6] font-semibold">{{ reviewMessage() }}</span>
                   }
                 </div>
               } @else if (!authService.isAuthenticated()) {
-                <p class="font-['Inter'] text-sm text-[#d9c3af]">
-                  <a routerLink="/auth/login" [queryParams]="{ returnUrl: router.url }" class="text-[#3B82F6] hover:underline">Sign in</a>
+                <p class="font-['Inter'] text-sm text-slate-600 dark:text-[#d9c3af]">
+                  <a routerLink="/auth/login" [queryParams]="{ returnUrl: router.url }" class="text-[#2563EB] dark:text-[#3B82F6] font-semibold hover:underline">Sign in</a>
                   and enroll to leave a course review.
                 </p>
               } @else {
-                <p class="font-['Inter'] text-sm text-[#d9c3af]">Enroll in this course to leave a review.</p>
+                <p class="font-['Inter'] text-sm text-slate-600 dark:text-[#d9c3af]">Enroll in this course to leave a review.</p>
               }
             </div>
           </div>

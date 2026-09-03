@@ -35,8 +35,9 @@ import { AuthService } from '../../core/services/auth.service';
 
         <form (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
           <div>
-            <label class="block font-['JetBrains_Mono'] text-xs text-[#d9c3af] uppercase tracking-wider mb-2">Email Address</label>
+            <label for="forgot-email" class="block font-['JetBrains_Mono'] text-xs text-[#d9c3af] uppercase tracking-wider mb-2">Email Address</label>
             <input
+              id="forgot-email"
               type="email"
               [(ngModel)]="email"
               name="email"

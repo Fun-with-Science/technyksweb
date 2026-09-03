@@ -165,7 +165,7 @@ import { ContactService, ContactMessage } from '../../core/services/contact.serv
                 <!-- Left: Thumbnail & Title -->
                 <div class="flex items-center gap-5 flex-grow">
                   <div class="relative w-36 h-20 rounded overflow-hidden shrink-0 border border-[#1E293B]">
-                    <img [src]="course.thumbnail || '/assets/agentic-ai.jpg'" class="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    <img [src]="course.thumbnail || '/assets/agentic-ai.jpg'" [alt]="course.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                   </div>
 
                   <div class="flex flex-col gap-1.5">

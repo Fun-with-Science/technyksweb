@@ -92,37 +92,43 @@ body.dark {
 }
 
 .hero-background {
-  background-image: url('/assets/hero-clean-light.jpg');
+  background-image: url('/assets/hero-coding-workspace.png');
   opacity: 1;
   background-position: center;
   background-size: cover;
-  transform: scale(1.01);
+  filter: saturate(.9) contrast(.96) brightness(.94);
+  transform: scale(1.03);
 }
 
 .hero-overlay {
-  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.65) 50%, rgba(255, 255, 255, 0.15) 100%);
+  background: rgba(0, 0, 0, .7);
 }
 
 .light-theme .hero-background,
 body:not(.dark) .hero-background {
-  background-image: url('/assets/hero-clean-light.jpg');
   opacity: 1;
+  filter: saturate(.86) contrast(.96) brightness(.98);
 }
 
 .light-theme .hero-overlay,
 body:not(.dark) .hero-overlay {
-  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.88) 0%, rgba(255, 255, 255, 0.65) 50%, rgba(255, 255, 255, 0.15) 100%);
+  background: rgba(255, 255, 255, .7);
 }
 
 .dark-theme .hero-background,
 .dark .hero-background {
-  background-image: url('/assets/hero-clean-dark.jpg');
   opacity: 1;
+  filter: saturate(.94) contrast(.98) brightness(.82);
 }
 
 .dark-theme .hero-overlay,
 .dark .hero-overlay {
-  background: radial-gradient(ellipse at center, rgba(4, 7, 17, 0.85) 0%, rgba(4, 7, 17, 0.60) 50%, rgba(4, 7, 17, 0.15) 100%);
+  background: rgba(0, 0, 0, .7);
+}
+
+.light-theme .hero-content h1,
+.light-theme .hero-content p {
+  color: #172033 !important;
 }
 
 .typing-caret {
@@ -137,40 +143,9 @@ body:not(.dark) .hero-overlay {
 }
 
 .hero-membership-button {
-  position: relative;
-  overflow: hidden;
-  color: #ffffff;
-  border: 1px solid rgba(196, 181, 253, .8);
-  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 54%, #0f6adf 100%);
-  box-shadow: 0 12px 28px rgba(37, 99, 235, .28), inset 0 1px 0 rgba(255, 255, 255, .28);
-  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  transition: transform .2s ease, box-shadow .2s ease;
 }
 
-.hero-membership-button::before {
-  content: '';
-  position: absolute;
-  inset: 1px;
-  border-radius: inherit;
-  background: linear-gradient(110deg, transparent 20%, rgba(255, 255, 255, .28) 48%, transparent 74%);
-  transform: translateX(-130%);
-  transition: transform .55s ease;
-}
-
-.hero-membership-button > * {
-  position: relative;
-  z-index: 1;
-}
-
-.hero-membership-button:hover {
-  color: #ffffff;
-  filter: saturate(1.1) brightness(1.06);
-  transform: translateY(-1px);
-  box-shadow: 0 16px 34px rgba(37, 99, 235, .36), inset 0 1px 0 rgba(255, 255, 255, .34);
-}
-
-.hero-membership-button:hover::before {
-  transform: translateX(130%);
-}
 
 .profile-link {
   display: inline-flex;

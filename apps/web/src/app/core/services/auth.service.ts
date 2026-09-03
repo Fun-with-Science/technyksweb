@@ -46,7 +46,9 @@ export class AuthService {
       if (savedUser) {
         try {
           this.currentUser.set(JSON.parse(savedUser));
-        } catch (e) {}
+        } catch {
+          // Ignore a malformed cached session and continue signed out.
+        }
       }
     }
   }

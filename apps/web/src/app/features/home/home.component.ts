@@ -11,12 +11,12 @@ import { SkeletonLoaderComponent } from '../../core/components/skeleton/skeleton
   imports: [CommonModule, RouterModule, CourseCardComponent, SkeletonLoaderComponent],
   template: `
     <div class="flex flex-col gap-24 pb-20 pt-16">
-      <!-- Hero Section (Matches Reference Screenshots in Light & Dark Mode) -->
+      <!-- Hero Section -->
       <section
-        class="hero-section min-h-[85vh] flex flex-col justify-between items-center px-4 sm:px-8 md:px-16 pt-12 pb-8 relative overflow-hidden text-center"
+        class="hero-section min-h-[75vh] flex flex-col justify-center items-center px-6 md:px-16 relative overflow-hidden text-center"
       >
         <div
-          class="hero-background absolute inset-0 pointer-events-none"
+          class="hero-background absolute inset-0 bg-cover bg-center pointer-events-none"
           aria-hidden="true"
         ></div>
         <div
@@ -24,114 +24,39 @@ import { SkeletonLoaderComponent } from '../../core/components/skeleton/skeleton
           aria-hidden="true"
         ></div>
 
-        <!-- Main Center Hero Content -->
         <div
-          class="hero-content max-w-4xl w-full relative z-10 flex flex-col items-center gap-6 my-auto"
+          class="hero-content max-w-4xl relative z-10 grid justify-items-center gap-8 mt-12 md:mt-0"
         >
-          <!-- Welcome Badge -->
-          <div
-            class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-blue-200/90 bg-white/90 shadow-sm text-xs font-['JetBrains_Mono'] tracking-wider uppercase transition-all dark:border-[#A855F7]/80 dark:bg-[#070b16]/90 dark:shadow-[0_0_18px_rgba(168,85,247,0.35)]"
-          >
-            <span class="material-symbols-outlined text-[#2563EB] dark:text-[#C084FC] text-[16px]">auto_awesome</span>
-            <span class="text-slate-700 dark:text-slate-200 font-semibold">WELCOME TO</span>
-            <span class="text-[#2563EB] dark:text-[#C084FC] font-bold">TECHNYKS ACADEMY</span>
-          </div>
-
-          <!-- Main Headline -->
           <h1
-            class="font-['Hanken_Grotesk'] text-5xl sm:text-7xl md:text-[86px] leading-[1.05] font-extrabold tracking-tight text-slate-900 dark:!text-white"
+            class="font-['Hanken_Grotesk'] text-4xl sm:text-6xl md:text-[72px] leading-[1.1] font-bold text-slate-900 dark:text-white tracking-tight"
           >
-            Learn <span class="text-[#2563EB] dark:!text-[#3B82F6] dark:drop-shadow-[0_0_30px_rgba(59,130,246,0.6)]">AI.</span><br />
-            Think. Build.<br />
-            <span class="bg-gradient-to-r from-[#A855F7] via-[#8B5CF6] to-[#3B82F6] dark:from-[#C084FC] dark:via-[#A855F7] dark:to-[#60A5FA] bg-clip-text text-transparent dark:drop-shadow-[0_0_25px_rgba(168,85,247,0.5)]">Innovate.</span>
+            Learn <span class="text-[#2563EB] dark:text-[#3B82F6]">{{ typedTopic() }}</span><span class="typing-caret" aria-hidden="true">|</span><br />
+            <span class="text-[#2563EB] dark:text-[#3B82F6]">Think. Build. Innovate.</span>
           </h1>
 
-          <!-- Subheading -->
           <p
-            class="font-['Inter'] text-base sm:text-lg md:text-xl text-slate-600 dark:!text-slate-200 max-w-2xl leading-relaxed font-normal"
+            class="font-['Inter'] text-lg text-slate-600 dark:text-[#d9c3af] max-w-2xl leading-relaxed"
           >
             Learn AI, think for yourself, and turn powerful AI tools into new
             ideas, useful products, and real-world innovations.
           </p>
 
-          <!-- Action Buttons -->
           <div class="flex flex-wrap justify-center gap-4 mt-2">
             <a
               routerLink="/courses"
-              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white px-7 py-4 rounded-xl transition-all shadow-md flex items-center gap-2.5 bg-[#1D4ED8] hover:bg-[#1E40AF] hover:scale-[0.98] dark:bg-gradient-to-r dark:from-[#2563EB] dark:to-[#9333EA] dark:hover:from-[#1D4ED8] dark:hover:to-[#7E22CE] dark:shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white bg-[#2563EB] hover:bg-[#1D4ED8] px-8 py-4 rounded-lg hover:scale-[0.98] transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
             >
-              <span class="material-symbols-outlined text-[19px] !text-white">school</span>
-              <span class="!text-white">VIEW ALL COURSES</span>
-              <span class="material-symbols-outlined text-[19px] !text-white">arrow_forward</span>
+              <span>View All Courses</span>
+              <span class="material-symbols-outlined text-[18px] !text-white">arrow_forward</span>
             </a>
 
             <a
               routerLink="/membership"
-              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold px-7 py-4 rounded-xl transition-all shadow-sm flex items-center gap-2.5 border-2 border-[#2563EB] text-[#2563EB] bg-white hover:bg-blue-50/50 hover:scale-[0.98] dark:border-[#6366F1] dark:!text-white dark:bg-[#0B0F19]/80 dark:hover:bg-[#1E293B] dark:shadow-[0_0_15px_rgba(99,102,241,0.25)]"
+              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold bg-white hover:bg-slate-50 text-slate-800 hover:text-[#2563EB] border-2 border-slate-300 hover:border-[#2563EB] dark:bg-[#121A2B]/90 dark:hover:bg-[#1E293B] dark:text-white dark:border-slate-700 dark:hover:border-[#3B82F6] dark:hover:text-[#60A5FA] px-8 py-4 rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2"
             >
-              <span class="material-symbols-outlined text-[19px]">workspace_premium</span>
-              <span>EXPLORE MEMBERSHIP</span>
-              <span class="material-symbols-outlined text-[19px]">arrow_forward</span>
+              <span class="material-symbols-outlined text-[18px] text-[#2563EB] dark:text-[#3B82F6]">workspace_premium</span>
+              <span>Explore Membership</span>
             </a>
-          </div>
-        </div>
-
-        <!-- Floating Bottom Feature Dock (4 Cards) -->
-        <div class="w-full max-w-5xl mt-12 relative z-10">
-          <div
-            class="rounded-2xl p-4 md:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 backdrop-blur-xl transition-all bg-white/95 border border-slate-200/70 shadow-[0_15px_35px_rgba(0,0,0,0.06)] text-slate-800 dark:bg-[#070C18]/90 dark:border-white/15 dark:shadow-[0_20px_40px_rgba(0,0,0,0.8)] dark:!text-white"
-          >
-            <!-- Feature 1: Beginner Friendly -->
-            <div class="flex items-center gap-3.5 p-2">
-              <div
-                class="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 bg-purple-100 text-purple-600 dark:bg-purple-900/60 dark:text-purple-300 dark:border dark:border-purple-500/40 shadow-sm"
-              >
-                <span class="material-symbols-outlined text-2xl">menu_book</span>
-              </div>
-              <div class="flex flex-col text-left">
-                <span class="font-['Hanken_Grotesk'] text-sm font-bold text-slate-900 dark:!text-white">Beginner Friendly</span>
-                <span class="font-['Inter'] text-xs text-slate-500 dark:!text-slate-300">Start from the basics</span>
-              </div>
-            </div>
-
-            <!-- Feature 2: Hands-on Learning -->
-            <div class="flex items-center gap-3.5 p-2">
-              <div
-                class="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 bg-blue-100 text-blue-600 dark:bg-blue-900/60 dark:text-blue-300 dark:border dark:border-blue-500/40 shadow-sm"
-              >
-                <span class="material-symbols-outlined text-2xl">smart_toy</span>
-              </div>
-              <div class="flex flex-col text-left">
-                <span class="font-['Hanken_Grotesk'] text-sm font-bold text-slate-900 dark:!text-white">Hands-on Learning</span>
-                <span class="font-['Inter'] text-xs text-slate-500 dark:!text-slate-300">Real projects, real skills</span>
-              </div>
-            </div>
-
-            <!-- Feature 3: Build & Innovate -->
-            <div class="flex items-center gap-3.5 p-2">
-              <div
-                class="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 bg-emerald-100 text-emerald-600 dark:bg-emerald-900/60 dark:text-emerald-300 dark:border dark:border-emerald-500/40 shadow-sm"
-              >
-                <span class="material-symbols-outlined text-2xl">rocket_launch</span>
-              </div>
-              <div class="flex flex-col text-left">
-                <span class="font-['Hanken_Grotesk'] text-sm font-bold text-slate-900 dark:!text-white">Build & Innovate</span>
-                <span class="font-['Inter'] text-xs text-slate-500 dark:!text-slate-300">Create your own AI tools</span>
-              </div>
-            </div>
-
-            <!-- Feature 4: Community Support -->
-            <div class="flex items-center gap-3.5 p-2">
-              <div
-                class="h-12 w-12 rounded-xl flex items-center justify-center shrink-0 bg-amber-100 text-amber-600 dark:bg-amber-900/60 dark:text-amber-300 dark:border dark:border-amber-500/40 shadow-sm"
-              >
-                <span class="material-symbols-outlined text-2xl">star</span>
-              </div>
-              <div class="flex flex-col text-left">
-                <span class="font-['Hanken_Grotesk'] text-sm font-bold text-slate-900 dark:!text-white">Community Support</span>
-                <span class="font-['Inter'] text-xs text-slate-500 dark:!text-slate-300">Learn together, grow together</span>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -466,8 +391,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   featuredCourses = signal<Course[]>([]);
   isLoading = signal(true);
-  typedTopic = signal('NN');
-  private readonly typingTopics = ['NN', 'Full Stack', 'Data Science', 'Data Engineering'];
+  typedTopic = signal('AI');
+  private readonly typingTopics = ['AI', 'Full Stack', 'Data Science', 'Data Engineering', 'Agentic AI'];
   private typingTopicIndex = 0;
   private typingCharacterIndex = this.typingTopics[0].length;
   private isDeletingTyping = true;

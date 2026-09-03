@@ -281,8 +281,9 @@ import {
               </div>
 
               <div>
-                <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Course title</label>
+                <label for="course-title" class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Course title</label>
                 <input
+                  id="course-title"
                   type="text"
                   [ngModel]="course()?.title"
                   (ngModelChange)="updateCourseField('title', $event)"
@@ -291,8 +292,9 @@ import {
               </div>
 
               <div>
-                <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Course subtitle</label>
+                <label for="course-subtitle" class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Course subtitle</label>
                 <input
+                  id="course-subtitle"
                   type="text"
                   [ngModel]="course()?.subtitle"
                   (ngModelChange)="updateCourseField('subtitle', $event)"
@@ -301,8 +303,9 @@ import {
               </div>
 
               <div>
-                <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Course description</label>
+                <label for="course-description" class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Course description</label>
                 <textarea
+                  id="course-description"
                   rows="6"
                   [ngModel]="course()?.description"
                   (ngModelChange)="updateCourseField('description', $event)"
@@ -500,8 +503,9 @@ import {
 
               @if (!course()?.isFree) {
                 <div>
-                <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Course Price (₹ INR)</label>
+                <label for="course-price" class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Course Price (₹ INR)</label>
                 <input
+                  id="course-price"
                   type="number"
                   [ngModel]="course()?.price"
                   (ngModelChange)="updateCourseField('price', $event)"

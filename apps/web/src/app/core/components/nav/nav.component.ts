@@ -66,14 +66,14 @@ import { ThemeService } from '../../services/theme.service';
         @if (authService.isAuthenticated()) {
           <button
             (click)="authService.logout()"
-            class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold text-white px-5 py-2.5 rounded-full transition-all shadow-md bg-[#1D4ED8] hover:bg-[#1E40AF] dark:bg-gradient-to-r dark:from-[#9333EA] dark:to-[#2563EB] dark:hover:from-[#7E22CE] dark:hover:to-[#1D4ED8] dark:shadow-[0_0_15px_rgba(147,51,234,0.4)]"
+            class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white px-5 py-2.5 rounded-lg transition-all shadow-sm bg-[#2563EB] hover:bg-[#1D4ED8]"
           >
             Logout
           </button>
         } @else {
           <a
             routerLink="/auth/login"
-            class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold text-white px-5 py-2.5 rounded-full transition-all shadow-md bg-[#1D4ED8] hover:bg-[#1E40AF] dark:bg-gradient-to-r dark:from-[#9333EA] dark:to-[#2563EB] dark:hover:from-[#7E22CE] dark:hover:to-[#1D4ED8] dark:shadow-[0_0_15px_rgba(147,51,234,0.4)]"
+            class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white px-5 py-2.5 rounded-lg transition-all shadow-sm bg-[#2563EB] hover:bg-[#1D4ED8]"
           >
             Login
           </a>

@@ -7,8 +7,6 @@ import { PaymentsService, CouponValidationResult } from '../../core/services/pay
 import { AuthService } from '../../core/services/auth.service';
 import { CoursesService } from '../../core/services/courses.service';
 
-declare var Razorpay: any;
-
 @Component({
   selector: 'app-checkout',
   standalone: true,
@@ -77,32 +75,34 @@ declare var Razorpay: any;
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
               <!-- Razorpay Option (India) -->
-              <div
+              <button
+                type="button"
                 (click)="selectedProvider.set('RAZORPAY')"
                 [class.border-[#3B82F6]]="selectedProvider() === 'RAZORPAY'"
                 [class.bg-[#3B82F6]/5]="selectedProvider() === 'RAZORPAY'"
-                class="p-4 technical-border rounded cursor-pointer transition-all flex flex-col justify-between"
+                class="p-4 technical-border rounded cursor-pointer transition-all flex flex-col justify-between text-left"
               >
                 <div class="flex justify-between items-center mb-2">
                   <span class="font-['Hanken_Grotesk'] text-sm font-bold text-white">Razorpay (India)</span>
                   <span class="font-['JetBrains_Mono'] text-[10px] text-[#3B82F6] font-bold">UPI / CARDS</span>
                 </div>
                 <p class="font-['Inter'] text-xs text-[#d9c3af]">UPI, GPay, PhonePe, Cards, Netbanking + RBI Autopay</p>
-              </div>
+              </button>
 
               <!-- Lemon Squeezy Option (Global) -->
-              <div
+              <button
+                type="button"
                 (click)="selectedProvider.set('LEMON_SQUEEZY')"
                 [class.border-[#3B82F6]]="selectedProvider() === 'LEMON_SQUEEZY'"
                 [class.bg-[#3B82F6]/5]="selectedProvider() === 'LEMON_SQUEEZY'"
-                class="p-4 technical-border rounded cursor-pointer transition-all flex flex-col justify-between"
+                class="p-4 technical-border rounded cursor-pointer transition-all flex flex-col justify-between text-left"
               >
                 <div class="flex justify-between items-center mb-2">
                   <span class="font-['Hanken_Grotesk'] text-sm font-bold text-white">Lemon Squeezy</span>
                   <span class="font-['JetBrains_Mono'] text-[10px] text-[#3B82F6] font-bold">GLOBAL / VAT</span>
                 </div>
                 <p class="font-['Inter'] text-xs text-[#d9c3af]">International Cards, Apple Pay, Merchant of Record</p>
-              </div>
+              </button>
             </div>
 
             <!-- RBI Compliance Note for Razorpay -->
