@@ -68,13 +68,13 @@ export interface Course {
 const STORAGE_KEY = 'technyks_courses_store_v2';
 const LEGACY_STORAGE_KEY = 'technyks_courses_store';
 const METRICS_MIGRATION_KEY = 'technyks_course_metrics_v1';
+const BUILT_IN_COURSES_MIGRATION_KEY = 'technyks_builtin_courses_live_v1';
 const ARCHIVED_FALLBACK_COURSE_IDS_KEY = 'technyks_archived_fallback_courses_v1';
 const LEGACY_DEMO_COURSE_IDS = new Set([
   'course-n8n-1',
   'course-vibe-2',
   'course-agent-3',
   'course-mern-4',
-  'course-javascript-2026',
   'course_1',
   'course_2',
   'course_3',
@@ -106,20 +106,44 @@ export class CoursesService {
       const hasStoredRoster = storedEntries.some((entry) => entry.raw !== null);
       const resetLegacyMetrics =
         localStorage.getItem(METRICS_MIGRATION_KEY) !== '1';
+      const migrateBuiltInCourses =
+        localStorage.getItem(BUILT_IN_COURSES_MIGRATION_KEY) !== '1';
+      const builtInCourses = [JAVASCRIPT_COURSE, TYPESCRIPT_COURSE];
       const stored = storedEntries
         .flatMap((entry) => entry.courses)
-        .map((course) =>
-          this.normaliseCourse({
+        .map((course) => {
+          const builtIn = builtInCourses.find(
+            (candidate) => candidate.id === course.id,
+          );
+          return this.normaliseCourse({
             ...course,
+            ...(migrateBuiltInCourses && builtIn
+              ? {
+                  level: ['Beginner', 'Intermediate', 'Advanced'].includes(
+                    course.level,
+                  )
+                    ? course.level
+                    : builtIn.level,
+                  status: 'LIVE',
+                  isPublished: true,
+                  modules:
+                    Array.isArray(course.modules) && course.modules.length
+                      ? course.modules
+                      : builtIn.modules,
+                }
+              : {}),
             ...(resetLegacyMetrics
               ? {
                   earnedThisMonth: 0,
                   rating: 0,
                 }
               : {}),
-          }),
-        );
+          });
+        });
       if (resetLegacyMetrics) localStorage.setItem(METRICS_MIGRATION_KEY, '1');
+      if (migrateBuiltInCourses) {
+        localStorage.setItem(BUILT_IN_COURSES_MIGRATION_KEY, '1');
+      }
       const unique = stored.filter(
         (course, index, all) =>
           all.findIndex(
@@ -132,7 +156,7 @@ export class CoursesService {
       );
       const archivedFallbackIds = this.getArchivedFallbackCourseIds();
       let roster = hasStoredRoster ? migrated : [];
-      for (const builtIn of [JAVASCRIPT_COURSE, TYPESCRIPT_COURSE]) {
+      for (const builtIn of builtInCourses) {
         if (
           !archivedFallbackIds.has(builtIn.id) &&
           !roster.some((course) => course.id === builtIn.id)

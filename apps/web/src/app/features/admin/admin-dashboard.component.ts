@@ -667,8 +667,9 @@ import { SiteSettingsService, AnnouncementBarSettings } from '../../core/service
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="md:col-span-2">
-                <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Banner Announcement Text</label>
+                <label for="announcement-message" class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Banner Announcement Text</label>
                 <input
+                  id="announcement-message"
                   type="text"
                   [(ngModel)]="editingAnnouncementBar.message"
                   placeholder="e.g. 🔥 Special Launch Offer: Get 50% OFF on all courses! Use code TECHNYKS50"
@@ -677,8 +678,9 @@ import { SiteSettingsService, AnnouncementBarSettings } from '../../core/service
               </div>
 
               <div>
-                <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Badge Text (Optional)</label>
+                <label for="announcement-badge" class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Badge Text (Optional)</label>
                 <input
+                  id="announcement-badge"
                   type="text"
                   [(ngModel)]="editingAnnouncementBar.badgeText"
                   placeholder="e.g. SPECIAL OFFER / NEW / 50% OFF"
@@ -687,8 +689,9 @@ import { SiteSettingsService, AnnouncementBarSettings } from '../../core/service
               </div>
 
               <div>
-                <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Banner Color Theme</label>
+                <label for="announcement-theme" class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Banner Color Theme</label>
                 <select
+                  id="announcement-theme"
                   [(ngModel)]="editingAnnouncementBar.theme"
                   class="w-full bg-[#121A2B] border border-[#1E293B] focus:border-[#3B82F6] rounded-lg px-4 py-2.5 text-xs text-white outline-none font-['JetBrains_Mono']"
                 >
@@ -700,8 +703,9 @@ import { SiteSettingsService, AnnouncementBarSettings } from '../../core/service
               </div>
 
               <div>
-                <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Button Call-to-Action Text</label>
+                <label for="announcement-button-text" class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Button Call-to-Action Text</label>
                 <input
+                  id="announcement-button-text"
                   type="text"
                   [(ngModel)]="editingAnnouncementBar.buttonText"
                   placeholder="e.g. Claim Offer →"
@@ -710,8 +714,9 @@ import { SiteSettingsService, AnnouncementBarSettings } from '../../core/service
               </div>
 
               <div>
-                <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Button Destination Link / URL</label>
+                <label for="announcement-button-url" class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Button Destination Link / URL</label>
                 <input
+                  id="announcement-button-url"
                   type="text"
                   [(ngModel)]="editingAnnouncementBar.buttonUrl"
                   placeholder="e.g. /courses or /checkout?coupon=TECHNYKS50 or https://..."
@@ -798,10 +803,16 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.getCoupons().subscribe((data) => this.coupons.set(data));
     this.adminService.getMembershipPlans().subscribe((data) => this.membershipPlans.set(data));
     this.contactService.messages$.subscribe((messages) => this.contactMessages.set(messages));
+    this.contactService.getMessages().subscribe();
 
     const currentSettings = this.siteSettingsService.settings();
     this.editingTypingWords = [...(currentSettings.typingWords || ['NN', 'Full Stack', 'Data Science', 'Data Engineering'])];
     this.editingAnnouncementBar = { ...currentSettings.announcementBar };
+    this.siteSettingsService.fetchRemoteSettings().subscribe((remote) => {
+      if (!remote) return;
+      this.editingTypingWords = [...remote.typingWords];
+      this.editingAnnouncementBar = { ...remote.announcementBar };
+    });
   }
 
   addTypingWord() {
@@ -823,14 +834,29 @@ export class AdminDashboardComponent implements OnInit {
       this.editingTypingWords = ['NN', 'Full Stack', 'Data Science', 'Data Engineering'];
     }
 
-    this.siteSettingsService.updateSettings({
-      typingWords: [...this.editingTypingWords],
-      announcementBar: { ...this.editingAnnouncementBar },
-    });
-
-    this.isSavingSettings.set(false);
-    this.settingsSavedFeedback.set('Settings and banner configuration updated successfully!');
-    setTimeout(() => this.settingsSavedFeedback.set(''), 5000);
+    this.siteSettingsService
+      .updateSettings({
+        typingWords: [...this.editingTypingWords],
+        announcementBar: { ...this.editingAnnouncementBar },
+      })
+      .subscribe({
+        next: (saved) => {
+          this.editingTypingWords = [...saved.typingWords];
+          this.editingAnnouncementBar = { ...saved.announcementBar };
+          this.isSavingSettings.set(false);
+          this.settingsSavedFeedback.set(
+            'Settings and banner configuration saved for all visitors.',
+          );
+          setTimeout(() => this.settingsSavedFeedback.set(''), 5000);
+        },
+        error: (error) => {
+          this.isSavingSettings.set(false);
+          alert(
+            error?.error?.message ||
+              'The settings were kept in this browser, but the server could not save them. Please try again.',
+          );
+        },
+      });
   }
 
   addPlanFeature(planId: string) {

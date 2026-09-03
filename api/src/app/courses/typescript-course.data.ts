@@ -111,7 +111,7 @@ export const TYPESCRIPT_COURSE = {
   price: 999,
   isFree: false,
   currency: 'INR',
-  level: 'Beginner to Advanced',
+  level: 'Beginner',
   isPublished: true,
   modules: MODULES.map((module, moduleIndex) => ({
     id: module.id,

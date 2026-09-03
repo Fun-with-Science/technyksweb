@@ -1,6 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, of, map, BehaviorSubject } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  catchError,
+  map,
+  of,
+  tap,
+  throwError,
+} from 'rxjs';
 
 export interface ContactMessage {
   id: string;
@@ -22,30 +30,12 @@ export interface ContactMessagePayload {
 export interface ContactMessageResponse {
   success: boolean;
   message: string;
+  id?: string;
 }
 
 const STORAGE_KEY = 'technyks_contact_messages';
 
-const INITIAL_MESSAGES: ContactMessage[] = [
-  {
-    id: 'msg_1',
-    name: 'Aarav Patel',
-    email: 'aarav.patel@example.com',
-    subject: 'Inquiry regarding n8n AI Automation Engineer course',
-    message: 'Hello Technyks team, does this course cover deploying n8n production instances with custom MCP servers on Docker? Looking forward to enrolling.',
-    status: 'NEW',
-    createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
-  },
-  {
-    id: 'msg_2',
-    name: 'Sarah Jenkins',
-    email: 'sarah.j@enterprise-tech.io',
-    subject: 'All-Access Annual membership invoice for company reimbursement',
-    message: 'Hi, I would like to purchase the All-Access Annual plan. Could you please provide a GST invoice addressed to my organization?',
-    status: 'NEW',
-    createdAt: new Date(Date.now() - 3600000 * 24).toISOString(),
-  }
-];
+const INITIAL_MESSAGES: ContactMessage[] = [];
 
 @Injectable({ providedIn: 'root' })
 export class ContactService {
@@ -87,36 +77,106 @@ export class ContactService {
       createdAt: new Date().toISOString(),
     };
 
-    const current = this.getStoredMessages();
-    this.saveStoredMessages([newMessage, ...current]);
-
     return this.http.post<ContactMessageResponse>('/api/contact', payload).pipe(
-      catchError(() => {
+      tap((response) => {
+        newMessage.id = response.id || newMessage.id;
+        const current = this.getStoredMessages().filter(
+          (message) => message.id !== newMessage.id,
+        );
+        this.saveStoredMessages([newMessage, ...current]);
+      }),
+      catchError((error) => {
+        if (!this.isApiUnavailable(error)) return throwError(() => error);
+        const current = this.getStoredMessages();
+        this.saveStoredMessages([newMessage, ...current]);
         return of({
           success: true,
-          message: 'Thanks — your message has been sent to the Technyks Academy team.',
+          message:
+            'Your message is saved in this browser. Please retry when the server connection is restored.',
         });
       })
     );
   }
 
   getMessages(): Observable<ContactMessage[]> {
-    return of(this.getStoredMessages());
+    return this.http.get<ContactMessage[]>('/api/admin/contacts').pipe(
+      map((messages): ContactMessage[] =>
+        messages.map((message) => ({
+          ...message,
+          status:
+            message.status === 'RESOLVED'
+              ? ('RESOLVED' as const)
+              : ('NEW' as const),
+        })),
+      ),
+      tap((messages) => this.saveStoredMessages(messages)),
+      catchError((error) =>
+        this.isApiUnavailable(error)
+          ? of(this.getStoredMessages())
+          : throwError(() => error),
+      ),
+    );
   }
 
   toggleMessageStatus(id: string): Observable<boolean> {
     const current = this.getStoredMessages();
     const target = current.find((m) => m.id === id);
-    if (target) {
-      target.status = target.status === 'NEW' ? 'RESOLVED' : 'NEW';
-      this.saveStoredMessages([...current]);
-    }
-    return of(true);
+    if (!target) return of(false);
+    const status = target.status === 'NEW' ? 'RESOLVED' : 'NEW';
+
+    return this.http
+      .patch<ContactMessage>(`/api/admin/contacts/${encodeURIComponent(id)}`, {
+        status,
+      })
+      .pipe(
+        tap((saved) => {
+          this.saveStoredMessages(
+            current.map((message) =>
+              message.id === id ? { ...message, ...saved } : message,
+            ),
+          );
+        }),
+        map(() => true),
+        catchError((error) => {
+          if (!this.isApiUnavailable(error)) return throwError(() => error);
+          target.status = status;
+          this.saveStoredMessages([...current]);
+          return of(true);
+        }),
+      );
   }
 
   deleteMessage(id: string): Observable<boolean> {
-    const current = this.getStoredMessages().filter((m) => m.id !== id);
-    this.saveStoredMessages([...current]);
-    return of(true);
+    return this.http
+      .delete<{ success: boolean }>(
+        `/api/admin/contacts/${encodeURIComponent(id)}`,
+      )
+      .pipe(
+        tap(() => this.removeStoredMessage(id)),
+        map(() => true),
+        catchError((error) => {
+          if (!this.isApiUnavailable(error)) return throwError(() => error);
+          this.removeStoredMessage(id);
+          return of(true);
+        }),
+      );
+  }
+
+  private removeStoredMessage(id: string) {
+    this.saveStoredMessages(
+      this.getStoredMessages().filter((message) => message.id !== id),
+    );
+  }
+
+  private isApiUnavailable(error: any): boolean {
+    return (
+      error?.status === 0 ||
+      error?.status === 404 ||
+      error?.status === 502 ||
+      error?.status === 503 ||
+      error?.status === 504 ||
+      (error?.status === 200 &&
+        /parse|json/i.test(String(error?.message || '')))
+    );
   }
 }

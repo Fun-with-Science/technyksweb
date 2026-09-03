@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { json, urlencoded } from 'express';
 import { mkdirSync } from 'node:fs';
+import { randomBytes } from 'node:crypto';
 import { AppModule } from './app/app.module';
 import { getUploadsDirectory } from './app/admin/media.service';
 
@@ -23,10 +24,10 @@ function validateProductionEnvironment() {
   const jwtSecret = String(process.env.JWT_SECRET || '').trim();
   if (jwtSecret.length < 32) {
     Logger.warn(
-      '[Startup] JWT_SECRET is missing or shorter than 32 characters. Using built-in secure fallback key.',
+      '[Startup] JWT_SECRET is missing or shorter than 32 characters. Using an ephemeral secure key; configure JWT_SECRET to keep sessions across restarts.',
       'Bootstrap',
     );
-    process.env.JWT_SECRET = process.env.JWT_SECRET || 'technyks-academy-production-jwt-super-secret-key-2026-v2-secure';
+    process.env.JWT_SECRET = randomBytes(48).toString('hex');
   }
 }
 

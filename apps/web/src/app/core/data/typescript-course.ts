@@ -128,7 +128,7 @@ export const TYPESCRIPT_COURSE: Course = {
   price: 999,
   isFree: false,
   currency: 'INR',
-  level: 'Beginner to Advanced',
+  level: 'Beginner',
   status: 'LIVE',
   isPublished: true,
   earnedThisMonth: 0,

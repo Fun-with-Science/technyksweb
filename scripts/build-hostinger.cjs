@@ -13,20 +13,24 @@ const { join } = require('node:path');
 const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const isApiBuild = process.env.HOSTINGER_API_BUILD === 'true';
 
-function runNpm(args) {
+function runNpm(args, options = {}) {
   const result = spawnSync(npmCommand, args, {
     stdio: 'inherit',
     shell: process.platform === 'win32',
   });
 
   if (result.error) {
+    if (options.allowFailure) return false;
     console.error(result.error);
     process.exit(1);
   }
 
   if (result.status !== 0) {
+    if (options.allowFailure) return false;
     process.exit(result.status ?? 1);
   }
+
+  return true;
 }
 
 function hasLocalNx() {
@@ -89,9 +93,7 @@ if (isApiBuild) {
   // compiling the NestJS bundle on Hostinger.
   runNpm(['run', 'prisma:generate']);
   if (hasDb) {
-    try {
-      runNpm(['run', 'prisma:db:push']);
-    } catch (e) {
+    if (!runNpm(['run', 'prisma:db:push'], { allowFailure: true })) {
       console.warn('⚠️ [Build] prisma:db:push skipped during build step.');
     }
   }

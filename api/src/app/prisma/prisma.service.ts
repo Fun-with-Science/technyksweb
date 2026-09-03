@@ -25,6 +25,7 @@ export class PrismaService
   public inMemoryMembershipPlans: any[] = [];
   public inMemoryReviews: any[] = [];
   public inMemoryContactMessages: any[] = [];
+  public inMemorySiteSettings: any | null = null;
 
   async onModuleInit() {
     try {

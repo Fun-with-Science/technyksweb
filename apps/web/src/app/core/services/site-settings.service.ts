@@ -1,6 +1,6 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, of, tap } from 'rxjs';
+import { catchError, map, Observable, of, shareReplay, tap } from 'rxjs';
 
 export interface AnnouncementBarSettings {
   enabled: boolean;
@@ -35,12 +35,13 @@ const DEFAULT_SETTINGS: SiteSettings = {
 })
 export class SiteSettingsService {
   private http = inject(HttpClient);
+  private remoteSettingsRequest$?: Observable<SiteSettings | null>;
 
   settings = signal<SiteSettings>(this.loadStoredSettings());
   isDismissed = signal(false);
 
   constructor() {
-    this.fetchRemoteSettings();
+    this.fetchRemoteSettings().subscribe();
   }
 
   private loadStoredSettings(): SiteSettings {
@@ -77,30 +78,36 @@ export class SiteSettingsService {
     this.settings.set(settings);
   }
 
-  fetchRemoteSettings() {
-    this.http
+  fetchRemoteSettings(): Observable<SiteSettings | null> {
+    if (this.remoteSettingsRequest$) return this.remoteSettingsRequest$;
+
+    this.remoteSettingsRequest$ = this.http
       .get<Partial<SiteSettings>>('/api/settings')
       .pipe(
         catchError(() => of(null)),
-        tap((remote) => {
-          if (remote) {
-            const merged: SiteSettings = {
-              typingWords: Array.isArray(remote.typingWords) && remote.typingWords.length
+        map((remote) => {
+          if (!remote) return null;
+          return {
+            typingWords:
+              Array.isArray(remote.typingWords) && remote.typingWords.length
                 ? remote.typingWords
                 : this.settings().typingWords,
-              announcementBar: {
-                ...this.settings().announcementBar,
-                ...(remote.announcementBar || {}),
-              },
-            };
-            this.saveLocalSettings(merged);
-          }
+            announcementBar: {
+              ...this.settings().announcementBar,
+              ...(remote.announcementBar || {}),
+            },
+          } satisfies SiteSettings;
         }),
-      )
-      .subscribe();
+        tap((remote) => {
+          if (remote) this.saveLocalSettings(remote);
+        }),
+        shareReplay({ bufferSize: 1, refCount: false }),
+      );
+
+    return this.remoteSettingsRequest$;
   }
 
-  updateSettings(updated: Partial<SiteSettings>) {
+  updateSettings(updated: Partial<SiteSettings>): Observable<SiteSettings> {
     const current = this.settings();
     const newSettings: SiteSettings = {
       ...current,
@@ -112,13 +119,21 @@ export class SiteSettingsService {
     };
     this.saveLocalSettings(newSettings);
 
-    // Save to backend if available
-    this.http
-      .post('/api/admin/settings', newSettings)
-      .pipe(catchError(() => of(null)))
-      .subscribe();
-
-    return newSettings;
+    return this.http
+      .post<Partial<SiteSettings>>('/api/admin/settings', newSettings)
+      .pipe(
+        map((saved) => ({
+          typingWords:
+            Array.isArray(saved.typingWords) && saved.typingWords.length
+              ? saved.typingWords
+              : newSettings.typingWords,
+          announcementBar: {
+            ...newSettings.announcementBar,
+            ...(saved.announcementBar || {}),
+          },
+        })),
+        tap((saved) => this.saveLocalSettings(saved)),
+      );
   }
 
   dismissAnnouncement() {

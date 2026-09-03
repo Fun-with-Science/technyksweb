@@ -9,7 +9,7 @@ import { ThemeService } from '../../services/theme.service';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <nav class="sticky top-0 w-full z-40 transition-colors duration-200 border-b flex justify-between items-center h-16 px-4 md:px-12 max-w-full backdrop-blur-xl bg-white/90 border-slate-200/80 text-slate-800 dark:bg-[#040810]/90 dark:border-white/10 dark:text-white shadow-sm">
+    <nav class="relative w-full z-40 transition-colors duration-200 border-b flex justify-between items-center h-16 px-4 md:px-12 max-w-full backdrop-blur-xl bg-white/90 border-slate-200/80 text-slate-800 dark:bg-[#040810]/90 dark:border-white/10 dark:text-white shadow-sm">
       <div class="flex items-center gap-8">
         <a routerLink="/" class="font-['Hanken_Grotesk'] text-xl font-bold tracking-tight transition-colors flex items-center gap-1.5">
           <span class="text-slate-900 dark:text-white">Technyks</span>

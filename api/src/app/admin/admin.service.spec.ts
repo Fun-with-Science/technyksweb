@@ -17,6 +17,7 @@ describe('AdminService - course deletion', () => {
       inMemoryEnrollments: [],
       inMemoryCertificates: [],
       inMemoryPayments: [],
+      inMemoryContactMessages: [],
     };
     service = new AdminService(prisma);
   });
@@ -105,5 +106,29 @@ describe('AdminService - course deletion', () => {
 
     await expect(service.createMembershipPlan({ name: 'Team Monthly', slug: 'team-monthly', price: 2499, interval: 'MONTHLY', features: ['All courses'] })).resolves.toEqual(plan);
     await expect(service.deleteMembershipPlan('plan_1')).resolves.toEqual({ success: true });
+  });
+
+  it('lists, resolves, and deletes support messages in the local adapter', async () => {
+    prisma.isDbConnected = false;
+    prisma.inMemoryContactMessages = [
+      {
+        id: 'contact_1',
+        name: 'Asha',
+        email: 'asha@example.com',
+        subject: 'Course access',
+        message: 'Please help me access the next lesson.',
+        status: 'NEW',
+        createdAt: new Date('2026-09-01T10:00:00Z'),
+      },
+    ];
+
+    await expect(service.getContactMessages()).resolves.toHaveLength(1);
+    await expect(
+      service.updateContactMessageStatus('contact_1', 'RESOLVED'),
+    ).resolves.toMatchObject({ status: 'RESOLVED' });
+    await expect(service.deleteContactMessage('contact_1')).resolves.toEqual({
+      success: true,
+    });
+    expect(prisma.inMemoryContactMessages).toHaveLength(0);
   });
 });

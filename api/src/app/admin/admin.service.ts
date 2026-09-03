@@ -696,6 +696,79 @@ export class AdminService {
     return { success: true };
   }
 
+  async getContactMessages() {
+    if (this.prisma.isDbConnected) {
+      try {
+        return await this.prisma.contactMessage.findMany({
+          orderBy: { createdAt: 'desc' },
+        });
+      } catch {
+        // Use the local adapter if the database becomes unavailable.
+      }
+    }
+
+    return [...this.prisma.inMemoryContactMessages].sort(
+      (a, b) =>
+        new Date(b.createdAt || 0).getTime() -
+        new Date(a.createdAt || 0).getTime(),
+    );
+  }
+
+  async updateContactMessageStatus(id: string, requestedStatus?: string) {
+    const status = String(requestedStatus || '').toUpperCase();
+    if (!['NEW', 'RESOLVED'].includes(status)) {
+      throw new BadRequestException(
+        'Contact message status must be NEW or RESOLVED.',
+      );
+    }
+
+    if (this.prisma.isDbConnected) {
+      try {
+        return await this.prisma.contactMessage.update({
+          where: { id },
+          data: { status },
+        });
+      } catch (error: any) {
+        if (error?.code === 'P2025') {
+          throw new NotFoundException('Contact message not found.');
+        }
+        throw new BadRequestException('Contact message could not be updated.');
+      }
+    }
+
+    const message = this.prisma.inMemoryContactMessages.find(
+      (candidate) => candidate.id === id,
+    );
+    if (!message) throw new NotFoundException('Contact message not found.');
+    message.status = status;
+    message.updatedAt = new Date();
+    return message;
+  }
+
+  async deleteContactMessage(id: string) {
+    if (this.prisma.isDbConnected) {
+      try {
+        await this.prisma.contactMessage.delete({ where: { id } });
+        return { success: true };
+      } catch (error: any) {
+        if (error?.code === 'P2025') {
+          throw new NotFoundException('Contact message not found.');
+        }
+        throw new BadRequestException('Contact message could not be deleted.');
+      }
+    }
+
+    const originalLength = this.prisma.inMemoryContactMessages.length;
+    this.prisma.inMemoryContactMessages =
+      this.prisma.inMemoryContactMessages.filter(
+        (message) => message.id !== id,
+      );
+    if (this.prisma.inMemoryContactMessages.length === originalLength) {
+      throw new NotFoundException('Contact message not found.');
+    }
+    return { success: true };
+  }
+
   private normaliseMembershipPlan(dto: any) {
     const name = String(dto.name || '').trim();
     if (!name) throw new BadRequestException('Membership plan name is required.');

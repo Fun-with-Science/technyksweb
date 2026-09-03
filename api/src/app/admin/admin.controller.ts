@@ -38,6 +38,24 @@ export class AdminController {
     return this.adminService.searchStudents(search);
   }
 
+  @Get('contacts')
+  async getContactMessages() {
+    return this.adminService.getContactMessages();
+  }
+
+  @Patch('contacts/:id')
+  async updateContactMessage(
+    @Param('id') id: string,
+    @Body() dto: { status?: string },
+  ) {
+    return this.adminService.updateContactMessageStatus(id, dto.status);
+  }
+
+  @Delete('contacts/:id')
+  async deleteContactMessage(@Param('id') id: string) {
+    return this.adminService.deleteContactMessage(id);
+  }
+
   @Get('courses')
   async getCourses() {
     return this.adminService.getAllCourses();

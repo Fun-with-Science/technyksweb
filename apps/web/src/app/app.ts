@@ -2,11 +2,17 @@ import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NavComponent } from './core/components/nav/nav.component';
 import { FooterComponent } from './core/components/footer/footer.component';
+import { AnnouncementBarComponent } from './core/components/announcement-bar/announcement-bar.component';
 import { ThemeService } from './core/services/theme.service';
 
 @Component({
   standalone: true,
-  imports: [RouterModule, NavComponent, FooterComponent],
+  imports: [
+    RouterModule,
+    AnnouncementBarComponent,
+    NavComponent,
+    FooterComponent,
+  ],
   selector: 'app-root',
   template: `
     <div
@@ -14,7 +20,10 @@ import { ThemeService } from './core/services/theme.service';
       [class.light-theme]="!themeService.isDarkMode()"
       [class.dark-theme]="themeService.isDarkMode()"
     >
-      <app-nav></app-nav>
+      <header class="sticky top-0 z-50">
+        <app-announcement-bar></app-announcement-bar>
+        <app-nav></app-nav>
+      </header>
       <main class="flex-grow">
         <router-outlet></router-outlet>
       </main>

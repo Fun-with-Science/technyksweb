@@ -178,25 +178,46 @@ export class CoursesService implements OnModuleInit {
     ]) {
       if (this.prisma.isDbConnected) {
         try {
-        const existing = await this.prisma.course.findUnique({
-          where: { id: course.id },
-          include: { modules: { include: { lessons: true } } },
-        });
+          const existing = await this.prisma.course.findUnique({
+            where: { id: course.id },
+            include: { modules: { include: { lessons: true } } },
+          });
 
-        if (!existing) {
-          await this.prisma.course.create({
+          if (!existing) {
+            await this.prisma.course.create({
               data: this.toPrismaCourseCreateData(course, draft) as any,
-          });
-        } else if (!existing.isArchived && !this.hasCurriculum(existing)) {
-          // Preserve the title, thumbnail, visibility, enrollments, and any
-          // other administrator edits while repairing missing curriculum.
-          await this.prisma.course.update({
-              where: { id: course.id },
-            data: {
-                modules: { create: this.toPrismaModules(course.modules) },
-            } as any,
-          });
-        }
+            });
+          } else if (!existing.isArchived) {
+            const repairs: Record<string, unknown> = {};
+            const isMissingCurriculum = !this.hasCurriculum(existing);
+            const hasLegacyLevel =
+              !['Beginner', 'Intermediate', 'Advanced', 'All Levels'].includes(
+                existing.level,
+              );
+            if (isMissingCurriculum) {
+              // Preserve administrator-authored landing-page data while repairing
+              // the missing built-in curriculum.
+              repairs['modules'] = {
+                create: this.toPrismaModules(course.modules),
+              };
+            }
+            if (hasLegacyLevel) {
+              repairs['level'] = course.level;
+            }
+            if (
+              course.isPublished &&
+              !existing.isPublished &&
+              (isMissingCurriculum || hasLegacyLevel)
+            ) {
+              repairs['isPublished'] = true;
+            }
+            if (Object.keys(repairs).length) {
+              await this.prisma.course.update({
+                where: { id: course.id },
+                data: repairs as any,
+              });
+            }
+          }
           continue;
         } catch {
           // Keep the application available through the local adapter during a
@@ -208,9 +229,24 @@ export class CoursesService implements OnModuleInit {
         (candidate) => candidate.id === course.id,
       );
       if (existing) {
-        if (!existing.isArchived && !this.hasCurriculum(existing)) {
+        const isMissingCurriculum = !this.hasCurriculum(existing);
+        if (!existing.isArchived && isMissingCurriculum) {
           existing.modules = course.modules;
           existing.updatedAt = new Date();
+        }
+        const hasLegacyLevel =
+          !['Beginner', 'Intermediate', 'Advanced', 'All Levels'].includes(
+            existing.level,
+          );
+        if (!existing.isArchived && hasLegacyLevel) {
+          existing.level = course.level;
+        }
+        if (
+          !existing.isArchived &&
+          course.isPublished &&
+          (isMissingCurriculum || hasLegacyLevel)
+        ) {
+          existing.isPublished = true;
         }
         continue;
       }
