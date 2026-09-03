@@ -28,14 +28,14 @@ import { SkeletonLoaderComponent } from '../../core/components/skeleton/skeleton
           class="hero-content max-w-4xl relative z-10 grid justify-items-center gap-8 mt-12 md:mt-0"
         >
           <h1
-            class="font-['Hanken_Grotesk'] text-4xl sm:text-6xl md:text-[72px] leading-[1.1] font-bold text-slate-900 dark:text-white tracking-tight"
+            class="font-['Hanken_Grotesk'] text-4xl sm:text-6xl md:text-[72px] leading-[1.1] font-bold text-white tracking-tight"
           >
-            Learn <span class="text-[#2563EB] dark:text-[#3B82F6]">{{ typedTopic() }}</span><span class="typing-caret" aria-hidden="true">|</span><br />
-            <span class="text-[#2563EB] dark:text-[#3B82F6]">Think. Build. Innovate.</span>
+            Learn <span class="text-[#3B82F6]">{{ typedTopic() }}</span><span class="typing-caret" aria-hidden="true">|</span><br />
+            <span class="text-[#3B82F6]">Think. Build. Innovate.</span>
           </h1>
 
           <p
-            class="font-['Inter'] text-lg text-slate-600 dark:text-[#d9c3af] max-w-2xl leading-relaxed"
+            class="font-['Inter'] text-lg text-[#d9c3af] max-w-2xl leading-relaxed"
           >
             Learn AI, think for yourself, and turn powerful AI tools into new
             ideas, useful products, and real-world innovations.
@@ -44,18 +44,18 @@ import { SkeletonLoaderComponent } from '../../core/components/skeleton/skeleton
           <div class="flex flex-wrap justify-center gap-4 mt-2">
             <a
               routerLink="/courses"
-              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white bg-[#2563EB] hover:bg-[#1D4ED8] px-8 py-4 rounded-lg hover:scale-[0.98] transition-all flex items-center gap-2 shadow-lg shadow-blue-500/20"
+              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white bg-[#1D4ED8] hover:bg-[#1E40AF] px-8 py-4 rounded hover:scale-[0.98] transition-all flex items-center gap-2 shadow-lg"
             >
-              <span>View All Courses</span>
+              View All Courses
               <span class="material-symbols-outlined text-[18px] !text-white">arrow_forward</span>
             </a>
 
             <a
               routerLink="/membership"
-              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold bg-white hover:bg-slate-50 text-slate-800 hover:text-[#2563EB] border-2 border-slate-300 hover:border-[#2563EB] dark:bg-[#121A2B]/90 dark:hover:bg-[#1E293B] dark:text-white dark:border-slate-700 dark:hover:border-[#3B82F6] dark:hover:text-[#60A5FA] px-8 py-4 rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2"
+              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold text-[#3B82F6] hover:text-white bg-transparent hover:bg-[#3B82F6]/20 border border-[#3B82F6] px-8 py-4 rounded hover:scale-[0.98] transition-all flex items-center gap-2"
             >
-              <span class="material-symbols-outlined text-[18px] text-[#2563EB] dark:text-[#3B82F6]">workspace_premium</span>
-              <span>Explore Membership</span>
+              <span class="material-symbols-outlined text-[18px]">workspace_premium</span>
+              Explore Membership
             </a>
           </div>
         </div>
@@ -391,8 +391,8 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   featuredCourses = signal<Course[]>([]);
   isLoading = signal(true);
-  typedTopic = signal('AI');
-  private readonly typingTopics = ['AI', 'Full Stack', 'Data Science', 'Data Engineering', 'Agentic AI'];
+  typedTopic = signal('NN');
+  private readonly typingTopics = ['NN', 'Full Stack', 'Data Science', 'Data Engineering'];
   private typingTopicIndex = 0;
   private typingCharacterIndex = this.typingTopics[0].length;
   private isDeletingTyping = true;

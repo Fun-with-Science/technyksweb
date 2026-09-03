@@ -5,7 +5,6 @@
 @layer base {
   html {
     color-scheme: light;
-    cursor: url('/assets/cursors/technyks-light.png') 3 3, auto;
   }
 
   body {
@@ -23,7 +22,7 @@
   }
 
   a, button, [role='button'], label, select, summary {
-    cursor: url('/assets/cursors/technyks-light.png') 3 3, pointer;
+    cursor: pointer;
   }
 
   input, textarea, [contenteditable='true'] {
@@ -33,16 +32,6 @@
 
 html.dark-theme {
   color-scheme: dark;
-  cursor: url('/assets/cursors/technyks-dark.png') 3 3, auto;
-}
-
-html.dark-theme a,
-html.dark-theme button,
-html.dark-theme [role='button'],
-html.dark-theme label,
-html.dark-theme select,
-html.dark-theme summary {
-  cursor: url('/assets/cursors/technyks-dark.png') 3 3, pointer;
 }
 
 body.dark-theme,
