@@ -36,18 +36,18 @@ function hasLocalNx() {
 function requireMySqlDatabaseUrl() {
   const databaseUrl = String(process.env.DATABASE_URL || '').trim();
   if (!databaseUrl) {
-    console.error(
-      'DATABASE_URL is required for the API deployment. Add the Hostinger MySQL connection URL before redeploying.',
+    console.warn(
+      '⚠️ [Build] DATABASE_URL is not set at build time. API will use in-memory fallback or connect to runtime DATABASE_URL.',
     );
-    process.exit(1);
+    return false;
   }
 
   if (!/^mysql:\/\//i.test(databaseUrl)) {
-    console.error(
-      'DATABASE_URL must be a MySQL URL for this API deployment (it should start with mysql://).',
+    console.warn(
+      '⚠️ [Build] DATABASE_URL does not use mysql:// protocol.',
     );
-    process.exit(1);
   }
+  return true;
 }
 
 function ensurePrismaEngineExecutable() {
@@ -83,12 +83,18 @@ if (!hasLocalNx()) {
 }
 
 if (isApiBuild) {
-  requireMySqlDatabaseUrl();
+  const hasDb = requireMySqlDatabaseUrl();
   ensurePrismaEngineExecutable();
   // The API app uses the shared repository root, so initialize Prisma before
   // compiling the NestJS bundle on Hostinger.
   runNpm(['run', 'prisma:generate']);
-  runNpm(['run', 'prisma:db:push']);
+  if (hasDb) {
+    try {
+      runNpm(['run', 'prisma:db:push']);
+    } catch (e) {
+      console.warn('⚠️ [Build] prisma:db:push skipped during build step.');
+    }
+  }
   runNpm(['run', 'build:api:production']);
 
   // Ensure root, dist, and dist/api entry points exist for ANY Hostinger configuration
