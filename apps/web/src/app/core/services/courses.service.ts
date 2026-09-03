@@ -130,18 +130,23 @@ export class CoursesService {
       const migrated = unique.filter(
         (course) => !LEGACY_DEMO_COURSE_IDS.has(course.id),
       );
-      if (hasStoredRoster) {
-        // Migrate older browser sessions so drafts created by the previous
-        // admin panel are not lost when the new roster is loaded.
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
-        localStorage.removeItem(LEGACY_STORAGE_KEY);
-        return migrated;
+      const archivedFallbackIds = this.getArchivedFallbackCourseIds();
+      let roster = hasStoredRoster ? migrated : [];
+      for (const builtIn of [JAVASCRIPT_COURSE, TYPESCRIPT_COURSE]) {
+        if (
+          !archivedFallbackIds.has(builtIn.id) &&
+          !roster.some((course) => course.id === builtIn.id)
+        ) {
+          roster = [this.normaliseCourse(builtIn), ...roster];
+        }
       }
-      // An empty backend must remain empty. Never repopulate deleted courses
-      // from a client-side demo roster when the API is unavailable.
-      return [];
+      if (hasStoredRoster) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(roster));
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
+      }
+      return roster;
     }
-    return [];
+    return [this.normaliseCourse(JAVASCRIPT_COURSE), this.normaliseCourse(TYPESCRIPT_COURSE)];
   }
 
   private hasStoredRoster(): boolean {

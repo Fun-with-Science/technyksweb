@@ -39,14 +39,8 @@ export class PrismaService
       );
     } catch (error: any) {
       this.isDbConnected = false;
-      const allowFallback =
-        process.env.NODE_ENV !== 'production' &&
-        process.env.ALLOW_IN_MEMORY_FALLBACK !== 'false';
-      if (!allowFallback) {
-        throw error;
-      }
       this.logger.warn(
-        ` Configured MySQL database not reachable (${error?.message || 'Connection failed'}). ` +
+        `Configured MySQL database not reachable (${error?.message || 'Connection failed'}). ` +
           `Switching seamlessly to high-performance in-memory persistence layer.`,
       );
     }

@@ -4,9 +4,11 @@ import { NavComponent } from './core/components/nav/nav.component';
 import { FooterComponent } from './core/components/footer/footer.component';
 import { ThemeService } from './core/services/theme.service';
 
+import { AnnouncementBarComponent } from './core/components/announcement-bar/announcement-bar.component';
+
 @Component({
   standalone: true,
-  imports: [RouterModule, NavComponent, FooterComponent],
+  imports: [RouterModule, AnnouncementBarComponent, NavComponent, FooterComponent],
   selector: 'app-root',
   template: `
     <div
@@ -14,6 +16,7 @@ import { ThemeService } from './core/services/theme.service';
       [class.light-theme]="!themeService.isDarkMode()"
       [class.dark-theme]="themeService.isDarkMode()"
     >
+      <app-announcement-bar></app-announcement-bar>
       <app-nav></app-nav>
       <main class="flex-grow">
         <router-outlet></router-outlet>

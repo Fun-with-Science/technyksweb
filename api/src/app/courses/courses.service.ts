@@ -14,6 +14,7 @@ const PUBLIC_REVIEW_INCLUDE = {
 
 const INITIAL_COURSES = [
   JAVASCRIPT_COURSE,
+  TYPESCRIPT_COURSE,
   {
     id: 'course_1',
     slug: 'mastering-agentic-ai',
@@ -172,7 +173,7 @@ export class CoursesService implements OnModuleInit {
     // Built-in courses must exist in the API database so they are visible and
     // editable in the admin panel, not only in one browser's local fallback.
     for (const { course, draft } of [
-      { course: JAVASCRIPT_COURSE, draft: true },
+      { course: JAVASCRIPT_COURSE, draft: false },
       { course: TYPESCRIPT_COURSE, draft: false },
     ]) {
       if (this.prisma.isDbConnected) {

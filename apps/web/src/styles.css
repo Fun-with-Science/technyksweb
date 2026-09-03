@@ -441,7 +441,7 @@ body:not(.dark) .hero-overlay {
 .light-theme [class~="text-[#ffb4ab]"],
 .light-theme [class~="text-[#ffdad6]"] { color: #b42318 !important; }
 
-/* Keep all primary and action buttons with solid white text (exact match only, do not match translucent /10 or /20) */
+/* Keep all primary, purple, indigo, and dark action buttons with solid high-contrast white text */
 .light-theme [class~="bg-[#1D4ED8]"],
 .light-theme [class~="bg-[#1D4ED8]"] *,
 .light-theme [class~="bg-[#2563EB]"],
@@ -451,27 +451,26 @@ body:not(.dark) .hero-overlay {
 .dark-theme [class~="bg-[#1D4ED8]"],
 .dark-theme [class~="bg-[#1D4ED8]"] *,
 .dark [class~="bg-[#1D4ED8]"],
-.dark [class~="bg-[#1D4ED8]"] * {
-  color: #ffffff !important;
-}
-
-/* Ensure translucent badges keep saturated high-contrast colors in light mode */
-.light-theme [class*="bg-[#3B82F6]/10"],
-.light-theme [class*="bg-[#3B82F6]/15"],
-.light-theme [class*="bg-[#3B82F6]/20"] {
-  color: #1d4ed8 !important;
-}
-.light-theme [class*="bg-[#3B82F6]/10"] *,
-.light-theme [class*="bg-[#3B82F6]/15"] *,
-.light-theme [class*="bg-[#3B82F6]/20"] * {
-  color: #1d4ed8 !important;
-}
-
+.dark [class~="bg-[#1D4ED8]"] *,
+button[class*="bg-purple"],
+button[class*="bg-purple"] *,
+button[class*="bg-indigo"],
+button[class*="bg-indigo"] *,
+button[class*="bg-violet"],
+button[class*="bg-violet"] *,
+a[class*="bg-purple"],
+a[class*="bg-purple"] *,
+a[class*="bg-indigo"],
+a[class*="bg-indigo"] *,
+a[class*="bg-violet"],
+a[class*="bg-violet"] *,
 .admin-action-primary,
+.admin-action-primary *,
 .light-theme .admin-action-primary,
-.dark-theme .admin-action-primary {
+.light-theme .admin-action-primary *,
+.dark-theme .admin-action-primary,
+.dark-theme .admin-action-primary * {
   color: #ffffff !important;
-  border-radius: 0 !important;
 }
 
 .light-theme [class~="border-[#1E293B]"],

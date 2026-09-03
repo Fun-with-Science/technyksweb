@@ -9,7 +9,7 @@ import { ThemeService } from '../../services/theme.service';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <nav class="fixed top-0 w-full z-50 transition-colors duration-200 border-b flex justify-between items-center h-16 px-4 md:px-12 max-w-full backdrop-blur-xl bg-white/90 border-slate-200/80 text-slate-800 dark:bg-[#040810]/90 dark:border-white/10 dark:text-white">
+    <nav class="sticky top-0 w-full z-40 transition-colors duration-200 border-b flex justify-between items-center h-16 px-4 md:px-12 max-w-full backdrop-blur-xl bg-white/90 border-slate-200/80 text-slate-800 dark:bg-[#040810]/90 dark:border-white/10 dark:text-white shadow-sm">
       <div class="flex items-center gap-8">
         <a routerLink="/" class="font-['Hanken_Grotesk'] text-xl font-bold tracking-tight transition-colors flex items-center gap-1.5">
           <span class="text-slate-900 dark:text-white">Technyks</span>
@@ -33,10 +33,12 @@ import { ThemeService } from '../../services/theme.service';
             Contact
           </a>
           
-          <a routerLink="/admin" routerLinkActive="text-[#2563EB] dark:text-[#3B82F6] font-bold border-b-2 border-[#2563EB] dark:border-[#3B82F6]" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-slate-600 hover:text-[#2563EB] dark:text-slate-300 dark:hover:text-[#3B82F6] pb-1 transition-colors flex items-center gap-1">
-            <span class="material-symbols-outlined text-[16px]">headphones</span>
-            Admin
-          </a>
+          @if (authService.isAdmin()) {
+            <a routerLink="/admin" routerLinkActive="text-[#2563EB] dark:text-[#3B82F6] font-bold border-b-2 border-[#2563EB] dark:border-[#3B82F6]" class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-slate-600 hover:text-[#2563EB] dark:text-slate-300 dark:hover:text-[#3B82F6] pb-1 transition-colors flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px]">headphones</span>
+              Admin
+            </a>
+          }
         </div>
       </div>
 
@@ -101,10 +103,12 @@ import { ThemeService } from '../../services/theme.service';
         <a routerLink="/contact" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-slate-700 dark:text-[#d9c3af] hover:text-[#2563EB] py-2 border-b border-slate-100 dark:border-[#1E293B]/50">
           Contact
         </a>
-        <a routerLink="/admin" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-slate-700 dark:text-[#d9c3af] hover:text-[#2563EB] py-2 border-b border-slate-100 dark:border-[#1E293B]/50 flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-[16px]">headphones</span>
-          Admin
-        </a>
+        @if (authService.isAdmin()) {
+          <a routerLink="/admin" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-slate-700 dark:text-[#d9c3af] hover:text-[#2563EB] py-2 border-b border-slate-100 dark:border-[#1E293B]/50 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">headphones</span>
+            Admin
+          </a>
+        }
 
         @if (authService.isAuthenticated()) {
           <div class="pt-2 flex flex-col gap-3">

@@ -58,6 +58,18 @@ export const appRoutes: Routes = [
     loadComponent: () => import('./features/auth/forgot-password.component').then(m => m.ForgotPasswordComponent),
   },
   {
+    path: 'privacy-policy',
+    loadComponent: () => import('./features/legal/privacy-policy.component').then(m => m.PrivacyPolicyComponent),
+  },
+  {
+    path: 'terms-and-conditions',
+    loadComponent: () => import('./features/legal/terms.component').then(m => m.TermsComponent),
+  },
+  {
+    path: 'refund-policy',
+    loadComponent: () => import('./features/legal/refund-policy.component').then(m => m.RefundPolicyComponent),
+  },
+  {
     path: '**',
     redirectTo: '',
   },

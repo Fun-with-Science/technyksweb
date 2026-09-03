@@ -1,4 +1,5 @@
 import { HttpInterceptorFn } from '@angular/common/http';
+import { catchError, timeout, of } from 'rxjs';
 
 const PRODUCTION_API_ORIGIN = 'https://api.codingtechnyks.com';
 
@@ -9,16 +10,24 @@ function isLocalBrowser() {
 }
 
 /**
- * Keep local development on the Angular proxy, but send production API
- * requests to the separately deployed NestJS application. Without this,
- * `/api/...` is requested from the frontend Hostinger site and is handled by
- * its SPA/static route instead of the API process.
+ * Direct production client-side requests to API backend while ensuring
+ * SSR requests never hang or block server response rendering.
  */
 export const apiUrlInterceptor: HttpInterceptorFn = (req, next) => {
   if (!req.url.startsWith('/api')) return next(req);
   if (isLocalBrowser()) return next(req);
 
+  // In SSR environment, set a tight timeout so rendering never causes a 504 Gateway Time-out
+  if (typeof window === 'undefined') {
+    const targetUrl = `${PRODUCTION_API_ORIGIN}${req.url}`;
+    return next(req.clone({ url: targetUrl })).pipe(
+      timeout(1500),
+      catchError(() => of(null as any)),
+    );
+  }
+
   return next(req.clone({
     url: `${PRODUCTION_API_ORIGIN}${req.url}`,
   }));
 };
+

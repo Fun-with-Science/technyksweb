@@ -313,6 +313,53 @@ import {
                 ></textarea>
               </div>
 
+              <!-- Course Category / Level & Price Settings -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-[#1E293B] pt-6">
+                <div>
+                  <label for="course-level" class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">
+                    Course Level / Category
+                  </label>
+                  <select
+                    id="course-level"
+                    [ngModel]="course()?.level"
+                    (ngModelChange)="updateCourseField('level', $event)"
+                    class="w-full bg-[#040810] border border-[#1E293B] focus:border-[#3B82F6] rounded-lg px-4 py-2.5 text-xs text-white outline-none font-['JetBrains_Mono']"
+                  >
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                    <option value="All Levels">All Levels</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="course-price" class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">
+                    Course Price (₹)
+                  </label>
+                  <input
+                    id="course-price"
+                    type="number"
+                    min="0"
+                    [ngModel]="course()?.price"
+                    (ngModelChange)="updateCourseField('price', $event)"
+                    placeholder="e.g. 4999 (0 for free)"
+                    class="w-full bg-[#040810] border border-[#1E293B] focus:border-[#3B82F6] rounded-lg px-4 py-2.5 text-xs text-[#3B82F6] font-bold outline-none font-['JetBrains_Mono']"
+                  />
+                </div>
+
+                <div class="flex flex-col justify-end pb-2">
+                  <label class="inline-flex items-center gap-2 cursor-pointer font-['Inter'] text-xs text-white">
+                    <input
+                      type="checkbox"
+                      [checked]="course()?.isFree"
+                      (change)="updateCourseField('isFree', $any($event.target).checked)"
+                      class="rounded bg-[#040810] border-[#1E293B] text-[#3B82F6] focus:ring-0"
+                    />
+                    <span>Free Course (No payment required)</span>
+                  </label>
+                </div>
+              </div>
+
               <!-- Course Image Upload & Preview Card -->
               <div class="border-t border-[#1E293B] pt-6">
                 <div class="flex items-center justify-between mb-4"><div><h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white">Course image</h3><p class="font-['Inter'] text-xs text-[#a18d7b] mt-1">Shown in search results and behind the preview play button.</p></div>@if (course()?.thumbnail) {<button type="button" (click)="removeMedia('thumbnail')" [disabled]="removingMedia() === 'thumbnail'" class="font-['JetBrains_Mono'] text-[11px] text-[#ffb4ab] border border-[#ffb4ab]/40 rounded px-3 py-2 hover:bg-[#ffb4ab]/10 disabled:opacity-50">{{ removingMedia() === 'thumbnail' ? 'Removing…' : 'Remove image' }}</button>}</div>

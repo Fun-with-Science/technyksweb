@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { Course, CoursesService } from '../../core/services/courses.service';
 import { CourseCardComponent } from '../../core/components/course-card/course-card.component';
 import { SkeletonLoaderComponent } from '../../core/components/skeleton/skeleton-loader.component';
+import { SiteSettingsService } from '../../core/services/site-settings.service';
 
 @Component({
   selector: 'app-home',
@@ -387,16 +388,21 @@ import { SkeletonLoaderComponent } from '../../core/components/skeleton/skeleton
 })
 export class HomeComponent implements OnInit, OnDestroy {
   private coursesService = inject(CoursesService);
+  private siteSettingsService = inject(SiteSettingsService);
   private platformId = inject(PLATFORM_ID);
 
   featuredCourses = signal<Course[]>([]);
   isLoading = signal(true);
   typedTopic = signal('NN');
-  private readonly typingTopics = ['NN', 'Full Stack', 'Data Science', 'Data Engineering'];
   private typingTopicIndex = 0;
-  private typingCharacterIndex = this.typingTopics[0].length;
+  private typingCharacterIndex = 2;
   private isDeletingTyping = true;
   private typingTimer?: ReturnType<typeof setTimeout>;
+
+  private get typingTopics(): string[] {
+    const custom = this.siteSettingsService.settings().typingWords;
+    return custom && custom.length ? custom : ['NN', 'Full Stack', 'Data Science', 'Data Engineering'];
+  }
 
   ngOnInit() {
     this.coursesService.getCourses().subscribe({
@@ -416,7 +422,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private runTypingAnimation() {
-    const topic = this.typingTopics[this.typingTopicIndex];
+    const topics = this.typingTopics;
+    if (this.typingTopicIndex >= topics.length) {
+      this.typingTopicIndex = 0;
+    }
+    const topic = topics[this.typingTopicIndex] || 'AI';
     if (this.isDeletingTyping) {
       this.typingCharacterIndex = Math.max(0, this.typingCharacterIndex - 1);
     } else {
@@ -427,7 +437,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     let delay = this.isDeletingTyping ? 55 : 90;
     if (this.isDeletingTyping && this.typingCharacterIndex === 0) {
       this.isDeletingTyping = false;
-      this.typingTopicIndex = (this.typingTopicIndex + 1) % this.typingTopics.length;
+      this.typingTopicIndex = (this.typingTopicIndex + 1) % topics.length;
       this.typingCharacterIndex = 0;
       delay = 280;
     } else if (!this.isDeletingTyping && this.typingCharacterIndex === topic.length) {

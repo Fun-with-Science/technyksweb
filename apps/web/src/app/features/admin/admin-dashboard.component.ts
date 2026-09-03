@@ -12,6 +12,8 @@ import {
 import { CoursesService, Course } from '../../core/services/courses.service';
 import { ContactService, ContactMessage } from '../../core/services/contact.service';
 
+import { SiteSettingsService, AnnouncementBarSettings } from '../../core/services/site-settings.service';
+
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
@@ -108,6 +110,18 @@ import { ContactService, ContactMessage } from '../../core/services/contact.serv
               {{ unreadMessagesCount() }}
             </span>
           }
+        </button>
+
+        <button
+          (click)="activeTab.set('settings')"
+          [class.border-b-2]="activeTab() === 'settings'"
+          [class.border-[#3B82F6]]="activeTab() === 'settings'"
+          [class.text-[#3B82F6]]="activeTab() === 'settings'"
+          [class.text-[#d9c3af]]="activeTab() !== 'settings'"
+          class="pb-3 px-1 font-bold transition-colors shrink-0 flex items-center gap-1.5"
+        >
+          <span class="material-symbols-outlined text-[16px]">tune</span>
+          Site Settings & Banner
         </button>
       </div>
 
@@ -389,13 +403,51 @@ import { ContactService, ContactMessage } from '../../core/services/contact.serv
                     <textarea rows="3" [ngModel]="plan.description || ''" (ngModelChange)="updateMembershipPlanField(plan.id, 'description', $event)" class="mt-1 w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-sm text-white"></textarea>
                   </label>
 
-                  <div class="grid grid-cols-2 gap-3">
+                  <div class="grid grid-cols-1 gap-4">
                     <label class="font-['Inter'] text-xs text-[#a18d7b]">Price (₹)
-                      <input type="number" min="0" [ngModel]="plan.price" (ngModelChange)="updateMembershipPlanField(plan.id, 'price', $event)" class="mt-1 w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-sm text-[#3B82F6]" />
+                      <input type="number" min="0" [ngModel]="plan.price" (ngModelChange)="updateMembershipPlanField(plan.id, 'price', $event)" class="mt-1 w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-sm text-[#3B82F6] font-bold" />
                     </label>
-                    <label class="font-['Inter'] text-xs text-[#a18d7b]">Features (one per line)
-                      <textarea rows="3" [ngModel]="featuresText(plan)" (ngModelChange)="updateMembershipPlanField(plan.id, 'featuresText', $event)" class="mt-1 w-full bg-[#040810] border border-[#1E293B] rounded px-3 py-2 text-sm text-white"></textarea>
-                    </label>
+
+                    <!-- Item-by-Item Modern Features Editor -->
+                    <div class="border border-[#1E293B] bg-[#040810] rounded-lg p-4 flex flex-col gap-3">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <span class="font-['Hanken_Grotesk'] text-xs font-bold text-white uppercase tracking-wider">Plan Features</span>
+                          <p class="font-['Inter'] text-[11px] text-[#a18d7b]">Shown to learners on the pricing & membership page</p>
+                        </div>
+                        <button
+                          type="button"
+                          (click)="addPlanFeature(plan.id)"
+                          class="font-['JetBrains_Mono'] text-xs font-bold text-[#3B82F6] hover:text-[#60A5FA] bg-[#3B82F6]/10 hover:bg-[#3B82F6]/20 border border-[#3B82F6]/40 px-3 py-1.5 rounded flex items-center gap-1 transition-colors"
+                        >
+                          <span class="material-symbols-outlined text-sm">add</span>
+                          Add Feature
+                        </button>
+                      </div>
+
+                      <div class="flex flex-col gap-2.5 mt-1">
+                        @for (feature of plan.features; track $index) {
+                          <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm text-emerald-400 shrink-0">check_circle</span>
+                            <input
+                              type="text"
+                              [ngModel]="feature"
+                              (ngModelChange)="updatePlanFeature(plan.id, $index, $event)"
+                              placeholder="e.g. Unlimited access to every architecture course"
+                              class="flex-1 bg-[#121A2B] border border-[#1E293B] focus:border-[#3B82F6] rounded px-3 py-1.5 text-xs text-white outline-none font-['Inter'] transition-colors"
+                            />
+                            <button
+                              type="button"
+                              (click)="removePlanFeature(plan.id, $index)"
+                              class="text-red-400 hover:text-red-300 p-1.5 hover:bg-red-500/10 rounded transition-colors"
+                              title="Delete feature"
+                            >
+                              <span class="material-symbols-outlined text-base leading-none">delete</span>
+                            </button>
+                          </div>
+                        }
+                      </div>
+                    </div>
                   </div>
 
                   <label class="inline-flex items-center gap-2 font-['Inter'] text-xs text-[#d9c3af]">
@@ -530,6 +582,166 @@ import { ContactService, ContactMessage } from '../../core/services/contact.serv
           }
         </div>
       }
+
+      <!-- TAB 7: SITE SETTINGS & ANNOUNCEMENT BANNER -->
+      @if (activeTab() === 'settings') {
+        <div class="flex flex-col gap-8">
+          <div class="border-b border-[#1E293B] pb-4">
+            <h2 class="font-['Hanken_Grotesk'] text-2xl font-bold text-white">Site Settings & Banner Configuration</h2>
+            <p class="font-['Inter'] text-xs text-[#d9c3af] mt-1">
+              Customize hero typing topics, banner alerts, and global academy settings.
+            </p>
+          </div>
+
+          <!-- Section 1: Hero Typing Animation Words -->
+          <div class="border border-[#1E293B] bg-[#040810]/60 rounded-xl p-6 flex flex-col gap-5">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h3 class="font-['Hanken_Grotesk'] text-lg font-bold text-white flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[#3B82F6]">keyboard</span>
+                  Hero Typing Animation Words
+                </h3>
+                <p class="font-['Inter'] text-xs text-[#a18d7b] mt-1">
+                  Words that cycle dynamically in the homepage hero section: <em>"Learn [Word] | Think. Build. Innovate."</em>
+                </p>
+              </div>
+            </div>
+
+            <!-- Typing words chips/list -->
+            <div class="flex flex-wrap items-center gap-2 min-h-[44px] p-3 bg-[#121A2B] border border-[#1E293B] rounded-lg">
+              @for (word of editingTypingWords; track $index) {
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#3B82F6]/15 border border-[#3B82F6]/40 text-[#60A5FA] font-['JetBrains_Mono'] text-xs font-semibold">
+                  {{ word }}
+                  <button type="button" (click)="removeTypingWord($index)" class="text-slate-400 hover:text-white ml-1">
+                    <span class="material-symbols-outlined text-xs">close</span>
+                  </button>
+                </span>
+              }
+            </div>
+
+            <!-- Add new word input -->
+            <div class="flex gap-3 max-w-md">
+              <input
+                type="text"
+                [(ngModel)]="newTypingWordInput"
+                (keyup.enter)="addTypingWord()"
+                placeholder="Enter topic (e.g. Agentic AI, Python, React)..."
+                class="flex-1 bg-[#121A2B] border border-[#1E293B] focus:border-[#3B82F6] rounded-lg px-3 py-2 text-xs text-white outline-none font-['Inter']"
+              />
+              <button
+                type="button"
+                (click)="addTypingWord()"
+                class="font-['JetBrains_Mono'] text-xs font-bold uppercase !text-white bg-[#2563EB] hover:bg-[#1D4ED8] px-4 py-2 rounded-lg transition-colors flex items-center gap-1 shadow-sm"
+              >
+                <span class="material-symbols-outlined text-sm">add</span>
+                Add Word
+              </button>
+            </div>
+          </div>
+
+          <!-- Section 2: Top Announcement Bar / Advertisement Banner -->
+          <div class="border border-[#1E293B] bg-[#040810]/60 rounded-xl p-6 flex flex-col gap-5">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h3 class="font-['Hanken_Grotesk'] text-lg font-bold text-white flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[#3B82F6]">campaign</span>
+                  Top Announcement Bar (Advertisement / Offer Banner)
+                </h3>
+                <p class="font-['Inter'] text-xs text-[#a18d7b] mt-1">
+                  Displays a persistent, high-converting banner at the very top of all pages across the website.
+                </p>
+              </div>
+
+              <label class="inline-flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="editingAnnouncementBar.enabled"
+                  class="sr-only peer"
+                />
+                <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2563EB]"></div>
+                <span class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-white">
+                  {{ editingAnnouncementBar.enabled ? 'Enabled' : 'Disabled' }}
+                </span>
+              </label>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="md:col-span-2">
+                <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Banner Announcement Text</label>
+                <input
+                  type="text"
+                  [(ngModel)]="editingAnnouncementBar.message"
+                  placeholder="e.g. 🔥 Special Launch Offer: Get 50% OFF on all courses! Use code TECHNYKS50"
+                  class="w-full bg-[#121A2B] border border-[#1E293B] focus:border-[#3B82F6] rounded-lg px-4 py-2.5 text-xs text-white outline-none font-['Inter']"
+                />
+              </div>
+
+              <div>
+                <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Badge Text (Optional)</label>
+                <input
+                  type="text"
+                  [(ngModel)]="editingAnnouncementBar.badgeText"
+                  placeholder="e.g. SPECIAL OFFER / NEW / 50% OFF"
+                  class="w-full bg-[#121A2B] border border-[#1E293B] focus:border-[#3B82F6] rounded-lg px-4 py-2.5 text-xs text-white outline-none font-['JetBrains_Mono']"
+                />
+              </div>
+
+              <div>
+                <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Banner Color Theme</label>
+                <select
+                  [(ngModel)]="editingAnnouncementBar.theme"
+                  class="w-full bg-[#121A2B] border border-[#1E293B] focus:border-[#3B82F6] rounded-lg px-4 py-2.5 text-xs text-white outline-none font-['JetBrains_Mono']"
+                >
+                  <option value="blue">Royal Blue (Standard)</option>
+                  <option value="amber">Amber / Gold (High Alert / Promo)</option>
+                  <option value="emerald">Emerald Green (Discount / Launch)</option>
+                  <option value="purple">Vibrant Purple</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Button Call-to-Action Text</label>
+                <input
+                  type="text"
+                  [(ngModel)]="editingAnnouncementBar.buttonText"
+                  placeholder="e.g. Claim Offer →"
+                  class="w-full bg-[#121A2B] border border-[#1E293B] focus:border-[#3B82F6] rounded-lg px-4 py-2.5 text-xs text-white outline-none font-['Inter']"
+                />
+              </div>
+
+              <div>
+                <label class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">Button Destination Link / URL</label>
+                <input
+                  type="text"
+                  [(ngModel)]="editingAnnouncementBar.buttonUrl"
+                  placeholder="e.g. /courses or /checkout?coupon=TECHNYKS50 or https://..."
+                  class="w-full bg-[#121A2B] border border-[#1E293B] focus:border-[#3B82F6] rounded-lg px-4 py-2.5 text-xs text-white outline-none font-['JetBrains_Mono']"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Save Settings Action Button -->
+          <div class="flex items-center gap-4">
+            <button
+              type="button"
+              (click)="saveSiteSettings()"
+              [disabled]="isSavingSettings()"
+              class="font-['JetBrains_Mono'] text-xs font-bold uppercase !text-white bg-[#2563EB] hover:bg-[#1D4ED8] px-8 py-3.5 rounded-lg transition-all shadow-lg flex items-center gap-2 disabled:opacity-60"
+            >
+              <span class="material-symbols-outlined text-sm">{{ isSavingSettings() ? 'progress_activity' : (settingsSavedFeedback() ? 'check_circle' : 'save') }}</span>
+              {{ isSavingSettings() ? 'Saving Settings...' : (settingsSavedFeedback() ? 'Settings Saved!' : 'Save All Settings') }}
+            </button>
+
+            @if (settingsSavedFeedback()) {
+              <span class="text-xs font-['JetBrains_Mono'] text-emerald-400 flex items-center gap-1.5 animate-in fade-in duration-200">
+                <span class="material-symbols-outlined text-sm">check_circle</span>
+                {{ settingsSavedFeedback() }}
+              </span>
+            }
+          </div>
+        </div>
+      }
     </div>
   `,
 })
@@ -537,9 +749,10 @@ export class AdminDashboardComponent implements OnInit {
   private adminService = inject(AdminService);
   private coursesService = inject(CoursesService);
   private contactService = inject(ContactService);
+  private siteSettingsService = inject(SiteSettingsService);
   private router = inject(Router);
 
-  activeTab = signal<'courses' | 'revenue' | 'students' | 'coupons' | 'membership' | 'support'>('courses');
+  activeTab = signal<'courses' | 'revenue' | 'students' | 'coupons' | 'membership' | 'support' | 'settings'>('courses');
   metrics = signal<RevenueMetrics | null>(null);
   students = signal<Student[]>([]);
   coupons = signal<Coupon[]>([]);
@@ -557,6 +770,20 @@ export class AdminDashboardComponent implements OnInit {
   publishedCourses = signal<Course[]>([]);
   isLoadingCourses = signal(true);
 
+  // Site Settings & Banners state
+  editingTypingWords: string[] = [];
+  newTypingWordInput = '';
+  editingAnnouncementBar: AnnouncementBarSettings = {
+    enabled: true,
+    message: '🚀 Special Launch: Complete TypeScript & JavaScript Masterclasses are now LIVE!',
+    buttonText: 'Explore Courses',
+    buttonUrl: '/courses',
+    badgeText: 'NEW',
+    theme: 'blue',
+  };
+  isSavingSettings = signal(false);
+  settingsSavedFeedback = signal('');
+
   searchCourseQuery = '';
   sortBy = 'Newest';
   newMembershipCouponCode = '';
@@ -571,6 +798,72 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.getCoupons().subscribe((data) => this.coupons.set(data));
     this.adminService.getMembershipPlans().subscribe((data) => this.membershipPlans.set(data));
     this.contactService.messages$.subscribe((messages) => this.contactMessages.set(messages));
+
+    const currentSettings = this.siteSettingsService.settings();
+    this.editingTypingWords = [...(currentSettings.typingWords || ['NN', 'Full Stack', 'Data Science', 'Data Engineering'])];
+    this.editingAnnouncementBar = { ...currentSettings.announcementBar };
+  }
+
+  addTypingWord() {
+    const word = this.newTypingWordInput.trim();
+    if (!word) return;
+    if (!this.editingTypingWords.includes(word)) {
+      this.editingTypingWords.push(word);
+    }
+    this.newTypingWordInput = '';
+  }
+
+  removeTypingWord(index: number) {
+    this.editingTypingWords.splice(index, 1);
+  }
+
+  saveSiteSettings() {
+    this.isSavingSettings.set(true);
+    if (!this.editingTypingWords.length) {
+      this.editingTypingWords = ['NN', 'Full Stack', 'Data Science', 'Data Engineering'];
+    }
+
+    this.siteSettingsService.updateSettings({
+      typingWords: [...this.editingTypingWords],
+      announcementBar: { ...this.editingAnnouncementBar },
+    });
+
+    this.isSavingSettings.set(false);
+    this.settingsSavedFeedback.set('Settings and banner configuration updated successfully!');
+    setTimeout(() => this.settingsSavedFeedback.set(''), 5000);
+  }
+
+  addPlanFeature(planId: string) {
+    this.membershipPlans.update((plans) =>
+      plans.map((plan) => {
+        if (plan.id !== planId) return plan;
+        const features = Array.isArray(plan.features) ? [...plan.features] : [];
+        features.push('New included feature');
+        return { ...plan, features, featuresText: features.join('\n') };
+      }),
+    );
+  }
+
+  removePlanFeature(planId: string, index: number) {
+    this.membershipPlans.update((plans) =>
+      plans.map((plan) => {
+        if (plan.id !== planId) return plan;
+        const features = Array.isArray(plan.features) ? [...plan.features] : [];
+        features.splice(index, 1);
+        return { ...plan, features, featuresText: features.join('\n') };
+      }),
+    );
+  }
+
+  updatePlanFeature(planId: string, index: number, value: string) {
+    this.membershipPlans.update((plans) =>
+      plans.map((plan) => {
+        if (plan.id !== planId) return plan;
+        const features = Array.isArray(plan.features) ? [...plan.features] : [];
+        features[index] = value;
+        return { ...plan, features, featuresText: features.join('\n') };
+      }),
+    );
   }
 
   loadCourses() {
