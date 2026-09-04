@@ -516,7 +516,7 @@ export class CourseDetailComponent implements OnInit {
         this.coursesService.getCourseBySlug(slug).subscribe({
           next: (data) => {
             this.course.set(data);
-            this.loadEnrollmentStatus(data.id);
+            this.loadEnrollmentStatus(data);
             this.promoPlaying.set(false);
             this.promoEmbedUrl.set(this.toPromoEmbedUrl(data.promoVideoUrl));
             this.expandedModules.set(
@@ -537,12 +537,16 @@ export class CourseDetailComponent implements OnInit {
     });
   }
 
-  private loadEnrollmentStatus(courseId: string) {
+  private loadEnrollmentStatus(course: Course) {
     if (!this.authService.isAuthenticated()) return;
     this.enrollmentsService.getMyEnrollments().subscribe({
       next: (enrollments) =>
         this.isEnrolled.set(
-          enrollments.some((enrollment) => enrollment.courseId === courseId),
+          enrollments.some(
+            (enrollment) =>
+              enrollment.courseId === course.id ||
+              enrollment.course?.slug === course.slug,
+          ),
         ),
       error: () => this.isEnrolled.set(false),
     });

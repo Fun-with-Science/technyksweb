@@ -11,10 +11,10 @@ import { SiteSettingsService } from '../../core/services/site-settings.service';
   standalone: true,
   imports: [CommonModule, RouterModule, CourseCardComponent, SkeletonLoaderComponent],
   template: `
-    <div class="flex flex-col gap-24 pb-20 pt-16">
+    <div class="flex flex-col gap-16 sm:gap-20 lg:gap-24 pb-16 sm:pb-20 pt-0">
       <!-- Hero Section -->
       <section
-        class="hero-section min-h-[75vh] flex flex-col justify-center items-center px-6 md:px-16 relative overflow-hidden text-center"
+        class="hero-section min-h-[calc(100svh-4rem)] sm:min-h-[72vh] flex flex-col justify-center items-center px-4 sm:px-6 md:px-16 relative overflow-hidden text-center"
       >
         <div
           class="hero-background absolute inset-0 bg-cover bg-center pointer-events-none"
@@ -26,26 +26,26 @@ import { SiteSettingsService } from '../../core/services/site-settings.service';
         ></div>
 
         <div
-          class="hero-content max-w-4xl relative z-10 grid justify-items-center gap-8 mt-12 md:mt-0"
+          class="hero-content max-w-5xl relative z-10 grid justify-items-center gap-5 sm:gap-7 py-14 sm:py-16"
         >
           <h1
-            class="font-['Hanken_Grotesk'] text-4xl sm:text-6xl md:text-[72px] leading-[1.1] font-bold text-white tracking-tight"
+            class="font-['Hanken_Grotesk'] text-[2.35rem] min-[390px]:text-5xl sm:text-6xl md:text-[72px] leading-[1.06] font-bold text-slate-950 dark:text-white tracking-tight break-words"
           >
             Learn <span class="text-[#3B82F6]">{{ typedTopic() }}</span><span class="typing-caret" aria-hidden="true">|</span><br />
             <span class="text-[#3B82F6]">Think. Build. Innovate.</span>
           </h1>
 
           <p
-            class="font-['Inter'] text-lg text-[#d9c3af] max-w-2xl leading-relaxed"
+            class="font-['Inter'] text-sm sm:text-base md:text-lg text-slate-700 dark:text-[#d9c3af] max-w-2xl leading-relaxed"
           >
             Learn AI, think for yourself, and turn powerful AI tools into new
             ideas, useful products, and real-world innovations.
           </p>
 
-          <div class="flex flex-wrap justify-center gap-4 mt-2">
+          <div class="flex w-full max-w-xl flex-col sm:flex-row sm:flex-wrap justify-center gap-3 sm:gap-4 mt-2">
             <a
               routerLink="/courses"
-              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white bg-[#1D4ED8] hover:bg-[#1E40AF] px-8 py-4 rounded hover:scale-[0.98] transition-all flex items-center gap-2 shadow-lg"
+              class="justify-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white bg-[#1D4ED8] hover:bg-[#1E40AF] px-6 sm:px-8 py-4 rounded-lg hover:scale-[0.99] transition-all flex items-center gap-2 shadow-lg"
             >
               View All Courses
               <span class="material-symbols-outlined text-[18px] !text-white">arrow_forward</span>
@@ -53,7 +53,7 @@ import { SiteSettingsService } from '../../core/services/site-settings.service';
 
             <a
               routerLink="/membership"
-              class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold text-[#3B82F6] hover:text-white bg-transparent hover:bg-[#3B82F6]/20 border border-[#3B82F6] px-8 py-4 rounded hover:scale-[0.98] transition-all flex items-center gap-2"
+              class="justify-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold text-[#1D4ED8] dark:text-[#60A5FA] bg-white/80 dark:bg-transparent hover:bg-blue-50 dark:hover:bg-[#3B82F6]/20 border border-[#2563EB] dark:border-[#3B82F6] px-6 sm:px-8 py-4 rounded-lg hover:scale-[0.99] transition-all flex items-center gap-2"
             >
               <span class="material-symbols-outlined text-[18px]">workspace_premium</span>
               Explore Membership
@@ -170,7 +170,7 @@ import { SiteSettingsService } from '../../core/services/site-settings.service';
 
       <!-- Detailed Membership & Pricing Section -->
       <section
-        class="px-6 md:px-16 bg-[#0b0f10]/80 py-16 border-y border-[#1E293B]"
+        class="px-4 sm:px-6 md:px-16 bg-[#0b0f10]/80 py-12 sm:py-16 border-y border-[#1E293B]"
       >
         <div class="max-w-4xl mx-auto text-center mb-14">
           <span
@@ -239,7 +239,7 @@ import { SiteSettingsService } from '../../core/services/site-settings.service';
 
             <a
               routerLink="/auth/signup"
-              class="w-full text-center font-['JetBrains_Mono'] text-xs font-bold uppercase text-white border border-[#1E293B] hover:border-[#3B82F6] py-3.5 rounded transition-all"
+              class="w-full text-center font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#1D4ED8] dark:text-[#60A5FA] border border-[#2563EB] dark:border-[#3B82F6] hover:bg-blue-50 dark:hover:bg-[#3B82F6]/10 py-3.5 rounded-lg transition-all"
             >
               Create Free Account
             </a>
@@ -314,7 +314,7 @@ import { SiteSettingsService } from '../../core/services/site-settings.service';
             <a
               routerLink="/checkout"
               [queryParams]="{ plan: 'pro-monthly' }"
-              class="w-full text-center font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] bg-[#3B82F6] py-3.5 rounded hover:bg-[#3B82F6]/90 transition-all shadow-lg"
+              class="w-full text-center font-['JetBrains_Mono'] text-xs font-bold uppercase !text-white bg-[#2563EB] py-3.5 rounded-lg hover:bg-[#1D4ED8] transition-all shadow-lg"
             >
               Join Pro Monthly
             </a>

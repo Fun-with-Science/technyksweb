@@ -7,7 +7,7 @@ import {
   HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import {
   EnrollmentsService,
@@ -52,11 +52,9 @@ import { AuthService } from '../../core/services/auth.service';
 
             <button
               (click)="markAsCompleted()"
-              [class.bg-[#3B82F6]]="isCurrentLessonCompleted()"
-              [class.bg-[#3B82F6]]="!isCurrentLessonCompleted()"
               [disabled]="isCurrentLessonCompleted()"
               [attr.aria-label]="isCurrentLessonCompleted() ? 'Lesson completed' : 'Mark lesson as completed'"
-              class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] px-5 py-3 rounded hover:opacity-90 transition-all flex items-center gap-2 shadow-md"
+              class="font-['JetBrains_Mono'] text-xs font-bold uppercase !text-white bg-[#2563EB] px-5 py-3 rounded hover:bg-[#1D4ED8] transition-all flex items-center gap-2 shadow-md"
             >
               <span class="material-symbols-outlined text-sm">
                 {{ isCurrentLessonCompleted() ? 'check_circle' : 'task_alt' }}
@@ -172,6 +170,7 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class WatchComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private enrollmentsService = inject(EnrollmentsService);
   private coursesService = inject(CoursesService);
   private sanitizer = inject(DomSanitizer);
@@ -206,6 +205,21 @@ export class WatchComponent implements OnInit, OnDestroy {
       if (slug) {
         this.coursesService.getCourseBySlug(slug).subscribe({
           next: (c) => {
+            const requestedLessonExists = (c.modules || []).some((module) =>
+              (module.lessons || []).some((lesson) => lesson.id === lessonId),
+            );
+            if (!requestedLessonExists) {
+              const firstLesson = (c.modules || []).find(
+                (module) => module.lessons?.length,
+              )?.lessons?.[0];
+              if (firstLesson) {
+                this.router.navigate(
+                  ['/courses', c.slug, 'watch', firstLesson.id],
+                  { replaceUrl: true },
+                );
+                return;
+              }
+            }
             this.course.set(c);
             this.courseId.set(c.id);
             this.loadCompletionStatus(c.id, lessonId);
@@ -279,7 +293,11 @@ export class WatchComponent implements OnInit, OnDestroy {
 
     this.enrollmentsService.getMyEnrollments().subscribe({
       next: (enrollments) => {
-        const enrollment = enrollments.find((item) => item.courseId === courseId);
+        const enrollment = enrollments.find(
+          (item) =>
+            item.courseId === courseId ||
+            item.course?.slug === this.course()?.slug,
+        );
         const completedLessonIds = new Set(enrollment?.completedLessonIds || []);
 
         if (this.courseId() !== courseId || this.currentLessonId() !== lessonId) return;

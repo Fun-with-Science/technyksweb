@@ -52,8 +52,8 @@ const FALLBACK_PLANS: MembershipPlan[] = [
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <div class="px-6 md:px-16 pt-24 pb-20 max-w-7xl mx-auto">
-      <div class="text-center max-w-3xl mx-auto mb-16">
+    <div class="px-4 sm:px-6 md:px-16 pt-16 sm:pt-20 lg:pt-24 pb-16 sm:pb-20 max-w-7xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto mb-10 sm:mb-16">
         <div class="inline-flex items-center gap-2 font-['JetBrains_Mono'] text-xs text-[#1D4ED8] dark:text-[#3B82F6] px-3.5 py-1.5 border border-[#2563EB]/40 dark:border-[#3B82F6]/30 bg-blue-50/90 dark:bg-[#3B82F6]/10 rounded-full w-fit mb-4 font-bold">
           <span class="material-symbols-outlined text-[16px]">workspace_premium</span>
           TECHNYKS MEMBERSHIP PROGRAM
@@ -62,8 +62,8 @@ const FALLBACK_PLANS: MembershipPlan[] = [
         <p class="font-['Inter'] text-base md:text-lg text-slate-600 dark:text-[#d9c3af]">{{ paidPlan()?.description || 'Unlock structured courses, practical projects, and the tools to turn ideas into working products.' }}</p>
 
         <div class="inline-flex w-full max-w-md flex-col sm:flex-row items-stretch sm:items-center bg-slate-100 border border-slate-200 dark:bg-[#121A2B] dark:border-[#1E293B] p-1.5 rounded-2xl sm:rounded-full mt-8 shadow-sm">
-          <button type="button" (click)="isAnnual.set(false)" [class.bg-[#1D4ED8]]="!isAnnual()" [class.!text-white]="!isAnnual()" [class.font-bold]="!isAnnual()" [class.text-slate-600]="isAnnual()" [class.dark:text-[#d9c3af]]="isAnnual()" class="font-['JetBrains_Mono'] text-xs uppercase px-4 sm:px-6 py-2.5 rounded-full transition-all whitespace-nowrap">Monthly Billing</button>
-          <button type="button" (click)="isAnnual.set(true)" [class.bg-[#1D4ED8]]="isAnnual()" [class.!text-white]="isAnnual()" [class.font-bold]="isAnnual()" [class.text-slate-600]="!isAnnual()" [class.dark:text-[#d9c3af]]="!isAnnual()" class="font-['JetBrains_Mono'] text-xs uppercase px-4 sm:px-6 py-2.5 rounded-full transition-all flex items-center justify-center gap-2 whitespace-nowrap">Annual Billing <span class="membership-save-badge text-[10px] px-2 py-0.5 rounded-full bg-amber-400 text-slate-900 font-bold">SAVE 33%</span></button>
+          <button type="button" (click)="isAnnual.set(false)" [class.membership-period-active]="!isAnnual()" [class.bg-[#1D4ED8]]="!isAnnual()" [class.!text-white]="!isAnnual()" [class.font-bold]="!isAnnual()" [class.text-slate-600]="isAnnual()" [class.dark:text-[#d9c3af]]="isAnnual()" class="font-['JetBrains_Mono'] text-xs uppercase px-4 sm:px-6 py-2.5 rounded-full transition-all whitespace-nowrap">Monthly Billing</button>
+          <button type="button" (click)="isAnnual.set(true)" [class.membership-period-active]="isAnnual()" [class.bg-[#1D4ED8]]="isAnnual()" [class.!text-white]="isAnnual()" [class.font-bold]="isAnnual()" [class.text-slate-600]="!isAnnual()" [class.dark:text-[#d9c3af]]="!isAnnual()" class="font-['JetBrains_Mono'] text-xs uppercase px-4 sm:px-6 py-2.5 rounded-full transition-all flex items-center justify-center gap-2 whitespace-nowrap">Annual Billing <span class="membership-save-badge text-[10px] px-2 py-0.5 rounded-full font-bold">SAVE 33%</span></button>
         </div>
       </div>
 
@@ -77,7 +77,7 @@ const FALLBACK_PLANS: MembershipPlan[] = [
       } @else {
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
           @if (freePlan(); as plan) {
-            <article class="bg-white border border-slate-200 dark:bg-[#121A2B] dark:border-[#1E293B] rounded-xl p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
+            <article class="bg-white border border-slate-200 dark:bg-[#121A2B] dark:border-[#1E293B] rounded-xl p-5 sm:p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
               <div>
                 <span class="font-['JetBrains_Mono'] text-xs uppercase text-slate-500 dark:text-[#a18d7b] font-bold">STARTER</span>
                 <h2 class="font-['Hanken_Grotesk'] text-2xl font-bold text-slate-900 dark:text-white mt-1 mb-3">{{ plan.name }}</h2>
@@ -92,7 +92,7 @@ const FALLBACK_PLANS: MembershipPlan[] = [
           }
 
           @if (paidPlan(); as plan) {
-            <article class="lg:col-span-2 bg-white border-2 border-[#2563EB] dark:bg-[#121A2B] dark:border-[#3B82F6] rounded-xl p-8 flex flex-col justify-between relative shadow-xl">
+            <article class="lg:col-span-2 bg-white border-2 border-[#2563EB] dark:bg-[#121A2B] dark:border-[#3B82F6] rounded-xl p-5 sm:p-8 flex flex-col justify-between relative shadow-xl">
               <span class="absolute -top-3.5 right-6 font-['JetBrains_Mono'] text-[10px] uppercase font-bold !text-white bg-[#1D4ED8] dark:bg-[#3B82F6] px-3 py-1 rounded-full shadow">{{ isAnnual() ? 'BEST VALUE' : 'POPULAR' }}</span>
               <div>
                 <span class="font-['JetBrains_Mono'] text-xs uppercase text-[#2563EB] dark:text-[#3B82F6] font-bold">{{ isAnnual() ? 'ANNUAL VIP' : 'PRO ENGINEER' }}</span>

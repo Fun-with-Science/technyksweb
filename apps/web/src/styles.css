@@ -5,6 +5,7 @@
 @layer base {
   html {
     color-scheme: light;
+    overflow-x: hidden;
   }
 
   body {
@@ -15,6 +16,7 @@
       linear-gradient(to right, rgba(15, 23, 42, 0.035) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
     background-size: 24px 24px;
+    overflow-x: hidden;
   }
 
   input, select, textarea, button {
@@ -337,6 +339,13 @@ body:not(.dark) .hero-overlay {
   background-color: rgba(59, 130, 246, .16);
 }
 
+.membership-period-active .membership-save-badge {
+  border-color: rgba(255, 255, 255, .82) !important;
+  color: #1d4ed8 !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, .16);
+}
+
 .dark-theme .membership-save-badge {
   border-color: rgba(59, 130, 246, .55);
   color: #bfdbfe;
@@ -429,6 +438,11 @@ body:not(.dark) .hero-overlay {
 .light-theme h2[class~="text-white"],
 .light-theme h3[class~="text-white"],
 .light-theme div[class~="text-white"]:not([class*="bg-"]) { color: #172033 !important; }
+.light-theme a[class~="text-white"]:not([class~="!text-white"]):not([class~="bg-[#1D4ED8]"]):not([class~="bg-[#2563EB]"]):not([class~="bg-[#3B82F6]"]):not([class*="bg-purple"]):not([class*="bg-indigo"]):not([class*="bg-violet"]),
+.light-theme button[class~="text-white"]:not([class~="!text-white"]):not([class~="bg-[#1D4ED8]"]):not([class~="bg-[#2563EB]"]):not([class~="bg-[#3B82F6]"]):not([class*="bg-purple"]):not([class*="bg-indigo"]):not([class*="bg-violet"]),
+.light-theme label[class~="text-white"]:not([class~="!text-white"]),
+.light-theme strong[class~="text-white"],
+.light-theme li[class~="text-white"] { color: #172033 !important; }
 .light-theme [class~="text-[#040810]"]:not(button):not(a) { color: #172033 !important; }
 .light-theme [class~="text-[#e0e3e5]"]:not(button):not(a) { color: #172033 !important; }
 .light-theme [class~="text-[#d9c3af]"] { color: #475569 !important; }
@@ -689,6 +703,82 @@ a[class*="bg-violet"] *,
   color: #ffb4ab;
 }
 
+/* Admin screens were authored with dark palette utilities. These semantic
+   rules make native form values, selected options, and placeholders readable
+   in light mode without changing the high-contrast dark experience. */
+.admin-shell {
+  min-width: 0;
+}
+
+.light-theme .admin-shell input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']),
+.light-theme .admin-shell select,
+.light-theme .admin-shell textarea {
+  color: #0f172a !important;
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color-scheme: light;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .03);
+}
+
+.light-theme .admin-shell select option {
+  color: #0f172a !important;
+  background: #ffffff !important;
+}
+
+.light-theme .admin-shell input::placeholder,
+.light-theme .admin-shell textarea::placeholder {
+  color: #64748b !important;
+  opacity: 1;
+}
+
+.light-theme .admin-shell input:not([type='checkbox']):not([type='radio']):not([type='file']):focus,
+.light-theme .admin-shell select:focus,
+.light-theme .admin-shell textarea:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+}
+
+.dark-theme .admin-shell input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']),
+.dark-theme .admin-shell select,
+.dark-theme .admin-shell textarea {
+  color: #f8fafc;
+  color-scheme: dark;
+}
+
+.settings-save-button {
+  position: relative;
+  overflow: hidden;
+  min-width: 13rem;
+}
+
+.settings-save-button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.25), transparent);
+}
+
+.settings-save-button-saving::after {
+  animation: settings-save-shimmer 900ms ease-in-out infinite;
+}
+
+.settings-save-button-saved {
+  background-color: #047857 !important;
+  box-shadow: 0 12px 28px rgba(4, 120, 87, .24);
+  animation: settings-save-confirm 360ms ease-out;
+}
+
+@keyframes settings-save-shimmer {
+  to { transform: translateX(120%); }
+}
+
+@keyframes settings-save-confirm {
+  0% { transform: scale(.97); }
+  70% { transform: scale(1.025); }
+  100% { transform: scale(1); }
+}
+
 @media (max-width: 767px) {
   .hero-background {
     background-position: 58% center;
@@ -702,5 +792,24 @@ a[class*="bg-violet"] *,
 
   .dark-theme .watch-sidebar {
     border-top-color: #1e293b;
+  }
+
+  .announcement-bar {
+    min-height: 2.75rem;
+  }
+
+  .announcement-message {
+    flex-basis: min(100%, 28rem);
+  }
+
+  .admin-shell table {
+    min-width: 42rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-save-button-saving::after,
+  .settings-save-button-saved {
+    animation: none;
   }
 }

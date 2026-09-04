@@ -8,12 +8,13 @@ import { ThemeService } from '../../services/theme.service';
   selector: 'app-nav',
   standalone: true,
   imports: [CommonModule, RouterModule],
+  host: { class: 'relative block' },
   template: `
-    <nav class="relative w-full z-40 transition-colors duration-200 border-b flex justify-between items-center h-16 px-4 md:px-12 max-w-full backdrop-blur-xl bg-white/90 border-slate-200/80 text-slate-800 dark:bg-[#040810]/90 dark:border-white/10 dark:text-white shadow-sm">
-      <div class="flex items-center gap-8">
-        <a routerLink="/" class="font-['Hanken_Grotesk'] text-xl font-bold tracking-tight transition-colors flex items-center gap-1.5">
+    <nav class="relative w-full z-40 transition-colors duration-200 border-b flex justify-between items-center h-16 px-3 sm:px-5 md:px-8 xl:px-12 max-w-full backdrop-blur-xl bg-white/90 border-slate-200/80 text-slate-800 dark:bg-[#040810]/90 dark:border-white/10 dark:text-white shadow-sm">
+      <div class="flex min-w-0 items-center gap-5 lg:gap-8">
+        <a routerLink="/" class="min-w-0 font-['Hanken_Grotesk'] text-lg sm:text-xl font-bold tracking-tight transition-colors flex items-center gap-1 sm:gap-1.5 whitespace-nowrap">
           <span class="text-slate-900 dark:text-white">Technyks</span>
-          <span class="text-[#2563EB] dark:text-[#3B82F6]">Academy</span>
+          <span class="hidden min-[390px]:inline text-[#2563EB] dark:text-[#3B82F6]">Academy</span>
         </a>
         
         <div class="hidden md:flex gap-6 items-center ml-4">
@@ -42,7 +43,7 @@ import { ThemeService } from '../../services/theme.service';
         </div>
       </div>
 
-      <div class="flex items-center gap-3 md:gap-4">
+      <div class="flex shrink-0 items-center gap-2 sm:gap-3 md:gap-4">
         <!-- Theme Toggle Button -->
         <button
           type="button"
@@ -57,7 +58,7 @@ import { ThemeService } from '../../services/theme.service';
         <!-- Profile Avatar Button -->
         <a
           routerLink="/dashboard"
-          class="inline-grid h-9 w-9 place-items-center rounded-full border border-slate-200 text-slate-600 hover:text-[#2563EB] hover:border-[#2563EB] bg-white transition-all dark:border-white/15 dark:text-slate-300 dark:bg-[#0b101d] dark:hover:text-white dark:hover:border-white/30 shadow-sm"
+          class="hidden md:inline-grid h-9 w-9 place-items-center rounded-full border border-slate-200 text-slate-600 hover:text-[#2563EB] hover:border-[#2563EB] bg-white transition-all dark:border-white/15 dark:text-slate-300 dark:bg-[#0b101d] dark:hover:text-white dark:hover:border-white/30 shadow-sm"
           [attr.aria-label]="'Open dashboard for ' + (authService.currentUser()?.name || 'your account')"
           [title]="authService.currentUser()?.name || 'Open your dashboard'"
         >
@@ -68,21 +69,21 @@ import { ThemeService } from '../../services/theme.service';
         @if (authService.isAuthenticated()) {
           <button
             (click)="authService.logout()"
-            class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white px-5 py-2.5 rounded-lg transition-all shadow-sm bg-[#2563EB] hover:bg-[#1D4ED8]"
+            class="hidden md:inline-flex font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white px-5 py-2.5 rounded-lg transition-all shadow-sm bg-[#2563EB] hover:bg-[#1D4ED8]"
           >
             Logout
           </button>
         } @else {
           <a
             routerLink="/auth/login"
-            class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white px-5 py-2.5 rounded-lg transition-all shadow-sm bg-[#2563EB] hover:bg-[#1D4ED8]"
+            class="hidden md:inline-flex font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white px-5 py-2.5 rounded-lg transition-all shadow-sm bg-[#2563EB] hover:bg-[#1D4ED8]"
           >
             Login
           </a>
         }
         
         <!-- Mobile Menu Toggle Button -->
-        <button (click)="toggleMobileMenu()" class="md:hidden text-slate-700 dark:text-slate-200 focus:outline-none p-1">
+        <button (click)="toggleMobileMenu()" [attr.aria-expanded]="isMobileMenuOpen()" aria-label="Toggle navigation menu" class="md:hidden inline-grid h-9 w-9 place-items-center rounded-full border border-slate-200 text-slate-700 dark:border-white/15 dark:text-slate-200 focus:outline-none">
           <span class="material-symbols-outlined">{{ isMobileMenuOpen() ? 'close' : 'menu' }}</span>
         </button>
       </div>
@@ -90,7 +91,7 @@ import { ThemeService } from '../../services/theme.service';
 
     <!-- Mobile Dropdown Navigation -->
     @if (isMobileMenuOpen()) {
-      <div class="md:hidden fixed top-16 left-0 w-full bg-white dark:bg-[#121A2B] border-b border-slate-200 dark:border-[#1E293B] z-40 p-6 flex flex-col gap-4 animate-in slide-in-from-top-2 duration-200 shadow-xl">
+      <div class="md:hidden absolute top-full left-0 w-full bg-white dark:bg-[#121A2B] border-b border-slate-200 dark:border-[#1E293B] z-40 px-5 py-4 flex flex-col gap-2 animate-in slide-in-from-top-2 duration-200 shadow-xl max-h-[calc(100vh-4rem)] overflow-y-auto">
         <a routerLink="/" (click)="closeMobileMenu()" class="font-['JetBrains_Mono'] text-sm uppercase text-slate-700 dark:text-[#d9c3af] hover:text-[#2563EB] py-2 border-b border-slate-100 dark:border-[#1E293B]/50">
           Home
         </a>

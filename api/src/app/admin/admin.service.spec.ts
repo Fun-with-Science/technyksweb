@@ -79,6 +79,30 @@ describe('AdminService - course deletion', () => {
     expect(prisma.inMemoryCourses).toHaveLength(1);
   });
 
+  it('preserves module and lesson IDs when saving curriculum changes', () => {
+    const modules = (service as any).toPrismaModules([
+      {
+        id: 'module_stable',
+        title: 'Foundations',
+        order: 1,
+        lessons: [
+          {
+            id: 'lesson_stable',
+            title: 'Introduction',
+            description: null,
+            videoAssetRef: 'youtube:abcdefghijk',
+            duration: 120,
+            order: 1,
+            isFreePreview: false,
+          },
+        ],
+      },
+    ]);
+
+    expect(modules[0]).toMatchObject({ id: 'module_stable' });
+    expect(modules[0].lessons.create[0]).toMatchObject({ id: 'lesson_stable' });
+  });
+
   it('creates, updates, and deletes a coupon through database operations', async () => {
     const coupon = { id: 'coupon_1', code: 'SAVE500', discountAmount: 500, scope: 'COURSE', courseId: 'course_1' };
     prisma.coupon = {

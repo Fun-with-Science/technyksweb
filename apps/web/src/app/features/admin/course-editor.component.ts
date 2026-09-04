@@ -20,16 +20,16 @@ import {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
-    <div class="min-h-screen bg-[#040810] text-[#e0e3e5] pt-16 flex flex-col">
+    <div class="admin-shell min-h-screen bg-[#040810] text-[#e0e3e5] flex flex-col overflow-x-hidden">
       <!-- Top Header Navigation & Status Bar -->
-      <div class="bg-[#121A2B] border-b border-[#1E293B] px-6 py-4 flex items-center justify-between sticky top-16 z-30 shadow-md">
-        <div class="flex items-center gap-4">
+      <div class="bg-[#121A2B] border-b border-[#1E293B] px-4 sm:px-6 py-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4 z-30 shadow-md">
+        <div class="min-w-0 flex flex-wrap items-center gap-2 sm:gap-4">
           <a routerLink="/admin" class="text-[#a18d7b] hover:text-white flex items-center gap-1 font-['JetBrains_Mono'] text-xs">
             <span class="material-symbols-outlined text-sm">arrow_back</span>
             Back to Courses
           </a>
           <span class="text-[#1E293B]">|</span>
-          <h1 class="font-['Hanken_Grotesk'] text-lg font-bold text-white truncate max-w-md">
+          <h1 class="min-w-0 max-w-full sm:max-w-md font-['Hanken_Grotesk'] text-base sm:text-lg font-bold text-white truncate">
             {{ course()?.title || 'Loading Course...' }}
           </h1>
           <span
@@ -43,9 +43,9 @@ import {
           </span>
         </div>
 
-        <div class="flex flex-wrap items-center gap-3">
+        <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3">
           @if (saveMessage()) {
-            <span class="flex items-center gap-1.5 font-['JetBrains_Mono'] text-xs font-bold text-emerald-400 bg-emerald-950/70 border border-emerald-500/50 px-3.5 py-1.5 rounded-lg shadow-sm animate-in fade-in duration-200">
+            <span class="col-span-2 sm:order-first flex items-center gap-1.5 font-['JetBrains_Mono'] text-[11px] sm:text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-500/50 px-3.5 py-1.5 rounded-lg shadow-sm animate-in fade-in duration-200">
               <span class="material-symbols-outlined text-sm">check_circle</span>
               {{ saveMessage() }}
             </span>
@@ -53,9 +53,7 @@ import {
           <!-- LIVE / DRAFT Status Toggle Button -->
           <button
             (click)="togglePublishStatus()"
-            [class.bg-[#3B82F6]]="course()?.status === 'LIVE'"
-            [class.bg-[#3B82F6]]="course()?.status !== 'LIVE'"
-            class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#040810] px-4 py-2 rounded transition-all shadow flex items-center gap-1.5"
+            class="col-span-2 sm:col-span-1 justify-center font-['JetBrains_Mono'] text-[11px] sm:text-xs font-bold uppercase !text-white bg-[#2563EB] hover:bg-[#1D4ED8] px-4 py-2.5 rounded-lg transition-all shadow flex items-center gap-1.5"
           >
             <span class="material-symbols-outlined text-sm">
               {{ course()?.status === 'LIVE' ? 'public' : 'lock' }}
@@ -63,11 +61,11 @@ import {
             {{ course()?.status === 'LIVE' ? 'Course is LIVE (Public)' : 'Make Course LIVE (Public)' }}
           </button>
 
-          <a [routerLink]="['/courses', course()?.slug]" target="_blank" class="font-['JetBrains_Mono'] text-xs text-[#3B82F6] hover:underline flex items-center gap-1">
+          <a [routerLink]="['/courses', course()?.slug]" target="_blank" class="justify-center font-['JetBrains_Mono'] text-[11px] sm:text-xs text-[#3B82F6] hover:underline flex items-center gap-1 px-2">
             Preview Student View <span class="material-symbols-outlined text-sm">open_in_new</span>
           </a>
 
-          <button (click)="saveAllChanges()" [disabled]="isSaving()" class="admin-action-primary font-['JetBrains_Mono'] text-xs font-bold uppercase !text-white bg-[#2563EB] hover:bg-[#1D4ED8] px-5 py-2 transition-all shadow-lg flex items-center gap-1 disabled:opacity-60 disabled:cursor-wait">
+          <button (click)="saveAllChanges()" [disabled]="isSaving()" class="admin-action-primary justify-center font-['JetBrains_Mono'] text-[11px] sm:text-xs font-bold uppercase !text-white bg-[#2563EB] hover:bg-[#1D4ED8] px-5 py-2.5 rounded-lg transition-all shadow-lg flex items-center gap-1 disabled:opacity-60 disabled:cursor-wait">
             <span class="material-symbols-outlined text-sm" [class.animate-spin]="isSaving()">{{ isSaving() ? 'progress_activity' : 'save' }}</span>
             {{ isSaving() ? 'Saving…' : 'Save Changes' }}
           </button>
@@ -75,7 +73,7 @@ import {
           <button
             type="button"
             (click)="deleteCurrentCourse()"
-            class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#ffb4ab] border border-[#ffb4ab]/40 hover:bg-[#ffb4ab]/10 px-4 py-2 rounded transition-all"
+            class="font-['JetBrains_Mono'] text-[11px] sm:text-xs font-bold uppercase text-[#ffb4ab] border border-[#ffb4ab]/40 hover:bg-[#ffb4ab]/10 px-4 py-2.5 rounded-lg transition-all"
           >
             Delete Course
           </button>
@@ -83,10 +81,10 @@ import {
       </div>
 
       <!-- Main Udemy Studio Layout (Left Sidebar + Content Area) -->
-      <div class="flex-grow flex flex-col md:flex-row max-w-7xl w-full mx-auto px-4 md:px-8 py-8 gap-8">
+      <div class="min-w-0 flex-grow flex flex-col lg:flex-row max-w-7xl w-full mx-auto px-3 sm:px-4 lg:px-8 py-5 sm:py-8 gap-5 lg:gap-8">
         
         <!-- Left Udemy Navigation Sidebar -->
-        <aside class="w-full md:w-64 shrink-0 flex flex-col gap-6 font-['Inter'] text-xs">
+        <aside class="w-full lg:w-64 shrink-0 grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-col gap-4 lg:gap-6 font-['Inter'] text-xs">
           <div>
             <div class="font-['JetBrains_Mono'] text-[11px] font-bold text-[#a18d7b] uppercase tracking-wider mb-2">Course Editing</div>
             <nav class="flex flex-col gap-1">
@@ -161,7 +159,7 @@ import {
         </aside>
 
         <!-- Right Main Studio Content Area -->
-        <main class="flex-grow bg-[#121A2B] technical-border rounded-lg p-6 md:p-8 min-h-[650px]">
+        <main class="min-w-0 flex-grow bg-[#121A2B] technical-border rounded-xl p-4 sm:p-6 lg:p-8 min-h-[650px]">
           @if (isLoading()) {
             <div class="animate-pulse space-y-7" aria-label="Loading course editor">
               <div class="h-8 w-56 rounded bg-[#1E293B]"></div>
@@ -178,7 +176,7 @@ import {
           <!-- TAB 1: CURRICULUM BUILDER -->
           @if (activeTab() === 'curriculum') {
             <div>
-              <div class="flex items-center justify-between border-b border-[#1E293B] pb-6 mb-6">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1E293B] pb-6 mb-6">
                 <div>
                   <h2 class="font-['Hanken_Grotesk'] text-2xl font-bold text-white">Curriculum</h2>
                   <p class="font-['Inter'] text-xs text-[#d9c3af] mt-1">
@@ -193,42 +191,42 @@ import {
               <!-- Sections List Accordion -->
               <div class="flex flex-col gap-6">
                 @for (module of modules(); track module.id; let sIdx = $index) {
-                  <div class="border border-[#1E293B] bg-[#040810]/50 rounded-lg p-5">
-                    <div class="flex items-center justify-between mb-4 border-b border-[#1E293B]/60 pb-3">
-                      <div class="flex items-center gap-3 flex-grow max-w-xl">
+                  <div class="min-w-0 border border-[#1E293B] bg-[#040810]/50 rounded-xl p-3 sm:p-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-[#1E293B]/60 pb-3">
+                      <div class="min-w-0 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 flex-grow max-w-xl">
                         <span class="font-['JetBrains_Mono'] text-xs font-bold text-[#3B82F6]">Section {{ sIdx + 1 }}:</span>
                         <input
                           type="text"
                           [(ngModel)]="module.title"
                           placeholder="Section Title..."
-                          class="bg-[#121A2B] border border-[#1E293B] focus:border-[#3B82F6] focus:outline-none rounded px-3 py-1.5 text-xs text-white font-['Hanken_Grotesk'] font-bold flex-grow"
+                          class="min-w-0 w-full bg-[#121A2B] border border-[#1E293B] focus:border-[#3B82F6] focus:outline-none rounded-lg px-3 py-2 text-xs text-white font-['Hanken_Grotesk'] font-bold flex-grow"
                         />
                       </div>
-                      <button (click)="deleteSection(sIdx)" class="text-[#ffb4ab] hover:underline font-['JetBrains_Mono'] text-xs">
+                      <button (click)="deleteSection(sIdx)" class="self-start sm:self-auto text-[#ffb4ab] hover:underline font-['JetBrains_Mono'] text-xs whitespace-nowrap">
                         Remove Section
                       </button>
                     </div>
 
                     <!-- Lectures List inside Section -->
-                    <div class="flex flex-col gap-3 pl-4 border-l-2 border-[#1E293B]">
+                    <div class="min-w-0 flex flex-col gap-3 sm:pl-4 sm:border-l-2 border-[#1E293B]">
                       @for (lesson of module.lessons; track lesson.id; let lIdx = $index) {
-                        <div class="bg-[#121A2B] border border-[#1E293B] rounded p-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-                          <div class="flex items-center gap-3 flex-grow w-full md:w-auto">
+                        <div class="min-w-0 bg-[#121A2B] border border-[#1E293B] rounded-lg p-3 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3">
+                          <div class="min-w-0 flex items-start sm:items-center gap-2 sm:gap-3 flex-grow w-full xl:w-auto">
                             <span class="material-symbols-outlined text-[#3B82F6] text-base">play_circle</span>
-                            <div class="flex flex-col flex-grow">
+                            <div class="min-w-0 flex flex-col flex-grow">
                               <input
                                 type="text"
                                 [(ngModel)]="lesson.title"
                                 placeholder="Lecture Title..."
                                 class="bg-[#040810] border border-[#1E293B] rounded px-2.5 py-1 text-xs text-white font-['Inter'] font-semibold"
                               />
-                              <div class="flex items-center gap-2 mt-1">
+                              <div class="flex flex-wrap items-center gap-2 mt-2">
                                 <span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b]">Video source reference (optional):</span>
                                 <input
                                   type="text"
                                   [(ngModel)]="lesson.videoAssetRef"
                                   placeholder="youtube:VIDEO_ID or Bunny video ID"
-                                  class="bg-[#040810] border border-[#1E293B] rounded px-2 py-0.5 text-[10px] text-[#3B82F6] font-['JetBrains_Mono']"
+                                  class="min-w-[180px] flex-1 bg-[#040810] border border-[#1E293B] rounded px-2 py-1 text-[10px] text-[#3B82F6] font-['JetBrains_Mono']"
                                 />
                                 <span class="font-['JetBrains_Mono'] text-[10px] text-[#a18d7b] ml-1">Minutes:</span>
                                 <input
@@ -242,7 +240,7 @@ import {
                             </div>
                           </div>
 
-                          <div class="flex items-center gap-4 shrink-0 w-full md:w-auto justify-between md:justify-end">
+                          <div class="flex items-center gap-4 shrink-0 w-full xl:w-auto justify-between xl:justify-end">
                             <label class="inline-flex items-center gap-1.5 cursor-pointer font-['JetBrains_Mono'] text-[11px] text-[#d9c3af]">
                               <input
                                 type="checkbox"

@@ -986,10 +986,16 @@ export class AdminService {
 
   private toPrismaModules(modules: any[]) {
     return modules.map((module) => ({
+      // Keep curriculum identities stable when an administrator edits a
+      // course. Enrollments store the last watched lesson ID, so replacing
+      // every module/lesson ID on each save would send returning students to
+      // a lesson that no longer exists even though their enrollment remains.
+      id: module.id,
       title: module.title,
       order: module.order,
       lessons: {
         create: (module.lessons || []).map((lesson: any) => ({
+          id: lesson.id,
           title: lesson.title,
           description: lesson.description,
           videoAssetRef: lesson.videoAssetRef,

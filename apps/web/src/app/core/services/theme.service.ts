@@ -38,6 +38,7 @@ export class ThemeService {
     if (typeof document === 'undefined') return;
     const docEl = document.documentElement;
     const body = document.body;
+    docEl.classList.remove('theme-pending');
 
     if (isDark) {
       docEl.classList.add('dark', 'dark-theme');

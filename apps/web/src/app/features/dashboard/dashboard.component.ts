@@ -154,7 +154,17 @@ export class DashboardComponent implements OnInit {
   }
 
   getResumeLessonId(enrollment: Enrollment): string {
-    if (enrollment.lastWatchedLessonId) return enrollment.lastWatchedLessonId;
+    const lessons = (enrollment.course.modules || []).flatMap(
+      (module) => module.lessons || [],
+    );
+    // Older course saves regenerated lesson IDs. Never route an enrolled
+    // student to a stale lesson; resume it only when it still exists.
+    if (
+      enrollment.lastWatchedLessonId &&
+      lessons.some((lesson) => lesson.id === enrollment.lastWatchedLessonId)
+    ) {
+      return enrollment.lastWatchedLessonId;
+    }
     if (enrollment.course.modules?.[0]?.lessons?.[0]?.id) {
       return enrollment.course.modules[0].lessons[0].id;
     }

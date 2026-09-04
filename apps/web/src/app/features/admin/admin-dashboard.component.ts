@@ -19,7 +19,7 @@ import { SiteSettingsService, AnnouncementBarSettings } from '../../core/service
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
-    <div class="min-h-screen bg-[#040810] text-[#e0e3e5] pt-24 pb-20 px-6 md:px-16 max-w-7xl mx-auto">
+    <div class="admin-shell min-h-screen bg-[#040810] text-[#e0e3e5] pt-16 sm:pt-20 lg:pt-24 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-10 max-w-7xl mx-auto overflow-x-hidden">
       
       <!-- Top Udemy Instructor Header -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 border-b border-[#1E293B] pb-6">
@@ -106,7 +106,7 @@ import { SiteSettingsService, AnnouncementBarSettings } from '../../core/service
         >
           <span>Support & Messages</span>
           @if (unreadMessagesCount() > 0) {
-            <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-[#3B82F6] text-[#040810] font-extrabold">
+            <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-[#2563EB] !text-white font-extrabold">
               {{ unreadMessagesCount() }}
             </span>
           }
@@ -174,16 +174,16 @@ import { SiteSettingsService, AnnouncementBarSettings } from '../../core/service
           } @else if (filteredCourses().length) {
             <div class="flex flex-col gap-4">
               @for (course of filteredCourses(); track course.id) {
-                <div class="bg-[#121A2B] border border-[#1E293B] hover:border-[#3B82F6] rounded-lg p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-all group shadow-xl">
+                <div class="bg-[#121A2B] border border-[#1E293B] hover:border-[#3B82F6] rounded-xl p-4 sm:p-5 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_auto] items-start xl:items-center gap-5 xl:gap-8 transition-all group shadow-xl">
                 
                 <!-- Left: Thumbnail & Title -->
-                <div class="flex items-center gap-5 flex-grow">
-                  <div class="relative w-36 h-20 rounded overflow-hidden shrink-0 border border-[#1E293B]">
+                <div class="flex min-w-0 items-center gap-3 sm:gap-5">
+                  <div class="relative w-24 h-16 sm:w-36 sm:h-20 rounded-lg overflow-hidden shrink-0 border border-[#1E293B]">
                     <img [src]="course.thumbnail || '/assets/agentic-ai.jpg'" [alt]="course.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                   </div>
 
-                  <div class="flex flex-col gap-1.5">
-                    <h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white group-hover:text-[#3B82F6] transition-colors">
+                  <div class="min-w-0 flex flex-col gap-1.5">
+                    <h3 class="font-['Hanken_Grotesk'] text-sm sm:text-base font-bold text-white group-hover:text-[#3B82F6] transition-colors line-clamp-2">
                       {{ course.title }}
                     </h3>
 
@@ -205,30 +205,30 @@ import { SiteSettingsService, AnnouncementBarSettings } from '../../core/service
                 </div>
 
                 <!-- Right: Stats & Action Button (Screenshot 1 Metrics) -->
-                <div class="flex items-center gap-8 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-[#1E293B] pt-4 md:pt-0">
-                  <div class="flex flex-col text-right font-['JetBrains_Mono']">
-                    <span class="text-sm font-bold text-[#3B82F6]">₹{{ (course.earnedThisMonth || 0).toLocaleString('en-IN') }}</span>
-                    <span class="text-[10px] text-[#a18d7b]">Earned this month</span>
+                <div class="grid grid-cols-3 gap-3 sm:gap-5 xl:grid-cols-[104px_112px_86px_auto] w-full xl:w-auto items-stretch xl:items-center border-t xl:border-t-0 border-[#1E293B] pt-4 xl:pt-0">
+                  <div class="min-w-0 self-stretch flex flex-col items-center xl:items-end justify-start text-center xl:text-right font-['JetBrains_Mono']">
+                    <span class="h-5 inline-flex items-center text-sm font-bold text-[#3B82F6]">₹{{ (course.earnedThisMonth || 0).toLocaleString('en-IN') }}</span>
+                    <span class="text-[10px] leading-4 text-[#a18d7b]">Earned<br class="hidden xl:block" /> this month</span>
                   </div>
 
-                  <div class="flex flex-col text-right font-['JetBrains_Mono']">
-                    <span class="text-sm font-bold text-white">{{ course.enrollmentsThisMonth || 0 }}</span>
-                    <span class="text-[10px] text-[#a18d7b]">Enrollments this month</span>
+                  <div class="min-w-0 self-stretch flex flex-col items-center xl:items-end justify-start text-center xl:text-right font-['JetBrains_Mono']">
+                    <span class="h-5 inline-flex items-center text-sm font-bold text-white">{{ course.enrollmentsThisMonth || 0 }}</span>
+                    <span class="text-[10px] leading-4 text-[#a18d7b]">Enrollments<br class="hidden xl:block" /> this month</span>
                   </div>
 
-                    <div class="flex flex-col text-right font-['JetBrains_Mono']">
-                      <div class="flex items-center justify-end gap-1 text-[#3B82F6] text-xs font-bold">
+                    <div class="min-w-0 self-stretch flex flex-col items-center xl:items-end justify-start text-center xl:text-right font-['JetBrains_Mono']">
+                      <div class="h-5 flex items-center justify-center xl:justify-end gap-1 text-[#3B82F6] text-xs font-bold">
                         <span>{{ course.rating ?? 0 }}</span>
-                        <span class="material-symbols-outlined text-sm text-[#3B82F6]">star</span>
+                        <span class="material-symbols-outlined text-sm leading-none text-[#3B82F6]">star</span>
                       </div>
                       <span class="text-[10px] text-[#a18d7b]">{{ course.reviewCount || 0 }} reviews</span>
                     </div>
 
-                  <div class="flex items-center gap-2 shrink-0">
+                  <div class="col-span-3 xl:col-span-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
                     <!-- Edit / Manage Course Action Button -->
                     <a
                       [routerLink]="['/admin/courses', course.id, 'manage']"
-                      class="admin-action-primary font-['JetBrains_Mono'] text-xs font-bold !text-white bg-[#2563EB] hover:bg-[#1D4ED8] px-4 py-2.5 transition-all shadow"
+                      class="admin-action-primary text-center whitespace-nowrap font-['JetBrains_Mono'] text-xs font-bold !text-white bg-[#2563EB] hover:bg-[#1D4ED8] px-4 py-2.5 rounded-lg transition-all shadow"
                     >
                       Edit / manage course
                     </a>
@@ -594,7 +594,7 @@ import { SiteSettingsService, AnnouncementBarSettings } from '../../core/service
           </div>
 
           <!-- Section 1: Hero Typing Animation Words -->
-          <div class="border border-[#1E293B] bg-[#040810]/60 rounded-xl p-6 flex flex-col gap-5">
+          <div class="border border-[#1E293B] bg-[#040810]/60 rounded-xl p-4 sm:p-6 flex flex-col gap-5">
             <div class="flex items-start justify-between gap-4">
               <div>
                 <h3 class="font-['Hanken_Grotesk'] text-lg font-bold text-white flex items-center gap-2">
@@ -620,7 +620,7 @@ import { SiteSettingsService, AnnouncementBarSettings } from '../../core/service
             </div>
 
             <!-- Add new word input -->
-            <div class="flex gap-3 max-w-md">
+            <div class="flex flex-col sm:flex-row gap-3 max-w-xl">
               <input
                 type="text"
                 [(ngModel)]="newTypingWordInput"
@@ -640,8 +640,8 @@ import { SiteSettingsService, AnnouncementBarSettings } from '../../core/service
           </div>
 
           <!-- Section 2: Top Announcement Bar / Advertisement Banner -->
-          <div class="border border-[#1E293B] bg-[#040810]/60 rounded-xl p-6 flex flex-col gap-5">
-            <div class="flex items-start justify-between gap-4">
+          <div class="border border-[#1E293B] bg-[#040810]/60 rounded-xl p-4 sm:p-6 flex flex-col gap-5">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
               <div>
                 <h3 class="font-['Hanken_Grotesk'] text-lg font-bold text-white flex items-center gap-2">
                   <span class="material-symbols-outlined text-[#3B82F6]">campaign</span>
@@ -652,14 +652,14 @@ import { SiteSettingsService, AnnouncementBarSettings } from '../../core/service
                 </p>
               </div>
 
-              <label class="inline-flex items-center gap-2 cursor-pointer">
+              <label class="admin-toggle inline-flex w-fit items-center gap-2 cursor-pointer rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-[#121A2B] px-2.5 py-1.5">
                 <input
                   type="checkbox"
                   [(ngModel)]="editingAnnouncementBar.enabled"
                   class="sr-only peer"
                 />
-                <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2563EB]"></div>
-                <span class="font-['JetBrains_Mono'] text-xs font-bold uppercase text-white">
+                <div class="relative w-11 h-6 bg-slate-400 dark:bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2563EB]"></div>
+                <span class="font-['JetBrains_Mono'] text-[11px] font-bold uppercase text-slate-700 dark:text-white">
                   {{ editingAnnouncementBar.enabled ? 'Enabled' : 'Disabled' }}
                 </span>
               </label>
@@ -727,19 +727,21 @@ import { SiteSettingsService, AnnouncementBarSettings } from '../../core/service
           </div>
 
           <!-- Save Settings Action Button -->
-          <div class="flex items-center gap-4">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-3" aria-live="polite">
             <button
               type="button"
               (click)="saveSiteSettings()"
               [disabled]="isSavingSettings()"
-              class="font-['JetBrains_Mono'] text-xs font-bold uppercase !text-white bg-[#2563EB] hover:bg-[#1D4ED8] px-8 py-3.5 rounded-lg transition-all shadow-lg flex items-center gap-2 disabled:opacity-60"
+              [class.settings-save-button-saving]="isSavingSettings()"
+              [class.settings-save-button-saved]="!!settingsSavedFeedback()"
+              class="settings-save-button w-full sm:w-auto justify-center font-['JetBrains_Mono'] text-xs font-bold uppercase !text-white bg-[#2563EB] hover:bg-[#1D4ED8] px-8 py-3.5 rounded-xl transition-all shadow-lg flex items-center gap-2 disabled:cursor-wait"
             >
-              <span class="material-symbols-outlined text-sm">{{ isSavingSettings() ? 'progress_activity' : (settingsSavedFeedback() ? 'check_circle' : 'save') }}</span>
+              <span class="material-symbols-outlined text-sm" [class.animate-spin]="isSavingSettings()">{{ isSavingSettings() ? 'progress_activity' : (settingsSavedFeedback() ? 'check_circle' : 'save') }}</span>
               {{ isSavingSettings() ? 'Saving Settings...' : (settingsSavedFeedback() ? 'Settings Saved!' : 'Save All Settings') }}
             </button>
 
             @if (settingsSavedFeedback()) {
-              <span class="text-xs font-['JetBrains_Mono'] text-emerald-400 flex items-center gap-1.5 animate-in fade-in duration-200">
+              <span class="settings-saved-feedback text-xs font-['JetBrains_Mono'] text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-700/50 px-3 py-2 rounded-lg flex items-center gap-1.5 animate-in fade-in duration-200">
                 <span class="material-symbols-outlined text-sm">check_circle</span>
                 {{ settingsSavedFeedback() }}
               </span>

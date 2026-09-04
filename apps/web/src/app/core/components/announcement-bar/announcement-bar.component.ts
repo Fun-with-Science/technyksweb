@@ -10,11 +10,11 @@ import { SiteSettingsService } from '../../services/site-settings.service';
   template: `
     @if (isVisible()) {
       <aside
-        class="relative z-50 text-xs py-2 px-4 flex items-center justify-between transition-all duration-300 shadow-sm border-b"
+        class="announcement-bar relative z-50 min-h-10 text-xs px-3 sm:px-4 py-2 flex items-center justify-between transition-all duration-300 shadow-sm border-b"
         [ngClass]="getThemeClasses()"
         aria-label="Site announcement"
       >
-        <div class="flex-1 flex items-center justify-center gap-3 text-center px-4 flex-wrap">
+        <div class="min-w-0 flex-1 flex items-center justify-center gap-x-2 gap-y-1.5 text-center pl-1 pr-7 sm:px-4 flex-wrap">
           @if (announcement().badgeText) {
             <span
               class="font-['JetBrains_Mono'] text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-full shadow-sm"
@@ -24,7 +24,7 @@ import { SiteSettingsService } from '../../services/site-settings.service';
             </span>
           }
 
-          <span class="font-['Inter'] font-semibold tracking-wide text-sm sm:text-xs">
+          <span class="announcement-message max-w-full font-['Inter'] font-semibold tracking-wide text-[11px] sm:text-xs leading-4">
             {{ announcement().message }}
           </span>
 
@@ -32,7 +32,7 @@ import { SiteSettingsService } from '../../services/site-settings.service';
             @if (isInternalLink(announcement().buttonUrl)) {
               <a
                 [routerLink]="announcement().buttonUrl"
-                class="font-['JetBrains_Mono'] text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-md transition-all shadow-sm flex items-center gap-1 hover:scale-105"
+                class="font-['JetBrains_Mono'] text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-2.5 sm:px-3 py-1 rounded-md transition-all shadow-sm inline-flex items-center gap-1 hover:scale-[1.02]"
                 [ngClass]="getButtonClasses()"
               >
                 {{ announcement().buttonText }}
@@ -43,7 +43,7 @@ import { SiteSettingsService } from '../../services/site-settings.service';
                 [href]="announcement().buttonUrl"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="font-['JetBrains_Mono'] text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-md transition-all shadow-sm flex items-center gap-1 hover:scale-105"
+                class="font-['JetBrains_Mono'] text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-2.5 sm:px-3 py-1 rounded-md transition-all shadow-sm inline-flex items-center gap-1 hover:scale-[1.02]"
                 [ngClass]="getButtonClasses()"
               >
                 {{ announcement().buttonText }}
@@ -57,7 +57,7 @@ import { SiteSettingsService } from '../../services/site-settings.service';
           type="button"
           (click)="dismiss()"
           aria-label="Close announcement"
-          class="shrink-0 p-1 rounded-full opacity-80 hover:opacity-100 transition-opacity hover:bg-black/10 dark:hover:bg-white/10"
+          class="absolute right-2 top-1/2 -translate-y-1/2 shrink-0 p-1 rounded-full opacity-80 hover:opacity-100 transition-opacity hover:bg-black/10 dark:hover:bg-white/10"
         >
           <span class="material-symbols-outlined text-[16px] leading-none">close</span>
         </button>
