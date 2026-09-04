@@ -1,4 +1,10 @@
-import { Injectable, BadRequestException, UnauthorizedException, OnModuleInit, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+  OnModuleInit,
+  Logger,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { OAuth2Client } from 'google-auth-library';
@@ -24,7 +30,7 @@ export class AuthService implements OnModuleInit {
 
   constructor(
     private prisma: PrismaService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
   ) {}
 
   async onModuleInit() {
@@ -32,10 +38,17 @@ export class AuthService implements OnModuleInit {
   }
 
   async seedDefaultAdmin() {
-    const adminEmail = String(process.env.ADMIN_EMAIL || 'admin@technyks.com').toLowerCase().trim();
-    const initialPassword = String(process.env.ADMIN_PASSWORD || (process.env.NODE_ENV === 'production' ? '' : 'admin123'));
+    const adminEmail = String(process.env.ADMIN_EMAIL || 'admin@technyks.com')
+      .toLowerCase()
+      .trim();
+    const initialPassword = String(
+      process.env.ADMIN_PASSWORD ||
+        (process.env.NODE_ENV === 'production' ? '' : 'admin123'),
+    );
     if (!initialPassword) {
-      this.logger.log('Admin seed skipped because ADMIN_PASSWORD is not configured.');
+      this.logger.log(
+        'Admin seed skipped because ADMIN_PASSWORD is not configured.',
+      );
       return;
     }
     const passwordHash = await bcrypt.hash(initialPassword, 10);
@@ -51,35 +64,50 @@ export class AuthService implements OnModuleInit {
 
     if (this.prisma.isDbConnected) {
       try {
-        const existing = await this.prisma.user.findUnique({ where: { email: adminEmail } });
+        const existing = await this.prisma.user.findUnique({
+          where: { email: adminEmail },
+        });
         if (!existing) {
           await this.prisma.user.create({ data: adminUser as any });
         }
       } catch (error: any) {
-        throw new Error(`Admin database initialization failed: ${error?.message || 'unknown error'}`);
+        throw new Error(
+          `Admin database initialization failed: ${error?.message || 'unknown error'}`,
+        );
       }
     }
 
     // Always seed in-memory store
-    const inMemExisting = this.prisma.inMemoryUsers.find(u => u.email === adminEmail);
+    const inMemExisting = this.prisma.inMemoryUsers.find(
+      (u) => u.email === adminEmail,
+    );
     if (!inMemExisting) {
       this.prisma.inMemoryUsers.push(adminUser);
     }
   }
 
-  async signup(dto: { email: string; password?: string; name: string; googleId?: string }) {
+  async signup(dto: {
+    email: string;
+    password?: string;
+    name: string;
+    googleId?: string;
+  }) {
     const cleanEmail = dto.email.toLowerCase().trim();
 
     // Check existing user
     let existing: any = null;
     if (this.prisma.isDbConnected) {
-      existing = await this.prisma.user.findUnique({ where: { email: cleanEmail } });
+      existing = await this.prisma.user.findUnique({
+        where: { email: cleanEmail },
+      });
     } else {
-      existing = this.prisma.inMemoryUsers.find(u => u.email === cleanEmail);
+      existing = this.prisma.inMemoryUsers.find((u) => u.email === cleanEmail);
     }
 
     if (existing) {
-      throw new BadRequestException('An account with this email already exists.');
+      throw new BadRequestException(
+        'An account with this email already exists.',
+      );
     }
 
     let passwordHash: string | null = null;
@@ -116,6 +144,7 @@ export class AuthService implements OnModuleInit {
     return {
       accessToken: token,
       user: this.toPublicUser(newUser),
+      requiresOnboarding: true,
     };
   }
 
@@ -124,11 +153,13 @@ export class AuthService implements OnModuleInit {
 
     let user: any = null;
     if (this.prisma.isDbConnected) {
-      user = await this.prisma.user.findUnique({ where: { email: cleanEmail } });
+      user = await this.prisma.user.findUnique({
+        where: { email: cleanEmail },
+      });
     }
-    
+
     if (!user) {
-      user = this.prisma.inMemoryUsers.find(u => u.email === cleanEmail);
+      user = this.prisma.inMemoryUsers.find((u) => u.email === cleanEmail);
     }
 
     if (!user) {
@@ -156,6 +187,7 @@ export class AuthService implements OnModuleInit {
     return {
       accessToken: token,
       user: this.toPublicUser(user),
+      requiresOnboarding: false,
     };
   }
 
@@ -182,18 +214,25 @@ export class AuthService implements OnModuleInit {
       });
       payload = ticket.getPayload();
     } catch {
-      throw new UnauthorizedException('Google authentication could not be verified.');
+      throw new UnauthorizedException(
+        'Google authentication could not be verified.',
+      );
     }
 
     if (!payload?.sub || !payload?.email || payload.email_verified !== true) {
-      throw new UnauthorizedException('A verified Google email address is required.');
+      throw new UnauthorizedException(
+        'A verified Google email address is required.',
+      );
     }
 
     const email = String(payload.email).toLowerCase().trim();
     const googleId = String(payload.sub);
-    const name = String(payload.name || email.split('@')[0] || 'Technyks learner').trim();
+    const name = String(
+      payload.name || email.split('@')[0] || 'Technyks learner',
+    ).trim();
     const avatarUrl = payload.picture ? String(payload.picture) : null;
     let user: any = null;
+    let isNewUser = false;
 
     if (this.prisma.isDbConnected) {
       user = await this.prisma.user.findUnique({ where: { email } });
@@ -207,17 +246,23 @@ export class AuthService implements OnModuleInit {
           },
         });
       } else {
+        isNewUser = true;
         user = await this.prisma.user.create({
           data: { email, googleId, name, avatarUrl, role: 'STUDENT' },
         });
       }
     } else {
       user = this.prisma.inMemoryUsers.find(
-        (candidate) => candidate.email === email || candidate.googleId === googleId,
+        (candidate) =>
+          candidate.email === email || candidate.googleId === googleId,
       );
       if (user) {
-        Object.assign(user, { googleId, avatarUrl: avatarUrl || user.avatarUrl });
+        Object.assign(user, {
+          googleId,
+          avatarUrl: avatarUrl || user.avatarUrl,
+        });
       } else {
+        isNewUser = true;
         user = {
           id: `usr_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`,
           email,
@@ -240,6 +285,7 @@ export class AuthService implements OnModuleInit {
     return {
       accessToken: this.generateToken(user.id, user.email, user.role),
       user: this.toPublicUser(user),
+      requiresOnboarding: isNewUser,
     };
   }
 
@@ -248,14 +294,21 @@ export class AuthService implements OnModuleInit {
     if (this.prisma.isDbConnected) {
       user = await this.prisma.user.findUnique({ where: { id: userId } });
     }
-    user ??= this.prisma.inMemoryUsers.find(candidate => candidate.id === userId);
-    if (!user) throw new UnauthorizedException('User account could not be found.');
+    user ??= this.prisma.inMemoryUsers.find(
+      (candidate) => candidate.id === userId,
+    );
+    if (!user)
+      throw new UnauthorizedException('User account could not be found.');
     return this.toPublicUser(user);
   }
 
   async completeOnboarding(
     userId: string,
-    dto: { learnerGoal: string; experienceLevel: string; membershipPreference: string },
+    dto: {
+      learnerGoal: string;
+      experienceLevel: string;
+      membershipPreference: string;
+    },
   ) {
     const learnerGoal = String(dto.learnerGoal || '').trim();
     const experienceLevel = String(dto.experienceLevel || '').trim();
@@ -281,10 +334,13 @@ export class AuthService implements OnModuleInit {
     if (this.prisma.isDbConnected) {
       user = await this.prisma.user.update({ where: { id: userId }, data });
     } else {
-      user = this.prisma.inMemoryUsers.find(candidate => candidate.id === userId);
+      user = this.prisma.inMemoryUsers.find(
+        (candidate) => candidate.id === userId,
+      );
       if (user) Object.assign(user, data, { updatedAt: new Date() });
     }
-    if (!user) throw new UnauthorizedException('User account could not be found.');
+    if (!user)
+      throw new UnauthorizedException('User account could not be found.');
     return this.toPublicUser(user);
   }
 
@@ -292,18 +348,23 @@ export class AuthService implements OnModuleInit {
     const cleanEmail = email.toLowerCase().trim();
     let user: any = null;
     if (this.prisma.isDbConnected) {
-      user = await this.prisma.user.findUnique({ where: { email: cleanEmail } });
+      user = await this.prisma.user.findUnique({
+        where: { email: cleanEmail },
+      });
     } else {
-      user = this.prisma.inMemoryUsers.find(u => u.email === cleanEmail);
+      user = this.prisma.inMemoryUsers.find((u) => u.email === cleanEmail);
     }
 
     if (!user) {
-      return { message: 'If an account exists with this email, a reset link has been dispatched.' };
+      return {
+        message:
+          'If an account exists with this email, a reset link has been dispatched.',
+      };
     }
 
     const resetToken = this.jwtService.sign(
       { sub: user.id, purpose: 'reset-password' },
-      { expiresIn: '1h' }
+      { expiresIn: '1h' },
     );
 
     return {
@@ -320,7 +381,9 @@ export class AuthService implements OnModuleInit {
       }
 
       if (!newPassword || newPassword.length < 6) {
-        throw new BadRequestException('Password must be at least 6 characters.');
+        throw new BadRequestException(
+          'Password must be at least 6 characters.',
+        );
       }
 
       const passwordHash = await bcrypt.hash(newPassword, 10);
@@ -331,11 +394,13 @@ export class AuthService implements OnModuleInit {
           data: { passwordHash },
         });
       }
-      
-      const u = this.prisma.inMemoryUsers.find(x => x.id === payload.sub);
+
+      const u = this.prisma.inMemoryUsers.find((x) => x.id === payload.sub);
       if (u) u.passwordHash = passwordHash;
 
-      return { message: 'Password has been reset successfully. You can now login.' };
+      return {
+        message: 'Password has been reset successfully. You can now login.',
+      };
     } catch (e) {
       throw new BadRequestException('Expired or invalid reset token.');
     }

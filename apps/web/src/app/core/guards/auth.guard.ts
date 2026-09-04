@@ -31,11 +31,20 @@ export const onboardingGuard: CanActivateFn = (_route, state) => {
   const router = inject(Router);
   const user = authService.currentUser();
 
-  if (user?.role === 'ADMIN' || user?.onboardingCompleted === true) {
+  if (user?.role === 'ADMIN' || !authService.needsOnboarding()) {
     return true;
   }
 
   return router.createUrlTree(['/onboarding'], {
     queryParams: { returnUrl: state.url },
   });
+};
+
+export const onboardingEntryGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  return authService.needsOnboarding()
+    ? true
+    : router.createUrlTree(['/dashboard']);
 };

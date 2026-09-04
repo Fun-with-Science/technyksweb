@@ -18,6 +18,7 @@ export interface User {
 export interface AuthResponse {
   accessToken: string;
   user: User;
+  requiresOnboarding?: boolean;
 }
 
 @Injectable({
@@ -32,9 +33,12 @@ export class AuthService {
   isAdmin = computed(() => this.currentUser()?.role === 'ADMIN');
   tokenKey = 'technyks_auth_token';
   userKey = 'technyks_auth_user';
+  private onboardingKey = 'technyks_onboarding_pending';
+  onboardingPending = signal(false);
 
   constructor() {
     this.loadInitialUser();
+    this.onboardingPending.set(this.readOnboardingPending());
   }
 
   getToken(): string | null {
@@ -57,16 +61,23 @@ export class AuthService {
     }
   }
 
-  login(credentials: { email: string; password: string }): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('/api/auth/login', credentials).pipe(
-      tap(res => this.setSession(res)),
-    );
+  login(credentials: {
+    email: string;
+    password: string;
+  }): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>('/api/auth/login', credentials)
+      .pipe(tap((res) => this.setSession(res)));
   }
 
-  signup(data: { email: string; password: string; name: string }): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>('/api/auth/signup', data).pipe(
-      tap(res => this.setSession(res)),
-    );
+  signup(data: {
+    email: string;
+    password: string;
+    name: string;
+  }): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>('/api/auth/signup', data)
+      .pipe(tap((res) => this.setSession(res)));
   }
 
   getPublicAuthConfig(): Observable<{ googleClientId: string | null }> {
@@ -81,7 +92,12 @@ export class AuthService {
 
   getProfile(): Observable<User> {
     return this.http.get<User>('/api/auth/me').pipe(
-      tap((user) => this.persistUser(user)),
+      tap((user) => {
+        this.persistUser(user);
+        if (user.onboardingCompleted === true) {
+          this.setOnboardingPending(false);
+        }
+      }),
     );
   }
 
@@ -91,7 +107,16 @@ export class AuthService {
     membershipPreference: string;
   }): Observable<User> {
     return this.http.patch<User>('/api/auth/onboarding', payload).pipe(
-      tap((user) => this.persistUser(user)),
+      tap((user) => {
+        this.persistUser(user);
+        this.setOnboardingPending(false);
+      }),
+    );
+  }
+
+  needsOnboarding(): boolean {
+    return Boolean(
+      this.currentUser()?.role !== 'ADMIN' && this.onboardingPending(),
     );
   }
 
@@ -101,6 +126,29 @@ export class AuthService {
       localStorage.setItem(this.userKey, JSON.stringify(res.user));
     }
     this.currentUser.set(res.user);
+    this.setOnboardingPending(
+      res.requiresOnboarding === true && res.user.onboardingCompleted !== true,
+    );
+  }
+
+  private readOnboardingPending(): boolean {
+    if (typeof sessionStorage === 'undefined') return false;
+    try {
+      return sessionStorage.getItem(this.onboardingKey) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  private setOnboardingPending(pending: boolean) {
+    this.onboardingPending.set(pending);
+    if (typeof sessionStorage === 'undefined') return;
+    try {
+      if (pending) sessionStorage.setItem(this.onboardingKey, '1');
+      else sessionStorage.removeItem(this.onboardingKey);
+    } catch {
+      // Session persistence is optional; the in-memory signal still works.
+    }
   }
 
   private persistUser(user: User) {
@@ -111,11 +159,17 @@ export class AuthService {
   }
 
   forgotPassword(email: string) {
-    return this.http.post<{ message: string; resetToken?: string }>('/api/auth/forgot-password', { email });
+    return this.http.post<{ message: string; resetToken?: string }>(
+      '/api/auth/forgot-password',
+      { email },
+    );
   }
 
   resetPassword(token: string, newPassword?: string) {
-    return this.http.post<{ message: string }>('/api/auth/reset-password', { token, newPassword });
+    return this.http.post<{ message: string }>('/api/auth/reset-password', {
+      token,
+      newPassword,
+    });
   }
 
   logout() {
@@ -123,6 +177,7 @@ export class AuthService {
       localStorage.removeItem(this.tokenKey);
       localStorage.removeItem(this.userKey);
     }
+    this.setOnboardingPending(false);
     this.currentUser.set(null);
     this.router.navigate(['/auth/login']);
   }

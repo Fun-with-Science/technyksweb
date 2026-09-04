@@ -104,7 +104,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
 
             <!-- Enrollment Card -->
             <div
-              class="course-access-card bg-white dark:bg-[#0B111D] border border-slate-200 dark:border-[#26334B] rounded-2xl p-5 sm:p-6 flex flex-col gap-5 shadow-2xl lg:sticky lg:top-28 lg:row-span-3 lg:self-start lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto"
+              class="course-access-card bg-white dark:bg-[#0B111D] border border-slate-200 dark:border-[#26334B] rounded-2xl p-5 sm:p-6 flex flex-col gap-5 shadow-2xl lg:sticky lg:top-28 lg:row-span-3 lg:self-start"
             >
               <div
                 class="relative aspect-video shrink-0 overflow-hidden rounded-lg border border-slate-200 dark:border-[#334155] -mx-2 -mt-2 bg-slate-950 shadow-lg group"
@@ -391,9 +391,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                         <span
                           class="font-['JetBrains_Mono'] text-xs text-[#1D4ED8] dark:text-[#60A5FA] font-semibold bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800/60 px-2.5 py-1 rounded-md whitespace-nowrap shrink-0"
                         >
-                          {{
-                            module.lessons ? module.lessons.length : 0
-                          }}
+                          {{ module.lessons ? module.lessons.length : 0 }}
                           lectures · {{ getModuleDurationMinutes(module) }}m
                         </span>
                       </button>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -10,11 +10,25 @@
       (function () {
         try {
           var savedTheme = localStorage.getItem('technyks-theme');
-          var isDark = savedTheme ? savedTheme === 'dark' : true;
-          document.documentElement.classList.add(isDark ? 'dark' : 'light-theme');
-          document.documentElement.classList.add(isDark ? 'dark-theme' : 'theme-pending');
+          var isDark = savedTheme
+            ? savedTheme === 'dark'
+            : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.classList.add(
+            isDark ? 'dark' : 'light-theme',
+          );
+          document.documentElement.classList.add(
+            isDark ? 'dark-theme' : 'theme-pending',
+          );
         } catch (_) {
-          document.documentElement.classList.add('dark', 'dark-theme');
+          var systemDark =
+            window.matchMedia &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.classList.add(
+            systemDark ? 'dark' : 'light-theme',
+          );
+          document.documentElement.classList.add(
+            systemDark ? 'dark-theme' : 'theme-pending',
+          );
         }
       })();
     </script>
@@ -27,7 +41,9 @@
         place-items: center;
         background: #040810;
         color: #fff;
-        transition: opacity 260ms ease, visibility 260ms ease;
+        transition:
+          opacity 260ms ease,
+          visibility 260ms ease;
       }
       html.light-theme #app-preloader {
         background: #f8fafc;
@@ -41,16 +57,21 @@
         display: grid;
         justify-items: center;
         gap: 18px;
-        font: 700 18px/1.2 Inter, system-ui, sans-serif;
+        font:
+          700 18px/1.2 Inter,
+          system-ui,
+          sans-serif;
         letter-spacing: -0.02em;
       }
-      .app-preloader-logo span { color: #3b82f6; }
+      .app-preloader-logo span {
+        color: #3b82f6;
+      }
       .app-preloader-line {
         width: 132px;
         height: 3px;
         overflow: hidden;
         border-radius: 999px;
-        background: rgba(148, 163, 184, .25);
+        background: rgba(148, 163, 184, 0.25);
       }
       .app-preloader-line::after {
         content: '';
@@ -61,12 +82,19 @@
         background: #3b82f6;
         animation: app-preloader-slide 900ms ease-in-out infinite alternate;
       }
-      @keyframes app-preloader-slide { to { transform: translateX(128%); } }
+      @keyframes app-preloader-slide {
+        to {
+          transform: translateX(128%);
+        }
+      }
       html:not(.material-icons-ready) .material-symbols-outlined {
         visibility: hidden !important;
       }
       @media (prefers-reduced-motion: reduce) {
-        .app-preloader-line::after { animation: none; width: 100%; }
+        .app-preloader-line::after {
+          animation: none;
+          width: 100%;
+        }
       }
     </style>
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
