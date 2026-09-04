@@ -18,6 +18,10 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Client,
   },
   {
+    path: 'onboarding',
+    renderMode: RenderMode.Client,
+  },
+  {
     path: 'admin',
     renderMode: RenderMode.Client,
   },

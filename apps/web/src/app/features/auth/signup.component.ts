@@ -86,7 +86,7 @@ export class SignupComponent implements AfterViewInit {
     this.isLoading.set(true);
     this.errorMessage.set('');
     this.authService.signup({ name: this.name.trim(), email: this.email.trim(), password: this.password }).subscribe({
-      next: () => { this.isLoading.set(false); this.router.navigate(['/dashboard']); },
+      next: () => { this.isLoading.set(false); this.router.navigate(['/onboarding']); },
       error: (error) => { this.isLoading.set(false); this.errorMessage.set(error?.error?.message || 'Account creation failed. Please try again.'); },
     });
   }
@@ -104,7 +104,11 @@ export class SignupComponent implements AfterViewInit {
     this.googleLoading.set(true);
     this.errorMessage.set('');
     this.authService.loginWithGoogle(response.credential).subscribe({
-      next: () => { this.googleLoading.set(false); this.router.navigate(['/dashboard']); },
+      next: () => {
+        this.googleLoading.set(false);
+        const user = this.authService.currentUser();
+        this.router.navigate([user?.onboardingCompleted ? '/dashboard' : '/onboarding']);
+      },
       error: (error) => { this.googleLoading.set(false); this.errorMessage.set(error?.error?.message || 'Google sign-in failed. Please try again.'); },
     });
   }

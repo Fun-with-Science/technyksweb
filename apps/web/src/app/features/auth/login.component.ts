@@ -158,7 +158,13 @@ export class LoginComponent implements AfterViewInit {
     this.isLoading.set(false);
     this.googleLoading.set(false);
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-    this.router.navigateByUrl(returnUrl?.startsWith('/') ? returnUrl : '/dashboard');
+    const destination = returnUrl?.startsWith('/') ? returnUrl : '/dashboard';
+    const user = this.authService.currentUser();
+    if (user?.role !== 'ADMIN' && user?.onboardingCompleted !== true) {
+      this.router.navigate(['/onboarding'], { queryParams: { returnUrl: destination } });
+      return;
+    }
+    this.router.navigateByUrl(destination);
   }
 
   private loadGoogleIdentity(): Promise<void> {

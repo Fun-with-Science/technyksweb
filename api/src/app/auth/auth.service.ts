@@ -4,6 +4,19 @@ import * as bcrypt from 'bcryptjs';
 import { OAuth2Client } from 'google-auth-library';
 import { PrismaService } from '../prisma/prisma.service';
 
+const LEARNER_GOALS = new Set([
+  'learn-from-scratch',
+  'build-projects',
+  'advance-career',
+  'ai-automation',
+]);
+const EXPERIENCE_LEVELS = new Set([
+  'new-to-coding',
+  'learning-fundamentals',
+  'building-projects',
+  'working-developer',
+]);
+
 @Injectable()
 export class AuthService implements OnModuleInit {
   private readonly logger = new Logger(AuthService.name);
@@ -84,6 +97,10 @@ export class AuthService implements OnModuleInit {
       googleId: dto.googleId || null,
       name: dto.name,
       role,
+      onboardingCompleted: false,
+      learnerGoal: null,
+      experienceLevel: null,
+      membershipPreference: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -98,13 +115,7 @@ export class AuthService implements OnModuleInit {
 
     return {
       accessToken: token,
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        name: newUser.name,
-        role: newUser.role,
-        avatarUrl: null,
-      },
+      user: this.toPublicUser(newUser),
     };
   }
 
@@ -144,13 +155,7 @@ export class AuthService implements OnModuleInit {
 
     return {
       accessToken: token,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        avatarUrl: user.avatarUrl || null,
-      },
+      user: this.toPublicUser(user),
     };
   }
 
@@ -220,6 +225,10 @@ export class AuthService implements OnModuleInit {
           name,
           avatarUrl,
           role: 'STUDENT',
+          onboardingCompleted: false,
+          learnerGoal: null,
+          experienceLevel: null,
+          membershipPreference: null,
           passwordHash: null,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -230,14 +239,53 @@ export class AuthService implements OnModuleInit {
 
     return {
       accessToken: this.generateToken(user.id, user.email, user.role),
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        avatarUrl: user.avatarUrl || null,
-      },
+      user: this.toPublicUser(user),
     };
+  }
+
+  async getProfile(userId: string) {
+    let user: any = null;
+    if (this.prisma.isDbConnected) {
+      user = await this.prisma.user.findUnique({ where: { id: userId } });
+    }
+    user ??= this.prisma.inMemoryUsers.find(candidate => candidate.id === userId);
+    if (!user) throw new UnauthorizedException('User account could not be found.');
+    return this.toPublicUser(user);
+  }
+
+  async completeOnboarding(
+    userId: string,
+    dto: { learnerGoal: string; experienceLevel: string; membershipPreference: string },
+  ) {
+    const learnerGoal = String(dto.learnerGoal || '').trim();
+    const experienceLevel = String(dto.experienceLevel || '').trim();
+    const membershipPreference = String(dto.membershipPreference || '').trim();
+
+    if (!LEARNER_GOALS.has(learnerGoal)) {
+      throw new BadRequestException('Select a valid learning goal.');
+    }
+    if (!EXPERIENCE_LEVELS.has(experienceLevel)) {
+      throw new BadRequestException('Select a valid experience level.');
+    }
+    if (!/^[a-z0-9][a-z0-9-]{0,79}$/.test(membershipPreference)) {
+      throw new BadRequestException('Select a valid membership program.');
+    }
+
+    const data = {
+      learnerGoal,
+      experienceLevel,
+      membershipPreference,
+      onboardingCompleted: true,
+    };
+    let user: any = null;
+    if (this.prisma.isDbConnected) {
+      user = await this.prisma.user.update({ where: { id: userId }, data });
+    } else {
+      user = this.prisma.inMemoryUsers.find(candidate => candidate.id === userId);
+      if (user) Object.assign(user, data, { updatedAt: new Date() });
+    }
+    if (!user) throw new UnauthorizedException('User account could not be found.');
+    return this.toPublicUser(user);
   }
 
   async forgotPassword(email: string) {
@@ -299,5 +347,20 @@ export class AuthService implements OnModuleInit {
       email,
       role,
     });
+  }
+
+  private toPublicUser(user: any) {
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      avatarUrl: user.avatarUrl || null,
+      onboardingCompleted:
+        user.role === 'ADMIN' ? true : Boolean(user.onboardingCompleted),
+      learnerGoal: user.learnerGoal || null,
+      experienceLevel: user.experienceLevel || null,
+      membershipPreference: user.membershipPreference || null,
+    };
   }
 }

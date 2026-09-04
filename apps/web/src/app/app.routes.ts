@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, adminGuard } from './core/guards/auth.guard';
+import { authGuard, adminGuard, onboardingGuard } from './core/guards/auth.guard';
 
 export const appRoutes: Routes = [
   {
@@ -16,6 +16,7 @@ export const appRoutes: Routes = [
   },
   {
     path: 'courses/:slug/watch/:lessonId',
+    canActivate: [authGuard, onboardingGuard],
     loadComponent: () => import('./features/watch/watch.component').then(m => m.WatchComponent),
   },
   {
@@ -28,11 +29,17 @@ export const appRoutes: Routes = [
   },
   {
     path: 'checkout',
+    canActivate: [authGuard, onboardingGuard],
     loadComponent: () => import('./features/checkout/checkout.component').then(m => m.CheckoutComponent),
   },
   {
-    path: 'dashboard',
+    path: 'onboarding',
     canActivate: [authGuard],
+    loadComponent: () => import('./features/onboarding/onboarding.component').then(m => m.OnboardingComponent),
+  },
+  {
+    path: 'dashboard',
+    canActivate: [authGuard, onboardingGuard],
     loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent),
   },
   {

@@ -34,13 +34,11 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
           <span>{{ course()?.level }} course</span>
         </div>
 
-        <section
-          class="bg-white dark:bg-[#121A2B] border-y border-slate-200 dark:border-[#1E293B] px-6 md:px-16 py-12 transition-colors"
-        >
+        <section class="px-4 sm:px-6 lg:px-8 pb-8 transition-colors">
           <div
-            class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-12 items-center"
+            class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-8 lg:gap-12 items-start"
           >
-            <div class="lg:col-span-2">
+            <div class="min-w-0 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#1E293B] dark:bg-[#121A2B] sm:p-8 lg:p-10">
               <div class="flex items-center gap-3 mb-4">
                 <span
                   class="font-['JetBrains_Mono'] text-xs text-white dark:text-[#040810] bg-[#2563EB] dark:bg-[#3B82F6] px-3 py-1 rounded font-bold uppercase shadow-sm"
@@ -104,7 +102,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
 
             <!-- Enrollment Card -->
             <div
-              class="bg-slate-50 dark:bg-[#040810] border border-slate-200 dark:border-[#1E293B] rounded-xl p-8 flex flex-col gap-6 shadow-xl"
+              class="course-access-card bg-white dark:bg-[#0B111D] border border-slate-200 dark:border-[#26334B] rounded-2xl p-5 sm:p-6 flex flex-col gap-5 shadow-2xl lg:sticky lg:top-28 lg:row-span-3 lg:self-start lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto"
             >
               <div
                 class="relative aspect-video overflow-hidden rounded-lg border border-slate-200 dark:border-[#334155] -mx-2 -mt-2 bg-slate-900 shadow-lg group"
@@ -155,11 +153,21 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
               <div
                 class="font-['JetBrains_Mono'] text-xs text-[#2563EB] dark:text-[#3B82F6] uppercase tracking-widest font-bold"
               >
-                // INSTANT ACCESS
+                // COURSE ACCESS
               </div>
 
+              @if (isEnrolled()) {
+                <div class="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 font-['Inter'] text-sm font-semibold text-emerald-800 dark:border-emerald-800/70 dark:bg-emerald-950/35 dark:text-emerald-300">
+                  <span class="material-symbols-outlined text-lg">verified</span>
+                  You are enrolled in this course
+                </div>
+              }
+
               <div class="flex items-baseline justify-between gap-4">
-                @if (course()?.isFree) {
+                @if (isEnrolled()) {
+                  <span class="font-['JetBrains_Mono'] text-2xl font-bold text-[#2563EB] dark:text-[#60A5FA]">OWNED</span>
+                  <span class="font-['JetBrains_Mono'] text-[10px] text-emerald-700 dark:text-emerald-300 font-bold text-right uppercase">Saved to your account</span>
+                } @else if (course()?.isFree) {
                   <span
                     class="font-['JetBrains_Mono'] text-3xl font-bold text-[#2563EB] dark:text-[#3B82F6]"
                     >FREE</span
@@ -180,26 +188,24 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                 }
               </div>
 
-              @if (course()?.isFree) {
-                @if (isEnrolled()) {
-                  <a
-                    [routerLink]="['/courses', course()?.slug, 'watch', getFirstLessonId()]"
-                    class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white bg-[#2563EB] hover:bg-[#1D4ED8] py-4 rounded-lg transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
-                  >
-                    <span>Start learning</span>
-                    <span class="material-symbols-outlined text-sm !text-white">play_arrow</span>
-                  </a>
-                } @else {
-                  <button
-                    type="button"
-                    (click)="enrollInFreeCourse()"
-                    [disabled]="isEnrolling()"
-                    class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white bg-[#2563EB] hover:bg-[#1D4ED8] py-4 rounded-lg transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg disabled:opacity-60"
-                  >
-                    <span>{{ isEnrolling() ? 'Enrolling...' : 'Enroll for free' }}</span>
-                    <span class="material-symbols-outlined text-sm !text-white">arrow_forward</span>
-                  </button>
-                }
+              @if (isEnrolled()) {
+                <a
+                  [routerLink]="['/courses', course()?.slug, 'watch', getCourseEntryLessonId()]"
+                  class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white bg-[#2563EB] hover:bg-[#1D4ED8] py-4 rounded-lg transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+                >
+                  <span>Go to course</span>
+                  <span class="material-symbols-outlined text-sm !text-white">play_arrow</span>
+                </a>
+              } @else if (course()?.isFree) {
+                <button
+                  type="button"
+                  (click)="enrollInFreeCourse()"
+                  [disabled]="isEnrolling()"
+                  class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white bg-[#2563EB] hover:bg-[#1D4ED8] py-4 rounded-lg transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg disabled:opacity-60"
+                >
+                  <span>{{ isEnrolling() ? 'Enrolling...' : 'Enroll for free' }}</span>
+                  <span class="material-symbols-outlined text-sm !text-white">arrow_forward</span>
+                </button>
                 @if (enrollmentMessage()) {
                   <p class="font-['Inter'] text-xs text-slate-600 dark:text-[#d9c3af] text-center">
                     {{ enrollmentMessage() }}
@@ -216,28 +222,36 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
                 </a>
               }
 
-              <a
-                routerLink="/membership"
-                class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold bg-white hover:bg-slate-100 text-slate-800 hover:text-[#2563EB] border-2 border-slate-300 hover:border-[#2563EB] dark:bg-transparent dark:hover:bg-[#3B82F6]/10 dark:text-[#60A5FA] dark:border-[#3B82F6]/50 dark:hover:border-[#3B82F6] py-3.5 rounded-lg transition-all shadow-sm flex items-center justify-center gap-2"
-              >
-                <span class="material-symbols-outlined text-base text-[#2563EB] dark:text-[#3B82F6]">workspace_premium</span>
-                <span>Get All Courses with Membership</span>
-              </a>
+              @if (!isEnrolled()) {
+                <a
+                  routerLink="/membership"
+                  class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold bg-white hover:bg-slate-100 text-slate-800 hover:text-[#2563EB] border-2 border-slate-300 hover:border-[#2563EB] dark:bg-transparent dark:hover:bg-[#3B82F6]/10 dark:text-[#60A5FA] dark:border-[#3B82F6]/50 dark:hover:border-[#3B82F6] py-3.5 rounded-lg transition-all shadow-sm flex items-center justify-center gap-2"
+                >
+                  <span class="material-symbols-outlined text-base text-[#2563EB] dark:text-[#3B82F6]">workspace_premium</span>
+                  <span>Get All Courses with Membership</span>
+                </a>
+              }
+
+              <div class="border-t border-slate-200 pt-4 dark:border-[#26334B]">
+                <h3 class="mb-3 font-['Hanken_Grotesk'] text-sm font-bold text-slate-900 dark:text-white">This course includes:</h3>
+                <ul class="space-y-2.5 font-['Inter'] text-xs text-slate-600 dark:text-slate-300">
+                  <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-[#2563EB]">play_lesson</span>{{ getTotalLessons() }} on-demand lessons</li>
+                  <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-[#2563EB]">devices</span>Access on mobile, tablet, and desktop</li>
+                  <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-[#2563EB]">all_inclusive</span>Lifetime access to purchased courses</li>
+                  <li class="flex items-center gap-2"><span class="material-symbols-outlined text-base text-[#2563EB]">workspace_premium</span>Certificate of completion</li>
+                </ul>
+              </div>
 
               <div
                 class="text-center font-['Inter'] text-xs text-slate-500 dark:text-[#a18d7b] pt-2 border-t border-slate-200 dark:border-[#1E293B]"
               >
-                Instant lifetime access • 30-day money-back guarantee
+                {{ isEnrolled() ? 'Your enrollment remains active when course content is updated.' : 'Instant lifetime access • 30-day money-back guarantee' }}
               </div>
             </div>
-          </div>
-        </section>
 
         <!-- Curriculum & Overview Section -->
-        <section
-          class="max-w-6xl mx-auto px-6 md:px-16 mt-16 grid grid-cols-1 lg:grid-cols-3 gap-12"
-        >
-          <div class="lg:col-span-2">
+        <section class="min-w-0 lg:col-start-1 mt-2 lg:mt-4">
+          <div>
             <div
               class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6"
             >
@@ -343,7 +357,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
           </div>
 
           <!-- Sidebar: Instructor & Details -->
-          <div class="flex flex-col gap-8">
+          <div class="flex flex-col gap-8 mt-8">
             <div class="bg-white dark:bg-[#121A2B] border border-slate-200 dark:border-[#1E293B] rounded-xl shadow-sm p-6">
               <h3
                 class="font-['JetBrains_Mono'] text-xs uppercase text-[#2563EB] dark:text-[#3B82F6] tracking-wider font-bold mb-4"
@@ -390,7 +404,7 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
         </section>
 
         <!-- Student Reviews -->
-        <section class="max-w-6xl mx-auto px-6 md:px-16 mt-16">
+        <section class="min-w-0 lg:col-start-1 mt-4 lg:mt-8">
           <div class="max-w-3xl">
             <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
               <div>
@@ -481,6 +495,8 @@ import { EnrollmentsService } from '../../core/services/enrollments.service';
             </div>
           </div>
         </section>
+          </div>
+        </section>
       </div>
     }
   `,
@@ -501,6 +517,7 @@ export class CourseDetailComponent implements OnInit {
   promoEmbedUrl = signal<SafeResourceUrl | null>(null);
   promoPlaying = signal(false);
   isEnrolled = signal(false);
+  resumeLessonId = signal('');
   isEnrolling = signal(false);
   enrollmentMessage = signal('');
   reviewRating = 0;
@@ -540,20 +557,32 @@ export class CourseDetailComponent implements OnInit {
   private loadEnrollmentStatus(course: Course) {
     if (!this.authService.isAuthenticated()) return;
     this.enrollmentsService.getMyEnrollments().subscribe({
-      next: (enrollments) =>
-        this.isEnrolled.set(
-          enrollments.some(
-            (enrollment) =>
-              enrollment.courseId === course.id ||
-              enrollment.course?.slug === course.slug,
-          ),
-        ),
+      next: (enrollments) => {
+        const enrollment = enrollments.find(
+          (candidate) =>
+            candidate.courseId === course.id ||
+            candidate.course?.slug === course.slug,
+        );
+        this.isEnrolled.set(Boolean(enrollment));
+        if (enrollment?.lastWatchedLessonId) {
+          const lessonStillExists = course.modules?.some(module =>
+            module.lessons?.some(lesson => lesson.id === enrollment.lastWatchedLessonId),
+          );
+          this.resumeLessonId.set(lessonStillExists ? enrollment.lastWatchedLessonId : '');
+        } else {
+          this.resumeLessonId.set('');
+        }
+      },
       error: () => this.isEnrolled.set(false),
     });
   }
 
   getFirstLessonId(): string {
     return this.course()?.modules?.find((module) => module.lessons?.length)?.lessons[0]?.id || '';
+  }
+
+  getCourseEntryLessonId(): string {
+    return this.resumeLessonId() || this.getFirstLessonId();
   }
 
   enrollInFreeCourse() {

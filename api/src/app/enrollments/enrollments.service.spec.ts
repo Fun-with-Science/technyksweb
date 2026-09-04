@@ -15,6 +15,7 @@ describe('EnrollmentsService - Progress Tracking', () => {
         findUnique: vi.fn(),
         update: vi.fn(),
         findMany: vi.fn(),
+        upsert: vi.fn(),
       },
       course: {
         findUnique: vi.fn(),
@@ -25,6 +26,37 @@ describe('EnrollmentsService - Progress Tracking', () => {
       },
     };
     service = new EnrollmentsService(mockPrisma);
+  });
+
+  it('should persist a free-course enrollment idempotently for the user', async () => {
+    mockPrisma.course.findUnique.mockResolvedValue({
+      id: 'course_free',
+      isFree: true,
+      price: 0,
+    });
+    mockPrisma.enrollment.upsert.mockResolvedValue({
+      id: 'enr_free',
+      userId: 'user_1',
+      courseId: 'course_free',
+      progressPercent: 0,
+      completedLessonIds: [],
+    });
+
+    const result = await service.enrollInFreeCourse('user_1', 'course_free');
+
+    expect(mockPrisma.enrollment.upsert).toHaveBeenCalledWith({
+      where: {
+        userId_courseId: { userId: 'user_1', courseId: 'course_free' },
+      },
+      create: {
+        userId: 'user_1',
+        courseId: 'course_free',
+        progressPercent: 0,
+        completedLessonIds: [],
+      },
+      update: {},
+    });
+    expect(result.courseId).toBe('course_free');
   });
 
   it('should calculate 50% progress accurately when 1 of 2 lessons completed', async () => {

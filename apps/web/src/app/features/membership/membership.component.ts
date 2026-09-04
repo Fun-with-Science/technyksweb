@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { catchError, of } from 'rxjs';
 import { MembershipPlan } from '../../core/services/payments.service';
+import { AuthService } from '../../core/services/auth.service';
 
 const FALLBACK_PLANS: MembershipPlan[] = [
   {
@@ -87,7 +88,16 @@ const FALLBACK_PLANS: MembershipPlan[] = [
                   @for (feature of plan.features; track feature) { <li class="flex items-center gap-2"><span class="material-symbols-outlined text-[#2563EB] dark:text-[#3B82F6] text-base">check</span>{{ feature }}</li> }
                 </ul>
               </div>
-              <a routerLink="/auth/signup" class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#1D4ED8] dark:text-[#3B82F6] border-2 border-[#2563EB] dark:border-[#3B82F6] py-3.5 rounded-lg font-bold hover:bg-blue-50 dark:hover:bg-[#3B82F6]/10 transition-colors">Get Started Free</a>
+              @if (authService.isAuthenticated()) {
+                <div class="space-y-3">
+                  <div class="flex items-center justify-center gap-2 rounded-lg bg-emerald-50 px-3 py-2.5 font-['Inter'] text-xs font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+                    <span class="material-symbols-outlined text-base">verified</span>Your free access is active
+                  </div>
+                  <a routerLink="/dashboard" class="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-[#2563EB] py-3.5 text-center font-['JetBrains_Mono'] text-xs font-bold uppercase tracking-wider text-[#1D4ED8] transition-colors hover:bg-blue-50 dark:border-[#3B82F6] dark:text-[#3B82F6] dark:hover:bg-[#3B82F6]/10">Go to dashboard <span class="material-symbols-outlined text-base">arrow_forward</span></a>
+                </div>
+              } @else {
+                <a routerLink="/auth/signup" class="w-full text-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-[#1D4ED8] dark:text-[#3B82F6] border-2 border-[#2563EB] dark:border-[#3B82F6] py-3.5 rounded-lg font-bold hover:bg-blue-50 dark:hover:bg-[#3B82F6]/10 transition-colors">Create free account</a>
+              }
             </article>
           }
 
@@ -116,6 +126,7 @@ const FALLBACK_PLANS: MembershipPlan[] = [
 export class MembershipComponent implements OnInit {
   private http = inject(HttpClient);
   private platformId = inject(PLATFORM_ID);
+  authService = inject(AuthService);
   isAnnual = signal(true);
   isLoading = signal(true);
   plans = signal<MembershipPlan[]>([]);

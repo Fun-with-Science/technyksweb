@@ -46,6 +46,10 @@ export interface OrderResponse {
 export class PaymentsService {
   private http = inject(HttpClient);
 
+  getPlans(): Observable<MembershipPlan[]> {
+    return this.http.get<MembershipPlan[]>('/api/payments/plans');
+  }
+
   validateCoupon(code: string, originalAmount: number, context: { type: 'COURSE' | 'MEMBERSHIP'; courseId?: string; planId?: string }): Observable<CouponValidationResult> {
     return this.http.post<CouponValidationResult>('/api/payments/coupon/validate', { code, originalAmount, ...context });
   }

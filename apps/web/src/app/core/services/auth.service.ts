@@ -9,6 +9,10 @@ export interface User {
   name: string;
   role: 'STUDENT' | 'ADMIN';
   avatarUrl?: string;
+  onboardingCompleted?: boolean;
+  learnerGoal?: string | null;
+  experienceLevel?: string | null;
+  membershipPreference?: string | null;
 }
 
 export interface AuthResponse {
@@ -75,12 +79,35 @@ export class AuthService {
       .pipe(tap((response) => this.setSession(response)));
   }
 
+  getProfile(): Observable<User> {
+    return this.http.get<User>('/api/auth/me').pipe(
+      tap((user) => this.persistUser(user)),
+    );
+  }
+
+  completeOnboarding(payload: {
+    learnerGoal: string;
+    experienceLevel: string;
+    membershipPreference: string;
+  }): Observable<User> {
+    return this.http.patch<User>('/api/auth/onboarding', payload).pipe(
+      tap((user) => this.persistUser(user)),
+    );
+  }
+
   private setSession(res: AuthResponse) {
     if (typeof window !== 'undefined') {
       localStorage.setItem(this.tokenKey, res.accessToken);
       localStorage.setItem(this.userKey, JSON.stringify(res.user));
     }
     this.currentUser.set(res.user);
+  }
+
+  private persistUser(user: User) {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.userKey, JSON.stringify(user));
+    }
+    this.currentUser.set(user);
   }
 
   forgotPassword(email: string) {
