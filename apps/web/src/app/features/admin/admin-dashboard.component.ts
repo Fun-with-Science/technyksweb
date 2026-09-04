@@ -299,9 +299,9 @@ import {
 
       <!-- TAB 3: STUDENTS -->
       @if (activeTab() === 'students') {
-        <div class="bg-[#121A2B] technical-border rounded p-6 flex flex-col gap-6">
-          <table class="w-full text-left font-['Inter'] text-xs text-[#d9c3af]">
-            <thead class="font-['JetBrains_Mono'] text-[11px] uppercase text-[#a18d7b] bg-[#040810]/60 border-b border-[#1E293B]">
+        <div class="bg-white dark:bg-[#121A2B] technical-border rounded p-4 sm:p-6 flex flex-col gap-6 overflow-x-auto">
+          <table class="w-full min-w-[680px] text-left font-['Inter'] text-xs text-slate-700 dark:text-[#d9c3af]">
+            <thead class="font-['JetBrains_Mono'] text-[11px] uppercase text-slate-600 dark:text-[#a18d7b] bg-slate-50 dark:bg-[#040810]/60 border-b border-slate-200 dark:border-[#1E293B]">
               <tr>
                 <th class="p-3">Name</th>
                 <th class="p-3">Email</th>
@@ -309,13 +309,13 @@ import {
                 <th class="p-3">Joined Date</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-[#1E293B]/40">
+            <tbody class="divide-y divide-slate-200 dark:divide-[#1E293B]/40">
               @for (student of students(); track student.id) {
-                <tr>
-                  <td class="p-3 font-semibold text-white">{{ student.name }}</td>
-                  <td class="p-3 font-['JetBrains_Mono'] text-[#d9c3af]">{{ student.email }}</td>
-                  <td class="p-3 font-['JetBrains_Mono'] text-[#3B82F6]">{{ student.role }}</td>
-                  <td class="p-3 font-['JetBrains_Mono'] text-[#a18d7b]">{{ student.createdAt | date:'mediumDate' }}</td>
+                <tr class="hover:bg-slate-50 dark:hover:bg-white/[0.025] transition-colors">
+                  <td class="p-3 font-semibold text-slate-950 dark:text-white">{{ student.name }}</td>
+                  <td class="p-3 font-['JetBrains_Mono'] text-slate-700 dark:text-[#d9c3af]">{{ student.email }}</td>
+                  <td class="p-3 font-['JetBrains_Mono'] font-semibold text-[#1D4ED8] dark:text-[#60A5FA]">{{ student.role }}</td>
+                  <td class="p-3 font-['JetBrains_Mono'] text-slate-600 dark:text-[#a18d7b]">{{ student.createdAt | date:'mediumDate' }}</td>
                 </tr>
               }
             </tbody>
