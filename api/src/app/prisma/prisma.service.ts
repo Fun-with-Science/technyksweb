@@ -30,10 +30,7 @@ export class PrismaService
   async onModuleInit() {
     try {
       await this.$connect();
-      // Schema creation and non-destructive changes are handled by
-      // `prisma db push` during the Hostinger build. Keeping schema changes
-      // out of startup makes the API compatible with MySQL and prevents
-      // PostgreSQL-specific SQL from running against the production database.
+      await this.ensureOnboardingColumns();
       this.isDbConnected = true;
       this.logger.log(
         ' Connected successfully to MySQL database via Prisma',
@@ -50,6 +47,28 @@ export class PrismaService
   async onModuleDestroy() {
     if (this.isDbConnected) {
       await this.$disconnect();
+    }
+  }
+
+  private async ensureOnboardingColumns() {
+    const additions = [
+      'ADD COLUMN `onboardingCompleted` BOOLEAN NOT NULL DEFAULT false',
+      'ADD COLUMN `learnerGoal` VARCHAR(191) NULL',
+      'ADD COLUMN `experienceLevel` VARCHAR(191) NULL',
+      'ADD COLUMN `membershipPreference` VARCHAR(191) NULL',
+    ];
+
+    for (const addition of additions) {
+      try {
+        await this.$executeRawUnsafe(`ALTER TABLE \`User\` ${addition}`);
+      } catch (error: any) {
+        const databaseCode = String(error?.meta?.code || error?.code || '');
+        const message = String(error?.meta?.message || error?.message || '');
+        if (databaseCode === '1060' || message.includes('Duplicate column name')) {
+          continue;
+        }
+        throw error;
+      }
     }
   }
 }
