@@ -1,4 +1,9 @@
-type LessonDefinition = readonly [title: string, videoId: string, duration: number, preview?: boolean];
+type LessonDefinition = readonly [
+  title: string,
+  videoId: string,
+  duration: number,
+  preview?: boolean,
+];
 
 const MODULES: ReadonlyArray<{
   id: string;
@@ -13,7 +18,11 @@ const MODULES: ReadonlyArray<{
       ['1. Course Outline & Roadmap', 'ZIZalJKU_0k', 410, true],
       ['2. What is TypeScript?', '5qU6w3IQaNE', 490],
       ['3. TypeScript vs JavaScript', 'wDmORdV27sg', 520],
-      ['4. Setup VS Code Editor & Understand the Difference', 'R1eVBvdofko', 580],
+      [
+        '4. Setup VS Code Editor & Understand the Difference',
+        'R1eVBvdofko',
+        580,
+      ],
       ['5. How TypeScript Works & Why?', 'AaTVEoLLLuk', 460],
       ['6. Pros & Cons of TypeScript', '8chBa90Wpp0', 430],
     ],
@@ -30,7 +39,11 @@ const MODULES: ReadonlyArray<{
     id: 'ts-mod-03',
     title: 'Type System & Primitive Types',
     lessons: [
-      ['9. Basic Primitive Types (string, number, boolean)', 'o6liGrs7Qnk', 620],
+      [
+        '9. Basic Primitive Types (string, number, boolean)',
+        'o6liGrs7Qnk',
+        620,
+      ],
       ["10. The 'any' Type & When to Avoid It", 'hncqP0SksRU', 480],
       ['11. Typed Arrays in TypeScript', '71uD25Oxqjw', 510],
       ['12. Tuples in TypeScript', '2hZn2zmC9io', 440],
@@ -63,7 +76,11 @@ const MODULES: ReadonlyArray<{
     id: 'ts-mod-06',
     title: 'Object-Oriented Programming & Classes',
     lessons: [
-      ['24. Classes & Access Modifiers (public, private, protected)', 'yp7HLK87Fkk', 640],
+      [
+        '24. Classes & Access Modifiers (public, private, protected)',
+        'yp7HLK87Fkk',
+        640,
+      ],
       ['25. OOP Practice Problems & Inheritance', 'ha2Edtu9LTk', 660],
     ],
   },
@@ -76,7 +93,11 @@ const MODULES: ReadonlyArray<{
       ['28. Custom Type Guards (is operator)', 'i4tLynHBK60', 480],
       ['29. The keyof Operator', 'aeY-u_WxPMc', 450],
       ['30. Index Signatures for Dynamic Objects', 'rMIPhdkA-og', 490],
-      ['31. Built-in Utility Types (Partial, Pick, Omit, Record)', 'IDMu5OVIYJQ', 680],
+      [
+        '31. Built-in Utility Types (Partial, Pick, Omit, Record)',
+        'IDMu5OVIYJQ',
+        680,
+      ],
     ],
   },
   {
@@ -93,7 +114,11 @@ const MODULES: ReadonlyArray<{
     id: 'ts-mod-09',
     title: 'Technical Interview Mastery',
     lessons: [
-      ['36. TypeScript Interview Questions & Core Concepts Review', 'kRHJuBtpLI4', 780],
+      [
+        '36. TypeScript Interview Questions & Core Concepts Review',
+        'kRHJuBtpLI4',
+        780,
+      ],
     ],
   },
 ];
@@ -112,18 +137,21 @@ export const TYPESCRIPT_COURSE = {
   isFree: false,
   currency: 'INR',
   level: 'Beginner',
+  category: 'Web Development',
   isPublished: true,
   modules: MODULES.map((module, moduleIndex) => ({
     id: module.id,
     title: module.title,
     order: moduleIndex + 1,
-    lessons: module.lessons.map(([title, videoId, duration, isFreePreview], lessonIndex) => ({
-      id: `${module.id}-l${lessonIndex + 1}`,
-      title,
-      videoAssetRef: `youtube:${videoId}`,
-      duration,
-      order: lessonIndex + 1,
-      isFreePreview: Boolean(isFreePreview),
-    })),
+    lessons: module.lessons.map(
+      ([title, videoId, duration, isFreePreview], lessonIndex) => ({
+        id: `${module.id}-l${lessonIndex + 1}`,
+        title,
+        videoAssetRef: `youtube:${videoId}`,
+        duration,
+        order: lessonIndex + 1,
+        isFreePreview: Boolean(isFreePreview),
+      }),
+    ),
   })),
 };

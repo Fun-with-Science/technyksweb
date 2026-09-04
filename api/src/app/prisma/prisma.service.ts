@@ -30,11 +30,9 @@ export class PrismaService
   async onModuleInit() {
     try {
       await this.$connect();
-      await this.ensureOnboardingColumns();
+      await this.ensureRuntimeColumns();
       this.isDbConnected = true;
-      this.logger.log(
-        ' Connected successfully to MySQL database via Prisma',
-      );
+      this.logger.log(' Connected successfully to MySQL database via Prisma');
     } catch (error: any) {
       this.isDbConnected = false;
       this.logger.warn(
@@ -50,21 +48,36 @@ export class PrismaService
     }
   }
 
-  private async ensureOnboardingColumns() {
+  private async ensureRuntimeColumns() {
     const additions = [
-      'ADD COLUMN `onboardingCompleted` BOOLEAN NOT NULL DEFAULT false',
-      'ADD COLUMN `learnerGoal` VARCHAR(191) NULL',
-      'ADD COLUMN `experienceLevel` VARCHAR(191) NULL',
-      'ADD COLUMN `membershipPreference` VARCHAR(191) NULL',
+      {
+        table: 'User',
+        sql: 'ADD COLUMN `onboardingCompleted` BOOLEAN NOT NULL DEFAULT false',
+      },
+      { table: 'User', sql: 'ADD COLUMN `learnerGoal` VARCHAR(191) NULL' },
+      { table: 'User', sql: 'ADD COLUMN `experienceLevel` VARCHAR(191) NULL' },
+      {
+        table: 'User',
+        sql: 'ADD COLUMN `membershipPreference` VARCHAR(191) NULL',
+      },
+      {
+        table: 'Course',
+        sql: "ADD COLUMN `category` VARCHAR(191) NOT NULL DEFAULT 'Web Development'",
+      },
     ];
 
     for (const addition of additions) {
       try {
-        await this.$executeRawUnsafe(`ALTER TABLE \`User\` ${addition}`);
+        await this.$executeRawUnsafe(
+          `ALTER TABLE \`${addition.table}\` ${addition.sql}`,
+        );
       } catch (error: any) {
         const databaseCode = String(error?.meta?.code || error?.code || '');
         const message = String(error?.meta?.message || error?.message || '');
-        if (databaseCode === '1060' || message.includes('Duplicate column name')) {
+        if (
+          databaseCode === '1060' ||
+          message.includes('Duplicate column name')
+        ) {
           continue;
         }
         throw error;

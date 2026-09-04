@@ -69,6 +69,7 @@ model Course {
   isFree           Boolean                  @default(false)
   currency         String                   @default("INR")
   level            String                   @default("Intermediate")
+  category         String                   @default("Web Development")
   isPublished      Boolean                  @default(false)
   isArchived       Boolean                  @default(false)
   createdAt        DateTime                 @default(now())

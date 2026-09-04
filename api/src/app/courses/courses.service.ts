@@ -26,6 +26,7 @@ const INITIAL_COURSES = [
     price: 4999,
     currency: 'INR',
     level: 'Advanced',
+    category: 'AI & Agents',
     isPublished: true,
     thumbnail: '/assets/course-agentic-ai.png',
     modules: [
@@ -96,6 +97,7 @@ const INITIAL_COURSES = [
     price: 3999,
     currency: 'INR',
     level: 'Intermediate',
+    category: 'Software Architecture',
     isPublished: true,
     thumbnail: '/assets/course-mern-rag.png',
     modules: [
@@ -135,6 +137,7 @@ const INITIAL_COURSES = [
     price: 5999,
     currency: 'INR',
     level: 'Advanced',
+    category: 'Software Architecture',
     isPublished: true,
     thumbnail: '/assets/course-vibe-coding.png',
     modules: [
@@ -190,10 +193,12 @@ export class CoursesService implements OnModuleInit {
           } else if (!existing.isArchived) {
             const repairs: Record<string, unknown> = {};
             const isMissingCurriculum = !this.hasCurriculum(existing);
-            const hasLegacyLevel =
-              !['Beginner', 'Intermediate', 'Advanced', 'All Levels'].includes(
-                existing.level,
-              );
+            const hasLegacyLevel = ![
+              'Beginner',
+              'Intermediate',
+              'Advanced',
+              'All Levels',
+            ].includes(existing.level);
             if (isMissingCurriculum) {
               // Preserve administrator-authored landing-page data while repairing
               // the missing built-in curriculum.
@@ -234,10 +239,12 @@ export class CoursesService implements OnModuleInit {
           existing.modules = course.modules;
           existing.updatedAt = new Date();
         }
-        const hasLegacyLevel =
-          !['Beginner', 'Intermediate', 'Advanced', 'All Levels'].includes(
-            existing.level,
-          );
+        const hasLegacyLevel = ![
+          'Beginner',
+          'Intermediate',
+          'Advanced',
+          'All Levels',
+        ].includes(existing.level);
         if (!existing.isArchived && hasLegacyLevel) {
           existing.level = course.level;
         }
@@ -368,7 +375,8 @@ export class CoursesService implements OnModuleInit {
       ? Number(
           (
             reviews.reduce(
-              (total: number, review: any) => total + Number(review.rating || 0),
+              (total: number, review: any) =>
+                total + Number(review.rating || 0),
               0,
             ) / reviews.length
           ).toFixed(1),
@@ -425,6 +433,7 @@ export class CoursesService implements OnModuleInit {
       isFree: Boolean(course.isFree ?? Number(course.price || 0) === 0),
       currency: course.currency,
       level: course.level,
+      category: course.category || 'Web Development',
       isPublished: draft ? false : Boolean(course.isPublished),
       isArchived: false,
       modules: { create: this.toPrismaModules(course.modules) },
@@ -437,15 +446,17 @@ export class CoursesService implements OnModuleInit {
       title: module.title,
       order: module.order || moduleIndex + 1,
       lessons: {
-        create: (module.lessons || []).map((lesson: any, lessonIndex: number) => ({
-          id: lesson.id,
-          title: lesson.title,
-          description: lesson.description ?? null,
-          duration: lesson.duration || 0,
-          order: lesson.order || lessonIndex + 1,
-          isFreePreview: Boolean(lesson.isFreePreview),
-          videoAssetRef: lesson.videoAssetRef ?? null,
-        })),
+        create: (module.lessons || []).map(
+          (lesson: any, lessonIndex: number) => ({
+            id: lesson.id,
+            title: lesson.title,
+            description: lesson.description ?? null,
+            duration: lesson.duration || 0,
+            order: lesson.order || lessonIndex + 1,
+            isFreePreview: Boolean(lesson.isFreePreview),
+            videoAssetRef: lesson.videoAssetRef ?? null,
+          }),
+        ),
       },
     }));
   }

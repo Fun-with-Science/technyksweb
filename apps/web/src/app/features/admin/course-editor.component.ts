@@ -311,11 +311,31 @@ import {
                 ></textarea>
               </div>
 
-              <!-- Course Category / Level & Price Settings -->
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-[#1E293B] pt-6">
+              <!-- Course Category, Level & Price Settings -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-[#1E293B] pt-6">
+                <div>
+                  <label for="course-category" class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">
+                    Subject Category
+                  </label>
+                  <input
+                    id="course-category"
+                    list="course-category-options"
+                    [ngModel]="course()?.category"
+                    (ngModelChange)="updateCourseField('category', $event)"
+                    placeholder="e.g. AI & Agents"
+                    class="w-full bg-[#040810] border border-[#1E293B] focus:border-[#3B82F6] rounded-lg px-4 py-2.5 text-xs text-white outline-none font-['JetBrains_Mono']"
+                  />
+                  <datalist id="course-category-options">
+                    @for (category of suggestedCategories; track category) {
+                      <option [value]="category"></option>
+                    }
+                  </datalist>
+                  <p class="mt-1.5 font-['Inter'] text-[11px] text-[#a18d7b]">Choose a suggestion or type a new category.</p>
+                </div>
+
                 <div>
                   <label for="course-level" class="block font-['JetBrains_Mono'] text-xs text-[#a18d7b] uppercase mb-1">
-                    Course Level / Category
+                    Course Level
                   </label>
                   <select
                     id="course-level"
@@ -378,7 +398,7 @@ import {
                 <div class="flex items-center justify-between mb-4"><div><h3 class="font-['Hanken_Grotesk'] text-base font-bold text-white">Promotional video</h3><p class="font-['Inter'] text-xs text-[#a18d7b] mt-1">This plays directly inside the landing-page preview card.</p></div>@if (course()?.promoVideoUrl) {<button type="button" (click)="removeMedia('promoVideoUrl')" [disabled]="removingMedia() === 'promoVideoUrl'" class="font-['JetBrains_Mono'] text-[11px] text-[#ffb4ab] border border-[#ffb4ab]/40 rounded px-3 py-2 hover:bg-[#ffb4ab]/10 disabled:opacity-50">{{ removingMedia() === 'promoVideoUrl' ? 'Removing…' : 'Remove video' }}</button>}</div>
                 <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1.15fr)_minmax(260px,0.85fr)] gap-6 items-stretch">
                   <div class="relative aspect-video bg-black border border-[#1E293B] rounded-xl overflow-hidden grid place-items-center">
-                    @if (isDirectPromoVideo(course()?.promoVideoUrl)) {<video [src]="course()?.promoVideoUrl" controls class="w-full h-full object-contain"></video>} @else if (promoEmbedUrl()) {<iframe [src]="promoEmbedUrl()" title="Course promotional video preview" class="w-full h-full border-0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>} @else {<div class="text-center text-[#a18d7b]"><span class="material-symbols-outlined text-5xl">smart_display</span><p class="text-xs mt-2">No promotional video</p></div>}
+                    @if (isDirectPromoVideo(course()?.promoVideoUrl)) {<video [src]="course()?.promoVideoUrl" controls class="w-full h-full object-contain"></video>} @else if (promoEmbedUrl()) {<iframe [src]="promoEmbedUrl()" title="Course promotional video preview" class="w-full h-full border-0" allow="autoplay; encrypted-media; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>} @else {<div class="text-center text-[#a18d7b]"><span class="material-symbols-outlined text-5xl">smart_display</span><p class="text-xs mt-2">No promotional video</p></div>}
                     @if (isUploadingVideo()) {<div class="absolute inset-0 bg-[#040810]/90 backdrop-blur-sm grid place-items-center"><div class="text-center"><span class="material-symbols-outlined text-3xl text-[#3B82F6] animate-spin">progress_activity</span><p class="font-['JetBrains_Mono'] text-[11px] text-white mt-2">Uploading video…</p></div></div>}
                   </div>
                   <div class="rounded-xl border border-[#1E293B] bg-[#040810]/45 p-5 flex flex-col gap-4">
@@ -589,8 +609,21 @@ export class CourseEditorComponent implements OnInit {
   isLoadingStudents = signal(false);
   removingMedia = signal<'thumbnail' | 'promoVideoUrl' | null>(null);
   saveMessage = signal('');
+  readonly suggestedCategories = [
+    'Web Development',
+    'AI & Agents',
+    'AI Automation',
+    'Data Engineering',
+    'Software Architecture',
+    'Cloud & DevOps',
+  ];
   activeTab = signal<
-    'curriculum' | 'landing' | 'intended' | 'pricing' | 'promotions' | 'students'
+    | 'curriculum'
+    | 'landing'
+    | 'intended'
+    | 'pricing'
+    | 'promotions'
+    | 'students'
   >('curriculum');
 
   referralUrl = '';
@@ -673,7 +706,9 @@ export class CourseEditorComponent implements OnInit {
       next: ({ url }) => this.persistMediaField('thumbnail', url),
       error: (error) => {
         this.isUploadingImage.set(false);
-        alert(error?.error?.message || 'The image upload failed. Please try again.');
+        alert(
+          error?.error?.message || 'The image upload failed. Please try again.',
+        );
       },
     });
     (event.target as HTMLInputElement).value = '';
@@ -695,7 +730,9 @@ export class CourseEditorComponent implements OnInit {
       next: ({ url }) => this.persistMediaField('promoVideoUrl', url),
       error: (error) => {
         this.isUploadingVideo.set(false);
-        alert(error?.error?.message || 'The video upload failed. Please try again.');
+        alert(
+          error?.error?.message || 'The video upload failed. Please try again.',
+        );
       },
     });
     (event.target as HTMLInputElement).value = '';
@@ -728,13 +765,13 @@ export class CourseEditorComponent implements OnInit {
 
   isDirectPromoVideo(value?: string | null) {
     const url = String(value || '');
-    return url.startsWith('data:video/') || /\.(?:mp4|webm|ogv|ogg|mov)(?:\?|$)/i.test(url);
+    return (
+      url.startsWith('data:video/') ||
+      /\.(?:mp4|webm|ogv|ogg|mov)(?:\?|$)/i.test(url)
+    );
   }
 
-  private persistMediaField(
-    field: 'thumbnail' | 'promoVideoUrl',
-    url: string,
-  ) {
+  private persistMediaField(field: 'thumbnail' | 'promoVideoUrl', url: string) {
     const current = this.course();
     if (!current) return;
     const previousUrl = String(current[field] || '');
@@ -747,16 +784,26 @@ export class CourseEditorComponent implements OnInit {
           this.promoEmbedUrl.set(this.toPromoEmbedUrl(saved.promoVideoUrl));
           this.isUploadingVideo.set(false);
         } else this.isUploadingImage.set(false);
-        if (previousUrl && previousUrl !== url && this.isManagedUpload(previousUrl)) {
+        if (
+          previousUrl &&
+          previousUrl !== url &&
+          this.isManagedUpload(previousUrl)
+        ) {
           this.adminService.removeCourseMedia(previousUrl).subscribe();
         }
-        this.showSavedMessage(field === 'thumbnail' ? 'Image uploaded and saved' : 'Video uploaded and saved');
+        this.showSavedMessage(
+          field === 'thumbnail'
+            ? 'Image uploaded and saved'
+            : 'Video uploaded and saved',
+        );
       },
       error: () => {
         if (field === 'promoVideoUrl') this.isUploadingVideo.set(false);
         else this.isUploadingImage.set(false);
         this.adminService.removeCourseMedia(url).subscribe();
-        alert('The file uploaded, but the course could not be updated. Please try again.');
+        alert(
+          'The file uploaded, but the course could not be updated. Please try again.',
+        );
       },
     });
   }
@@ -772,25 +819,51 @@ export class CourseEditorComponent implements OnInit {
       if (url.hostname === 'youtu.be') {
         const id = url.pathname.split('/').filter(Boolean)[0];
         return id
-          ? this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube-nocookie.com/embed/${id}`)
+          ? this.sanitizer.bypassSecurityTrustResourceUrl(
+              this.youtubeEmbedUrl(id),
+            )
           : null;
       }
-      if (url.hostname === 'youtube.com' || url.hostname.endsWith('.youtube.com')) {
-        const id = url.searchParams.get('v') || url.pathname.match(/^\/(?:embed|shorts)\/([A-Za-z0-9_-]{11})/)?.[1];
+      if (
+        url.hostname === 'youtube.com' ||
+        url.hostname.endsWith('.youtube.com')
+      ) {
+        const id =
+          url.searchParams.get('v') ||
+          url.pathname.match(/^\/(?:embed|shorts)\/([A-Za-z0-9_-]{11})/)?.[1];
         return id
-          ? this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube-nocookie.com/embed/${id}`)
+          ? this.sanitizer.bypassSecurityTrustResourceUrl(
+              this.youtubeEmbedUrl(id),
+            )
           : null;
       }
       if (url.hostname === 'vimeo.com' || url.hostname.endsWith('.vimeo.com')) {
-        const id = url.pathname.split('/').filter(Boolean).find((part) => /^\d+$/.test(part));
+        const id = url.pathname
+          .split('/')
+          .filter(Boolean)
+          .find((part) => /^\d+$/.test(part));
         return id
-          ? this.sanitizer.bypassSecurityTrustResourceUrl(`https://player.vimeo.com/video/${id}`)
+          ? this.sanitizer.bypassSecurityTrustResourceUrl(
+              `https://player.vimeo.com/video/${id}`,
+            )
           : null;
       }
     } catch {
       return null;
     }
     return null;
+  }
+
+  private youtubeEmbedUrl(videoId: string) {
+    const params = new URLSearchParams({
+      controls: '1',
+      rel: '0',
+      playsinline: '1',
+      iv_load_policy: '3',
+      cc_load_policy: '0',
+      color: 'white',
+    });
+    return `https://www.youtube-nocookie.com/embed/${videoId}?${params.toString()}`;
   }
 
   addSection() {
@@ -881,13 +954,15 @@ export class CourseEditorComponent implements OnInit {
     const courseId = this.course()?.id;
     if (!courseId) return;
     this.isLoadingStudents.set(true);
-    this.adminService.getCourseStudents(courseId, this.studentSearch).subscribe({
-      next: (students) => {
-        this.courseStudents.set(students);
-        this.isLoadingStudents.set(false);
-      },
-      error: () => this.isLoadingStudents.set(false),
-    });
+    this.adminService
+      .getCourseStudents(courseId, this.studentSearch)
+      .subscribe({
+        next: (students) => {
+          this.courseStudents.set(students);
+          this.isLoadingStudents.set(false);
+        },
+        error: () => this.isLoadingStudents.set(false),
+      });
   }
 
   saveAllChanges() {
@@ -907,8 +982,14 @@ export class CourseEditorComponent implements OnInit {
         this.modules.set(saved.modules || []);
         this.promoEmbedUrl.set(this.toPromoEmbedUrl(saved.promoVideoUrl));
         this.isSaving.set(false);
-        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        this.showSavedMessage(`Course & curriculum saved at ${timeStr}! Live in store.`);
+        const timeStr = new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        });
+        this.showSavedMessage(
+          `Course & curriculum saved at ${timeStr}! Live in store.`,
+        );
       },
       error: (error) => {
         this.isSaving.set(false);

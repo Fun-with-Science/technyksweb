@@ -1,15 +1,28 @@
-import { Component, OnDestroy, OnInit, PLATFORM_ID, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  PLATFORM_ID,
+  inject,
+  signal,
+} from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Course, CoursesService } from '../../core/services/courses.service';
 import { CourseCardComponent } from '../../core/components/course-card/course-card.component';
 import { SkeletonLoaderComponent } from '../../core/components/skeleton/skeleton-loader.component';
 import { SiteSettingsService } from '../../core/services/site-settings.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, CourseCardComponent, SkeletonLoaderComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    CourseCardComponent,
+    SkeletonLoaderComponent,
+  ],
   template: `
     <div class="flex flex-col gap-16 sm:gap-20 lg:gap-24 pb-16 sm:pb-20 pt-0">
       <!-- Hero Section -->
@@ -31,7 +44,8 @@ import { SiteSettingsService } from '../../core/services/site-settings.service';
           <h1
             class="font-['Hanken_Grotesk'] text-[2.35rem] min-[390px]:text-5xl sm:text-6xl md:text-[72px] leading-[1.06] font-bold text-slate-950 dark:text-white tracking-tight break-words"
           >
-            Learn <span class="text-[#3B82F6]">{{ typedTopic() }}</span><span class="typing-caret" aria-hidden="true">|</span><br />
+            Learn <span class="text-[#3B82F6]">{{ typedTopic() }}</span
+            ><span class="typing-caret" aria-hidden="true">|</span><br />
             <span class="text-[#3B82F6]">Think. Build. Innovate.</span>
           </h1>
 
@@ -42,20 +56,26 @@ import { SiteSettingsService } from '../../core/services/site-settings.service';
             ideas, useful products, and real-world innovations.
           </p>
 
-          <div class="flex w-full max-w-xl flex-col sm:flex-row sm:flex-wrap justify-center gap-3 sm:gap-4 mt-2">
+          <div
+            class="flex w-full max-w-xl flex-col sm:flex-row sm:flex-wrap justify-center gap-3 sm:gap-4 mt-2"
+          >
             <a
               routerLink="/courses"
               class="justify-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold !text-white bg-[#1D4ED8] hover:bg-[#1E40AF] px-6 sm:px-8 py-4 rounded-lg hover:scale-[0.99] transition-all flex items-center gap-2 shadow-lg"
             >
               View All Courses
-              <span class="material-symbols-outlined text-[18px] !text-white">arrow_forward</span>
+              <span class="material-symbols-outlined text-[18px] !text-white"
+                >arrow_forward</span
+              >
             </a>
 
             <a
               routerLink="/membership"
               class="justify-center font-['JetBrains_Mono'] text-xs uppercase tracking-wider font-bold text-[#1D4ED8] dark:text-[#60A5FA] bg-white/80 dark:bg-transparent hover:bg-blue-50 dark:hover:bg-[#3B82F6]/20 border border-[#2563EB] dark:border-[#3B82F6] px-6 sm:px-8 py-4 rounded-lg hover:scale-[0.99] transition-all flex items-center gap-2"
             >
-              <span class="material-symbols-outlined text-[18px]">workspace_premium</span>
+              <span class="material-symbols-outlined text-[18px]"
+                >workspace_premium</span
+              >
               Explore Membership
             </a>
           </div>
@@ -237,12 +257,21 @@ import { SiteSettingsService } from '../../core/services/site-settings.service';
               </ul>
             </div>
 
-            <a
-              routerLink="/auth/signup"
-              class="w-full text-center font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#1D4ED8] dark:text-[#60A5FA] border border-[#2563EB] dark:border-[#3B82F6] hover:bg-blue-50 dark:hover:bg-[#3B82F6]/10 py-3.5 rounded-lg transition-all"
-            >
-              Create Free Account
-            </a>
+            @if (authService.isAuthenticated()) {
+              <a
+                routerLink="/dashboard"
+                class="w-full text-center font-['JetBrains_Mono'] text-xs font-bold uppercase !text-white bg-[#1D4ED8] hover:bg-[#1E40AF] border border-[#1D4ED8] py-3.5 rounded-lg transition-all shadow-md"
+              >
+                Go to Dashboard
+              </a>
+            } @else {
+              <a
+                routerLink="/auth/signup"
+                class="w-full text-center font-['JetBrains_Mono'] text-xs font-bold uppercase text-[#1D4ED8] dark:text-[#60A5FA] border border-[#2563EB] dark:border-[#3B82F6] hover:bg-blue-50 dark:hover:bg-[#3B82F6]/10 py-3.5 rounded-lg transition-all"
+              >
+                Create Free Account
+              </a>
+            }
           </div>
 
           <!-- Pro Monthly Plan Card (Highlighted) -->
@@ -390,6 +419,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private coursesService = inject(CoursesService);
   private siteSettingsService = inject(SiteSettingsService);
   private platformId = inject(PLATFORM_ID);
+  readonly authService = inject(AuthService);
 
   featuredCourses = signal<Course[]>([]);
   isLoading = signal(true);
@@ -401,7 +431,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   private get typingTopics(): string[] {
     const custom = this.siteSettingsService.settings().typingWords;
-    return custom && custom.length ? custom : ['NN', 'Full Stack', 'Data Science', 'Data Engineering'];
+    return custom && custom.length
+      ? custom
+      : ['NN', 'Full Stack', 'Data Science', 'Data Engineering'];
   }
 
   ngOnInit() {
@@ -430,7 +462,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (this.isDeletingTyping) {
       this.typingCharacterIndex = Math.max(0, this.typingCharacterIndex - 1);
     } else {
-      this.typingCharacterIndex = Math.min(topic.length, this.typingCharacterIndex + 1);
+      this.typingCharacterIndex = Math.min(
+        topic.length,
+        this.typingCharacterIndex + 1,
+      );
     }
     this.typedTopic.set(topic.slice(0, this.typingCharacterIndex));
 
@@ -440,7 +475,10 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.typingTopicIndex = (this.typingTopicIndex + 1) % topics.length;
       this.typingCharacterIndex = 0;
       delay = 280;
-    } else if (!this.isDeletingTyping && this.typingCharacterIndex === topic.length) {
+    } else if (
+      !this.isDeletingTyping &&
+      this.typingCharacterIndex === topic.length
+    ) {
       this.isDeletingTyping = true;
       delay = 1500;
     }

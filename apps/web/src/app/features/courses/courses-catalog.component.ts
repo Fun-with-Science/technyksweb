@@ -8,7 +8,12 @@ import { SkeletonLoaderComponent } from '../../core/components/skeleton/skeleton
 @Component({
   selector: 'app-courses-catalog',
   standalone: true,
-  imports: [CommonModule, RouterModule, CourseCardComponent, SkeletonLoaderComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    CourseCardComponent,
+    SkeletonLoaderComponent,
+  ],
   template: `
     <div class="px-5 sm:px-8 xl:px-12 pt-24 pb-20 max-w-[1400px] mx-auto">
       <div class="mb-10">
@@ -48,17 +53,17 @@ import { SkeletonLoaderComponent } from '../../core/components/skeleton/skeleton
         class="flex flex-wrap items-center justify-between gap-4 mb-8 border-y border-[#1E293B] py-4"
       >
         <div class="flex flex-wrap gap-2">
-          @for (level of levels; track level) {
+          @for (category of categories(); track category) {
             <button
-              (click)="selectedLevel.set(level)"
-              [class.bg-[#3B82F6]]="selectedLevel() === level"
-              [class.text-[#040810]]="selectedLevel() === level"
-              [class.font-bold]="selectedLevel() === level"
-              [class.bg-[#121A2B]]="selectedLevel() !== level"
-              [class.text-[#d9c3af]]="selectedLevel() !== level"
+              (click)="selectedCategory.set(category)"
+              [class.bg-[#3B82F6]]="selectedCategory() === category"
+              [class.text-[#040810]]="selectedCategory() === category"
+              [class.font-bold]="selectedCategory() === category"
+              [class.bg-[#121A2B]]="selectedCategory() !== category"
+              [class.text-[#d9c3af]]="selectedCategory() !== category"
               class="font-['JetBrains_Mono'] text-xs uppercase tracking-wider px-4 py-2 rounded border border-[#1E293B] hover:border-[#3B82F6] transition-colors"
             >
-              {{ level }}
+              {{ category }}
             </button>
           }
         </div>
@@ -101,7 +106,7 @@ import { SkeletonLoaderComponent } from '../../core/components/skeleton/skeleton
           <p class="font-['Inter'] text-sm text-[#a18d7b] max-w-xl mx-auto">
             {{
               courses().length
-                ? 'Try selecting another level to see available courses.'
+                ? 'Try selecting another subject category to see available courses.'
                 : 'New courses will appear here after they are published from the admin panel.'
             }}
           </p>
@@ -115,8 +120,27 @@ export class CoursesCatalogComponent implements OnInit {
 
   courses = signal<Course[]>([]);
   isLoading = signal(true);
-  selectedLevel = signal('ALL');
-  levels = ['ALL', 'Beginner', 'Intermediate', 'Advanced'];
+  selectedCategory = signal('ALL');
+  readonly preferredCategories = [
+    'Web Development',
+    'AI & Agents',
+    'AI Automation',
+    'Data Engineering',
+    'Software Architecture',
+    'Cloud & DevOps',
+  ];
+
+  categories = () => {
+    const available = new Set(
+      this.courses()
+        .map((course) => course.category?.trim())
+        .filter((category): category is string => Boolean(category)),
+    );
+    const preferred = this.preferredCategories.filter((category) =>
+      available.delete(category),
+    );
+    return ['ALL', ...preferred, ...Array.from(available).sort()];
+  };
 
   ngOnInit() {
     this.coursesService.getCourses().subscribe({
@@ -129,10 +153,10 @@ export class CoursesCatalogComponent implements OnInit {
   }
 
   filteredCourses = () => {
-    const level = this.selectedLevel();
-    if (level === 'ALL') return this.courses();
+    const category = this.selectedCategory();
+    if (category === 'ALL') return this.courses();
     return this.courses().filter(
-      (c) => c.level.toLowerCase() === level.toLowerCase(),
+      (course) => course.category.toLowerCase() === category.toLowerCase(),
     );
   };
 }

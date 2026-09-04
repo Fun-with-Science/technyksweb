@@ -10,9 +10,15 @@ import {
   MembershipPlan,
 } from '../../core/services/admin.service';
 import { CoursesService, Course } from '../../core/services/courses.service';
-import { ContactService, ContactMessage } from '../../core/services/contact.service';
+import {
+  ContactService,
+  ContactMessage,
+} from '../../core/services/contact.service';
 
-import { SiteSettingsService, AnnouncementBarSettings } from '../../core/services/site-settings.service';
+import {
+  SiteSettingsService,
+  AnnouncementBarSettings,
+} from '../../core/services/site-settings.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -759,14 +765,24 @@ export class AdminDashboardComponent implements OnInit {
   private siteSettingsService = inject(SiteSettingsService);
   private router = inject(Router);
 
-  activeTab = signal<'courses' | 'revenue' | 'students' | 'coupons' | 'membership' | 'support' | 'settings'>('courses');
+  activeTab = signal<
+    | 'courses'
+    | 'revenue'
+    | 'students'
+    | 'coupons'
+    | 'membership'
+    | 'support'
+    | 'settings'
+  >('courses');
   metrics = signal<RevenueMetrics | null>(null);
   students = signal<Student[]>([]);
   coupons = signal<Coupon[]>([]);
   membershipPlans = signal<MembershipPlan[]>([]);
   contactMessages = signal<ContactMessage[]>([]);
-  unreadMessagesCount = computed(() => this.contactMessages().filter((m) => m.status === 'NEW').length);
-  
+  unreadMessagesCount = computed(
+    () => this.contactMessages().filter((m) => m.status === 'NEW').length,
+  );
+
   savingMembershipPlanId = signal<string | null>(null);
   savingCouponId = signal<string | null>(null);
   lastSavedPlanId = signal<string | null>(null);
@@ -782,7 +798,8 @@ export class AdminDashboardComponent implements OnInit {
   newTypingWordInput = '';
   editingAnnouncementBar: AnnouncementBarSettings = {
     enabled: true,
-    message: '🚀 Special Launch: Complete TypeScript & JavaScript Masterclasses are now LIVE!',
+    message:
+      '🚀 Special Launch: Complete TypeScript & JavaScript Masterclasses are now LIVE!',
     buttonText: 'Explore Courses',
     buttonUrl: '/courses',
     badgeText: 'NEW',
@@ -803,12 +820,23 @@ export class AdminDashboardComponent implements OnInit {
       .searchStudents('')
       .subscribe((data) => this.students.set(data));
     this.adminService.getCoupons().subscribe((data) => this.coupons.set(data));
-    this.adminService.getMembershipPlans().subscribe((data) => this.membershipPlans.set(data));
-    this.contactService.messages$.subscribe((messages) => this.contactMessages.set(messages));
+    this.adminService
+      .getMembershipPlans()
+      .subscribe((data) => this.membershipPlans.set(data));
+    this.contactService.messages$.subscribe((messages) =>
+      this.contactMessages.set(messages),
+    );
     this.contactService.getMessages().subscribe();
 
     const currentSettings = this.siteSettingsService.settings();
-    this.editingTypingWords = [...(currentSettings.typingWords || ['NN', 'Full Stack', 'Data Science', 'Data Engineering'])];
+    this.editingTypingWords = [
+      ...(currentSettings.typingWords || [
+        'NN',
+        'Full Stack',
+        'Data Science',
+        'Data Engineering',
+      ]),
+    ];
     this.editingAnnouncementBar = { ...currentSettings.announcementBar };
     this.siteSettingsService.fetchRemoteSettings().subscribe((remote) => {
       if (!remote) return;
@@ -833,7 +861,12 @@ export class AdminDashboardComponent implements OnInit {
   saveSiteSettings() {
     this.isSavingSettings.set(true);
     if (!this.editingTypingWords.length) {
-      this.editingTypingWords = ['NN', 'Full Stack', 'Data Science', 'Data Engineering'];
+      this.editingTypingWords = [
+        'NN',
+        'Full Stack',
+        'Data Science',
+        'Data Engineering',
+      ];
     }
 
     this.siteSettingsService
@@ -895,15 +928,13 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   loadCourses() {
-    this.coursesService
-      .getAllCoursesAdmin()
-      .subscribe({
-        next: (data) => {
-          this.publishedCourses.set(data);
-          this.isLoadingCourses.set(false);
-        },
-        error: () => this.isLoadingCourses.set(false),
-      });
+    this.coursesService.getAllCoursesAdmin().subscribe({
+      next: (data) => {
+        this.publishedCourses.set(data);
+        this.isLoadingCourses.set(false);
+      },
+      error: () => this.isLoadingCourses.set(false),
+    });
   }
 
   filteredCourses(): Course[] {
@@ -933,6 +964,7 @@ export class AdminDashboardComponent implements OnInit {
       isFree: false,
       currency: 'INR',
       level: 'Advanced',
+      category: 'Software Architecture',
       status: 'DRAFT',
       isPublished: false,
       earnedThisMonth: 0,
@@ -954,105 +986,155 @@ export class AdminDashboardComponent implements OnInit {
 
   updateMembershipPlanField(planId: string, field: string, value: any) {
     this.membershipPlans.update((plans) =>
-      plans.map((plan) => (plan.id === planId ? { ...plan, [field]: value } : plan)),
+      plans.map((plan) =>
+        plan.id === planId ? { ...plan, [field]: value } : plan,
+      ),
     );
   }
 
   hasPlanCourse(plan: MembershipPlan, courseId: string): boolean {
-    return (plan.courseAccess || []).some((access) => access.courseId === courseId);
+    return (plan.courseAccess || []).some(
+      (access) => access.courseId === courseId,
+    );
   }
 
   toggleMembershipCourse(planId: string, courseId: string, selected: boolean) {
     this.membershipPlans.update((plans) =>
       plans.map((plan) => {
         if (plan.id !== planId) return plan;
-        const current = new Set((plan.courseAccess || []).map((access) => access.courseId));
+        const current = new Set(
+          (plan.courseAccess || []).map((access) => access.courseId),
+        );
         if (selected) current.add(courseId);
         else current.delete(courseId);
-        return { ...plan, courseAccess: [...current].map((id) => ({ courseId: id })) };
+        return {
+          ...plan,
+          courseAccess: [...current].map((id) => ({ courseId: id })),
+        };
       }),
     );
   }
 
   saveMembershipPlan(plan: MembershipPlan) {
     this.savingMembershipPlanId.set(plan.id);
-    this.adminService.updateMembershipPlan(plan.id, {
-      name: plan.name,
-      slug: plan.slug,
-      description: plan.description || '',
-      price: Number(plan.price) || 0,
-      currency: plan.currency,
-      interval: plan.interval,
-      isFree: plan.isFree,
-      isActive: plan.isActive,
-      accessAllCourses: plan.accessAllCourses,
-      featuresText: this.featuresText(plan),
-      courseIds: (plan.courseAccess || []).map((access) => access.courseId),
-    }).subscribe({
-      next: (saved) => {
-        this.membershipPlans.update((plans) => plans.map((candidate) => candidate.id === saved.id ? saved : candidate));
-        this.savingMembershipPlanId.set(null);
-        this.lastSavedPlanId.set(saved.id);
-        this.lastSavedTime.set(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
-        setTimeout(() => {
-          if (this.lastSavedPlanId() === saved.id) {
-            this.lastSavedPlanId.set(null);
-          }
-        }, 6000);
-      },
-      error: () => {
-        this.savingMembershipPlanId.set(null);
-        alert('The membership plan could not be saved. Please try again.');
-      },
-    });
+    this.adminService
+      .updateMembershipPlan(plan.id, {
+        name: plan.name,
+        slug: plan.slug,
+        description: plan.description || '',
+        price: Number(plan.price) || 0,
+        currency: plan.currency,
+        interval: plan.interval,
+        isFree: plan.isFree,
+        isActive: plan.isActive,
+        accessAllCourses: plan.accessAllCourses,
+        featuresText: this.featuresText(plan),
+        courseIds: (plan.courseAccess || []).map((access) => access.courseId),
+      })
+      .subscribe({
+        next: (saved) => {
+          this.membershipPlans.update((plans) =>
+            plans.map((candidate) =>
+              candidate.id === saved.id ? saved : candidate,
+            ),
+          );
+          this.savingMembershipPlanId.set(null);
+          this.lastSavedPlanId.set(saved.id);
+          this.lastSavedTime.set(
+            new Date().toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+            }),
+          );
+          setTimeout(() => {
+            if (this.lastSavedPlanId() === saved.id) {
+              this.lastSavedPlanId.set(null);
+            }
+          }, 6000);
+        },
+        error: () => {
+          this.savingMembershipPlanId.set(null);
+          alert('The membership plan could not be saved. Please try again.');
+        },
+      });
   }
 
   createMembershipPlan() {
     this.creatingMembershipPlan.set(true);
-    this.adminService.createMembershipPlan({
-      name: 'New Membership Plan',
-      slug: `membership-${Date.now().toString(36)}`,
-      description: 'Describe the value and access included in this plan.',
-      price: 999,
-      currency: 'INR',
-      interval: 'MONTHLY',
-      isFree: false,
-      isActive: false,
-      accessAllCourses: true,
-      features: ['All included courses'],
-      courseIds: [],
-    }).subscribe({
-      next: (plan) => {
-        this.membershipPlans.update((plans) => [...plans, plan]);
-        this.creatingMembershipPlan.set(false);
-      },
-      error: (error) => {
-        this.creatingMembershipPlan.set(false);
-        alert(error?.error?.message || 'The membership plan could not be created.');
-      },
-    });
+    this.adminService
+      .createMembershipPlan({
+        name: 'New Membership Plan',
+        slug: `membership-${Date.now().toString(36)}`,
+        description: 'Describe the value and access included in this plan.',
+        price: 999,
+        currency: 'INR',
+        interval: 'MONTHLY',
+        isFree: false,
+        isActive: false,
+        accessAllCourses: true,
+        features: ['All included courses'],
+        courseIds: [],
+      })
+      .subscribe({
+        next: (plan) => {
+          this.membershipPlans.update((plans) => [...plans, plan]);
+          this.creatingMembershipPlan.set(false);
+        },
+        error: (error) => {
+          this.creatingMembershipPlan.set(false);
+          alert(
+            error?.error?.message ||
+              'The membership plan could not be created.',
+          );
+        },
+      });
   }
 
   deleteMembershipPlan(plan: MembershipPlan) {
-    if (typeof window === 'undefined' || !window.confirm(`Delete “${plan.name}”?`)) return;
+    if (
+      typeof window === 'undefined' ||
+      !window.confirm(`Delete “${plan.name}”?`)
+    )
+      return;
     this.adminService.deleteMembershipPlan(plan.id).subscribe({
-      next: () => this.membershipPlans.update((plans) => plans.filter((candidate) => candidate.id !== plan.id)),
-      error: (error) => alert(error?.error?.message || 'The membership plan could not be deleted.'),
+      next: () =>
+        this.membershipPlans.update((plans) =>
+          plans.filter((candidate) => candidate.id !== plan.id),
+        ),
+      error: (error) =>
+        alert(
+          error?.error?.message || 'The membership plan could not be deleted.',
+        ),
     });
   }
 
   updateCouponField(id: string, field: keyof Coupon, value: unknown) {
-    this.coupons.update((coupons) => coupons.map((coupon) => coupon.id === id ? { ...coupon, [field]: value } : coupon));
+    this.coupons.update((coupons) =>
+      coupons.map((coupon) =>
+        coupon.id === id ? { ...coupon, [field]: value } : coupon,
+      ),
+    );
   }
 
   saveCoupon(coupon: Coupon) {
     this.savingCouponId.set(coupon.id);
     this.adminService.updateCoupon(coupon.id, coupon).subscribe({
       next: (saved) => {
-        this.coupons.update((coupons) => coupons.map((candidate) => candidate.id === saved.id ? saved : candidate));
+        this.coupons.update((coupons) =>
+          coupons.map((candidate) =>
+            candidate.id === saved.id ? saved : candidate,
+          ),
+        );
         this.savingCouponId.set(null);
         this.lastSavedCouponId.set(saved.id);
-        this.lastSavedTime.set(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+        this.lastSavedTime.set(
+          new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+          }),
+        );
         setTimeout(() => {
           if (this.lastSavedCouponId() === saved.id) {
             this.lastSavedCouponId.set(null);
@@ -1069,19 +1151,27 @@ export class AdminDashboardComponent implements OnInit {
   createMembershipCoupon() {
     const code = this.newMembershipCouponCode.trim();
     if (!code) return;
-    this.adminService.createCoupon({
-      code,
-      discountAmount: Number(this.newMembershipCouponDiscount) || 0,
-      scope: 'MEMBERSHIP',
-    }).subscribe({
-      next: (coupon) => {
-        this.coupons.update((coupons) => [coupon, ...coupons]);
-        this.newMembershipCouponCode = '';
-        this.membershipCouponFeedback.set(`Coupon "${coupon.code}" created and activated successfully!`);
-        setTimeout(() => this.membershipCouponFeedback.set(''), 6000);
-      },
-      error: (error) => alert(error?.error?.message || 'The membership coupon could not be created.'),
-    });
+    this.adminService
+      .createCoupon({
+        code,
+        discountAmount: Number(this.newMembershipCouponDiscount) || 0,
+        scope: 'MEMBERSHIP',
+      })
+      .subscribe({
+        next: (coupon) => {
+          this.coupons.update((coupons) => [coupon, ...coupons]);
+          this.newMembershipCouponCode = '';
+          this.membershipCouponFeedback.set(
+            `Coupon "${coupon.code}" created and activated successfully!`,
+          );
+          setTimeout(() => this.membershipCouponFeedback.set(''), 6000);
+        },
+        error: (error) =>
+          alert(
+            error?.error?.message ||
+              'The membership coupon could not be created.',
+          ),
+      });
   }
 
   toggleMessageStatus(id: string) {
@@ -1089,7 +1179,11 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   deleteMessage(id: string) {
-    if (typeof window !== 'undefined' && !window.confirm('Delete this inquiry?')) return;
+    if (
+      typeof window !== 'undefined' &&
+      !window.confirm('Delete this inquiry?')
+    )
+      return;
     this.contactService.deleteMessage(id).subscribe();
   }
 

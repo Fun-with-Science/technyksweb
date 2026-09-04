@@ -326,6 +326,7 @@ export const JAVASCRIPT_COURSE = {
   isFree: false,
   currency: 'INR',
   level: 'Beginner',
+  category: 'Web Development',
   isPublished: true,
   modules: SECTION_DEFINITIONS.map((section) => ({
     id: section.id,

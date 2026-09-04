@@ -212,6 +212,7 @@ export const JAVASCRIPT_COURSE: Course = {
   isFree: false,
   currency: 'INR',
   level: 'Beginner',
+  category: 'Web Development',
   status: 'LIVE',
   isPublished: true,
   earnedThisMonth: 0,

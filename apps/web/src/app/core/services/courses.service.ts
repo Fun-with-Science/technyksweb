@@ -54,6 +54,7 @@ export interface Course {
   isFree: boolean;
   currency: string;
   level: string;
+  category: string;
   status?: 'LIVE' | 'DRAFT' | 'BANNED';
   isPublished: boolean;
   isArchived?: boolean;
@@ -69,7 +70,8 @@ const STORAGE_KEY = 'technyks_courses_store_v2';
 const LEGACY_STORAGE_KEY = 'technyks_courses_store';
 const METRICS_MIGRATION_KEY = 'technyks_course_metrics_v1';
 const BUILT_IN_COURSES_MIGRATION_KEY = 'technyks_builtin_courses_live_v1';
-const ARCHIVED_FALLBACK_COURSE_IDS_KEY = 'technyks_archived_fallback_courses_v1';
+const ARCHIVED_FALLBACK_COURSE_IDS_KEY =
+  'technyks_archived_fallback_courses_v1';
 const LEGACY_DEMO_COURSE_IDS = new Set([
   'course-n8n-1',
   'course-vibe-2',
@@ -170,7 +172,10 @@ export class CoursesService {
       }
       return roster;
     }
-    return [this.normaliseCourse(JAVASCRIPT_COURSE), this.normaliseCourse(TYPESCRIPT_COURSE)];
+    return [
+      this.normaliseCourse(JAVASCRIPT_COURSE),
+      this.normaliseCourse(TYPESCRIPT_COURSE),
+    ];
   }
 
   private hasStoredRoster(): boolean {
@@ -526,6 +531,9 @@ export class CoursesService {
       isFree: Boolean(course.isFree ?? Number(course.price || 0) === 0),
       currency: course.currency || 'INR',
       level: course.level || 'Intermediate',
+      category:
+        String(course.category || 'Web Development').trim() ||
+        'Web Development',
       status,
       isPublished: status === 'LIVE',
       isArchived: Boolean(course.isArchived),

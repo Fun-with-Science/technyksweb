@@ -203,10 +203,10 @@ export class AdminService {
     courses = this.prisma.inMemoryCourses
       .filter((course) => !course.isArchived)
       .sort((a, b) => {
-      return (
-        new Date(b.createdAt || 0).getTime() -
-        new Date(a.createdAt || 0).getTime()
-      );
+        return (
+          new Date(b.createdAt || 0).getTime() -
+          new Date(a.createdAt || 0).getTime()
+        );
       });
     return this.withCourseMetrics(courses);
   }
@@ -234,7 +234,9 @@ export class AdminService {
   }
 
   async getCourseStudents(courseId: string, query?: string) {
-    const q = String(query || '').trim().toLowerCase();
+    const q = String(query || '')
+      .trim()
+      .toLowerCase();
     if (this.prisma.isDbConnected) {
       try {
         const course = await this.prisma.course.findUnique({
@@ -249,10 +251,7 @@ export class AdminService {
             ...(q
               ? {
                   user: {
-                    OR: [
-                      { name: { contains: q } },
-                      { email: { contains: q } },
-                    ],
+                    OR: [{ name: { contains: q } }, { email: { contains: q } }],
                   },
                 }
               : {}),
@@ -293,8 +292,12 @@ export class AdminService {
         ({ user }) =>
           user &&
           (!q ||
-            String(user.name || '').toLowerCase().includes(q) ||
-            String(user.email || '').toLowerCase().includes(q)),
+            String(user.name || '')
+              .toLowerCase()
+              .includes(q) ||
+            String(user.email || '')
+              .toLowerCase()
+              .includes(q)),
       )
       .map(({ enrollment, user }: any) => ({
         id: enrollment.id,
@@ -341,7 +344,9 @@ export class AdminService {
         });
       } catch (error: any) {
         if (error?.code === 'P2002') {
-          throw new BadRequestException('A membership plan with this slug already exists.');
+          throw new BadRequestException(
+            'A membership plan with this slug already exists.',
+          );
         }
         throw new BadRequestException('Membership plan could not be created.');
       }
@@ -366,7 +371,9 @@ export class AdminService {
     if (this.prisma.isDbConnected) {
       try {
         return await this.prisma.$transaction(async (transaction: any) => {
-          await transaction.membershipCourseAccess.deleteMany({ where: { planId: id } });
+          await transaction.membershipCourseAccess.deleteMany({
+            where: { planId: id },
+          });
           if (!data.accessAllCourses && courseIds.length) {
             await transaction.membershipCourseAccess.createMany({
               data: courseIds.map((courseId) => ({ planId: id, courseId })),
@@ -380,16 +387,24 @@ export class AdminService {
           });
         });
       } catch (error: any) {
-        if (error?.code === 'P2025') throw new NotFoundException('Membership plan not found.');
-        if (error?.code === 'P2002') throw new BadRequestException('A membership plan with this slug already exists.');
+        if (error?.code === 'P2025')
+          throw new NotFoundException('Membership plan not found.');
+        if (error?.code === 'P2002')
+          throw new BadRequestException(
+            'A membership plan with this slug already exists.',
+          );
         throw new BadRequestException('Membership plan could not be updated.');
       }
     }
 
-    const plan = this.prisma.inMemoryMembershipPlans.find((candidate) => candidate.id === id);
+    const plan = this.prisma.inMemoryMembershipPlans.find(
+      (candidate) => candidate.id === id,
+    );
     if (!plan) throw new NotFoundException('Membership plan not found.');
     Object.assign(plan, data, {
-      courseAccess: data.accessAllCourses ? [] : courseIds.map((courseId) => ({ courseId })),
+      courseAccess: data.accessAllCourses
+        ? []
+        : courseIds.map((courseId) => ({ courseId })),
       updatedAt: new Date(),
     });
     return plan;
@@ -397,21 +412,28 @@ export class AdminService {
 
   async deleteMembershipPlan(id: string) {
     if (this.prisma.isDbConnected) {
-      const subscriptions = await this.prisma.subscription.count({ where: { planId: id } });
+      const subscriptions = await this.prisma.subscription.count({
+        where: { planId: id },
+      });
       if (subscriptions > 0) {
-        throw new BadRequestException('This plan has subscription history and cannot be deleted. Deactivate it instead.');
+        throw new BadRequestException(
+          'This plan has subscription history and cannot be deleted. Deactivate it instead.',
+        );
       }
       try {
         await this.prisma.membershipPlan.delete({ where: { id } });
         return { success: true };
       } catch (error: any) {
-        if (error?.code === 'P2025') throw new NotFoundException('Membership plan not found.');
+        if (error?.code === 'P2025')
+          throw new NotFoundException('Membership plan not found.');
         throw new BadRequestException('Membership plan could not be deleted.');
       }
     }
     const before = this.prisma.inMemoryMembershipPlans.length;
-    this.prisma.inMemoryMembershipPlans = this.prisma.inMemoryMembershipPlans.filter((plan) => plan.id !== id);
-    if (before === this.prisma.inMemoryMembershipPlans.length) throw new NotFoundException('Membership plan not found.');
+    this.prisma.inMemoryMembershipPlans =
+      this.prisma.inMemoryMembershipPlans.filter((plan) => plan.id !== id);
+    if (before === this.prisma.inMemoryMembershipPlans.length)
+      throw new NotFoundException('Membership plan not found.');
     return { success: true };
   }
 
@@ -432,6 +454,7 @@ export class AdminService {
             isFree: fields.isFree,
             currency: fields.currency,
             level: fields.level,
+            category: fields.category,
             isPublished: fields.isPublished,
             isArchived: false,
             modules: { create: this.toPrismaModules(fields.modules) },
@@ -439,7 +462,10 @@ export class AdminService {
           include: COURSE_INCLUDE,
         });
       } catch (error: any) {
-        if (error?.code === 'P2002') throw new BadRequestException('A course with this slug already exists.');
+        if (error?.code === 'P2002')
+          throw new BadRequestException(
+            'A course with this slug already exists.',
+          );
         throw new BadRequestException('Course could not be created.');
       }
     }
@@ -480,6 +506,7 @@ export class AdminService {
             isFree: template.isFree ?? Number(template.price || 0) === 0,
             currency: template.currency,
             level: template.level,
+            category: template.category,
             isPublished: template.isPublished,
             modules: {
               create: template.modules.map((module) => ({
@@ -552,6 +579,7 @@ export class AdminService {
             isFree: fields.isFree,
             currency: fields.currency,
             level: fields.level,
+            category: fields.category,
             isPublished: fields.isPublished,
             modules: {
               deleteMany: {},
@@ -561,8 +589,12 @@ export class AdminService {
           include: COURSE_INCLUDE,
         });
       } catch (error: any) {
-        if (error?.code === 'P2002') throw new BadRequestException('A course with this slug already exists.');
-        if (error?.code === 'P2025') throw new NotFoundException('Course not found.');
+        if (error?.code === 'P2002')
+          throw new BadRequestException(
+            'A course with this slug already exists.',
+          );
+        if (error?.code === 'P2025')
+          throw new NotFoundException('Course not found.');
         throw new BadRequestException('Course could not be updated.');
       }
     }
@@ -611,8 +643,7 @@ export class AdminService {
     const course = this.prisma.inMemoryCourses.find(
       (candidate) => candidate.id === id,
     );
-    if (!course || course.isArchived)
-      return { success: true, deleted: false };
+    if (!course || course.isArchived) return { success: true, deleted: false };
     course.isArchived = true;
     course.isPublished = false;
     course.updatedAt = new Date();
@@ -626,7 +657,8 @@ export class AdminService {
       try {
         return await this.prisma.coupon.create({ data: data as any });
       } catch (error: any) {
-        if (error?.code === 'P2002') throw new BadRequestException('This coupon code already exists.');
+        if (error?.code === 'P2002')
+          throw new BadRequestException('This coupon code already exists.');
         throw new BadRequestException('Coupon could not be created.');
       }
     }
@@ -647,15 +679,23 @@ export class AdminService {
       if (!current) throw new NotFoundException('Coupon not found.');
       const data = this.normaliseCoupon(dto, current);
       try {
-        return await this.prisma.coupon.update({ where: { id }, data: data as any });
+        return await this.prisma.coupon.update({
+          where: { id },
+          data: data as any,
+        });
       } catch (error: any) {
-        if (error?.code === 'P2002') throw new BadRequestException('This coupon code already exists.');
+        if (error?.code === 'P2002')
+          throw new BadRequestException('This coupon code already exists.');
         throw new BadRequestException('Coupon could not be updated.');
       }
     }
-    const coupon = this.prisma.inMemoryCoupons.find((candidate) => candidate.id === id);
+    const coupon = this.prisma.inMemoryCoupons.find(
+      (candidate) => candidate.id === id,
+    );
     if (!coupon) throw new NotFoundException('Coupon not found.');
-    Object.assign(coupon, this.normaliseCoupon(dto, coupon), { updatedAt: new Date() });
+    Object.assign(coupon, this.normaliseCoupon(dto, coupon), {
+      updatedAt: new Date(),
+    });
     return coupon;
   }
 
@@ -685,7 +725,8 @@ export class AdminService {
         await this.prisma.coupon.delete({ where: { id } });
         return { success: true };
       } catch (error: any) {
-        if (error?.code === 'P2025') throw new NotFoundException('Coupon not found.');
+        if (error?.code === 'P2025')
+          throw new NotFoundException('Coupon not found.');
         throw new BadRequestException('Coupon could not be deleted.');
       }
     }
@@ -771,17 +812,37 @@ export class AdminService {
 
   private normaliseMembershipPlan(dto: any) {
     const name = String(dto.name || '').trim();
-    if (!name) throw new BadRequestException('Membership plan name is required.');
-    const slug = String(dto.slug || name).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    if (!slug) throw new BadRequestException('Membership plan slug is required.');
+    if (!name)
+      throw new BadRequestException('Membership plan name is required.');
+    const slug = String(dto.slug || name)
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+    if (!slug)
+      throw new BadRequestException('Membership plan slug is required.');
     const price = Number(dto.price);
-    if (!Number.isFinite(price) || price < 0) throw new BadRequestException('Membership price must be a non-negative number.');
+    if (!Number.isFinite(price) || price < 0)
+      throw new BadRequestException(
+        'Membership price must be a non-negative number.',
+      );
     const features = Array.isArray(dto.features)
-      ? dto.features.map((feature: any) => String(feature).trim()).filter(Boolean)
-      : String(dto.featuresText || '').split('\n').map((feature) => feature.trim()).filter(Boolean);
+      ? dto.features
+          .map((feature: any) => String(feature).trim())
+          .filter(Boolean)
+      : String(dto.featuresText || '')
+          .split('\n')
+          .map((feature) => feature.trim())
+          .filter(Boolean);
     const accessAllCourses = dto.accessAllCourses !== false;
     const courseIds = Array.isArray(dto.courseIds)
-      ? [...new Set(dto.courseIds.map((courseId: any) => String(courseId).trim()).filter(Boolean))] as string[]
+      ? ([
+          ...new Set(
+            dto.courseIds
+              .map((courseId: any) => String(courseId).trim())
+              .filter(Boolean),
+          ),
+        ] as string[])
       : [];
     return {
       data: {
@@ -789,8 +850,13 @@ export class AdminService {
         slug,
         description: String(dto.description || '').trim() || null,
         price,
-        currency: String(dto.currency || 'INR').trim().toUpperCase(),
-        interval: String(dto.interval || 'MONTHLY').toUpperCase() === 'ANNUAL' ? 'ANNUAL' : 'MONTHLY',
+        currency: String(dto.currency || 'INR')
+          .trim()
+          .toUpperCase(),
+        interval:
+          String(dto.interval || 'MONTHLY').toUpperCase() === 'ANNUAL'
+            ? 'ANNUAL'
+            : 'MONTHLY',
         isFree: dto.isFree === true || price === 0,
         features,
         isActive: dto.isActive !== false,
@@ -801,22 +867,69 @@ export class AdminService {
   }
 
   private normaliseCoupon(dto: any, current?: any) {
-    const code = String(dto.code ?? current?.code ?? '').trim().toUpperCase();
+    const code = String(dto.code ?? current?.code ?? '')
+      .trim()
+      .toUpperCase();
     if (!code) throw new BadRequestException('Coupon code is required.');
     const percentValue = dto.discountPercent ?? current?.discountPercent;
     const amountValue = dto.discountAmount ?? current?.discountAmount;
-    const discountPercent = percentValue === null || percentValue === '' || percentValue === undefined ? null : Number(percentValue);
-    const discountAmount = amountValue === null || amountValue === '' || amountValue === undefined ? null : Number(amountValue);
-    if (discountPercent === null && discountAmount === null) throw new BadRequestException('Enter a percentage or fixed discount.');
-    if (discountPercent !== null && (!Number.isFinite(discountPercent) || discountPercent <= 0 || discountPercent > 100)) throw new BadRequestException('Percentage discount must be between 1 and 100.');
-    if (discountAmount !== null && (!Number.isFinite(discountAmount) || discountAmount <= 0)) throw new BadRequestException('Fixed discount must be greater than zero.');
-    const scope = String(dto.scope ?? current?.scope ?? 'COURSE').toUpperCase() === 'MEMBERSHIP' ? 'MEMBERSHIP' : 'COURSE';
-    const courseId = dto.courseId !== undefined ? dto.courseId || null : current?.courseId || null;
-    if (scope === 'COURSE' && !courseId) throw new BadRequestException('Course coupons must be locked to a course.');
-    if (scope === 'MEMBERSHIP' && courseId) throw new BadRequestException('Membership coupons cannot be attached to a course.');
+    const discountPercent =
+      percentValue === null || percentValue === '' || percentValue === undefined
+        ? null
+        : Number(percentValue);
+    const discountAmount =
+      amountValue === null || amountValue === '' || amountValue === undefined
+        ? null
+        : Number(amountValue);
+    if (discountPercent === null && discountAmount === null)
+      throw new BadRequestException('Enter a percentage or fixed discount.');
+    if (
+      discountPercent !== null &&
+      (!Number.isFinite(discountPercent) ||
+        discountPercent <= 0 ||
+        discountPercent > 100)
+    )
+      throw new BadRequestException(
+        'Percentage discount must be between 1 and 100.',
+      );
+    if (
+      discountAmount !== null &&
+      (!Number.isFinite(discountAmount) || discountAmount <= 0)
+    )
+      throw new BadRequestException(
+        'Fixed discount must be greater than zero.',
+      );
+    const scope =
+      String(dto.scope ?? current?.scope ?? 'COURSE').toUpperCase() ===
+      'MEMBERSHIP'
+        ? 'MEMBERSHIP'
+        : 'COURSE';
+    const courseId =
+      dto.courseId !== undefined
+        ? dto.courseId || null
+        : current?.courseId || null;
+    if (scope === 'COURSE' && !courseId)
+      throw new BadRequestException(
+        'Course coupons must be locked to a course.',
+      );
+    if (scope === 'MEMBERSHIP' && courseId)
+      throw new BadRequestException(
+        'Membership coupons cannot be attached to a course.',
+      );
     const usageValue = dto.usageLimit ?? current?.usageLimit;
-    const usageLimit = usageValue === null || usageValue === '' || usageValue === undefined ? null : Math.max(1, Number(usageValue));
-    return { code, discountPercent, discountAmount, scope, courseId, usageLimit, isActive: dto.isActive ?? current?.isActive ?? true };
+    const usageLimit =
+      usageValue === null || usageValue === '' || usageValue === undefined
+        ? null
+        : Math.max(1, Number(usageValue));
+    return {
+      code,
+      discountPercent,
+      discountAmount,
+      scope,
+      courseId,
+      usageLimit,
+      isActive: dto.isActive ?? current?.isActive ?? true,
+    };
   }
 
   private async normaliseCourse(dto: any, existingId?: string, current?: any) {
@@ -860,6 +973,9 @@ export class AdminService {
         dto.currency ?? current?.currency ?? 'INR',
       ).toUpperCase(),
       level: String(dto.level ?? current?.level ?? 'Intermediate'),
+      category:
+        String(dto.category ?? current?.category ?? 'Web Development').trim() ||
+        'Web Development',
       isPublished: Boolean(
         dto.isPublished ??
           (dto.status
