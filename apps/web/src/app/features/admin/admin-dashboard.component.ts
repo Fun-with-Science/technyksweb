@@ -19,11 +19,17 @@ import {
   SiteSettingsService,
   AnnouncementBarSettings,
 } from '../../core/services/site-settings.service';
+import { AdminCommunicationComponent } from './admin-communication.component';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    AdminCommunicationComponent,
+  ],
   template: `
     <div class="admin-shell min-h-screen bg-[#040810] text-[#e0e3e5] pt-16 sm:pt-20 lg:pt-24 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-10 max-w-7xl mx-auto overflow-x-hidden">
       
@@ -103,6 +109,18 @@ import {
         </button>
 
         <button
+          (click)="activeTab.set('communication')"
+          [class.border-b-2]="activeTab() === 'communication'"
+          [class.border-[#3B82F6]]="activeTab() === 'communication'"
+          [class.text-[#3B82F6]]="activeTab() === 'communication'"
+          [class.text-[#d9c3af]]="activeTab() !== 'communication'"
+          class="pb-3 px-1 font-bold transition-colors shrink-0 flex items-center gap-1.5"
+        >
+          <span class="material-symbols-outlined text-[16px]">forum</span>
+          Communication
+        </button>
+
+        <button
           (click)="activeTab.set('support')"
           [class.border-b-2]="activeTab() === 'support'"
           [class.border-[#3B82F6]]="activeTab() === 'support'"
@@ -130,6 +148,10 @@ import {
           Site Settings & Banner
         </button>
       </div>
+
+      @if (activeTab() === 'communication') {
+        <app-admin-communication [courses]="publishedCourses()" />
+      }
 
       <!-- TAB 1: UDEMY COURSES ROSTER (Screenshot 1) -->
       @if (activeTab() === 'courses') {
@@ -771,6 +793,7 @@ export class AdminDashboardComponent implements OnInit {
     | 'students'
     | 'coupons'
     | 'membership'
+    | 'communication'
     | 'support'
     | 'settings'
   >('courses');

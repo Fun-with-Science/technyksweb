@@ -11,6 +11,7 @@ import { VideoModule } from './video/video.module';
 import { AdminModule } from './admin/admin.module';
 import { ContactModule } from './contact/contact.module';
 import { SiteSettingsModule } from './site-settings/site-settings.module';
+import { CommunicationModule } from './communication/communication.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { SiteSettingsModule } from './site-settings/site-settings.module';
     AdminModule,
     ContactModule,
     SiteSettingsModule,
+    CommunicationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

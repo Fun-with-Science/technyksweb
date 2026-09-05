@@ -25,12 +25,16 @@ export class PrismaService
   public inMemoryMembershipPlans: any[] = [];
   public inMemoryReviews: any[] = [];
   public inMemoryContactMessages: any[] = [];
+  public inMemoryCourseQuestions: any[] = [];
+  public inMemoryCourseReplies: any[] = [];
+  public inMemoryCourseAnnouncements: any[] = [];
   public inMemorySiteSettings: any | null = null;
 
   async onModuleInit() {
     try {
       await this.$connect();
       await this.ensureRuntimeColumns();
+      await this.ensureCommunicationTables();
       this.isDbConnected = true;
       this.logger.log(' Connected successfully to MySQL database via Prisma');
     } catch (error: any) {
@@ -82,6 +86,55 @@ export class PrismaService
         }
         throw error;
       }
+    }
+  }
+
+  private async ensureCommunicationTables() {
+    const statements = [
+      `CREATE TABLE IF NOT EXISTS \`CourseQuestion\` (
+        \`id\` VARCHAR(191) NOT NULL,
+        \`userId\` VARCHAR(191) NOT NULL,
+        \`courseId\` VARCHAR(191) NOT NULL,
+        \`lessonId\` VARCHAR(191) NULL,
+        \`title\` VARCHAR(240) NOT NULL,
+        \`body\` TEXT NOT NULL,
+        \`status\` VARCHAR(32) NOT NULL DEFAULT 'OPEN',
+        \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        \`updatedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+        PRIMARY KEY (\`id\`),
+        INDEX \`CourseQuestion_courseId_createdAt_idx\` (\`courseId\`, \`createdAt\`),
+        INDEX \`CourseQuestion_lessonId_idx\` (\`lessonId\`),
+        INDEX \`CourseQuestion_status_idx\` (\`status\`)
+      ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+      `CREATE TABLE IF NOT EXISTS \`CourseReply\` (
+        \`id\` VARCHAR(191) NOT NULL,
+        \`questionId\` VARCHAR(191) NOT NULL,
+        \`userId\` VARCHAR(191) NOT NULL,
+        \`body\` TEXT NOT NULL,
+        \`isInstructor\` BOOLEAN NOT NULL DEFAULT false,
+        \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        \`updatedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+        PRIMARY KEY (\`id\`),
+        INDEX \`CourseReply_questionId_createdAt_idx\` (\`questionId\`, \`createdAt\`)
+      ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+      `CREATE TABLE IF NOT EXISTS \`CourseAnnouncement\` (
+        \`id\` VARCHAR(191) NOT NULL,
+        \`createdById\` VARCHAR(191) NOT NULL,
+        \`title\` VARCHAR(240) NOT NULL,
+        \`body\` TEXT NOT NULL,
+        \`targetCourseIds\` JSON NOT NULL,
+        \`sendEmail\` BOOLEAN NOT NULL DEFAULT false,
+        \`emailStatus\` VARCHAR(32) NOT NULL DEFAULT 'NOT_REQUESTED',
+        \`recipientCount\` INT NOT NULL DEFAULT 0,
+        \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        \`updatedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+        PRIMARY KEY (\`id\`),
+        INDEX \`CourseAnnouncement_createdAt_idx\` (\`createdAt\`)
+      ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+    ];
+
+    for (const statement of statements) {
+      await this.$executeRawUnsafe(statement);
     }
   }
 }

@@ -37,24 +37,27 @@ enum PaymentProvider {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  passwordHash  String?
-  googleId      String?        @unique
-  name          String
-  avatarUrl     String?
-  role          UserRole       @default(STUDENT)
-  onboardingCompleted Boolean  @default(false)
+  id                   String               @id @default(uuid())
+  email                String               @unique
+  passwordHash         String?
+  googleId             String?              @unique
+  name                 String
+  avatarUrl            String?
+  role                 UserRole             @default(STUDENT)
+  onboardingCompleted  Boolean              @default(false)
   learnerGoal          String?
   experienceLevel      String?
   membershipPreference String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  enrollments   Enrollment[]
-  subscriptions Subscription[]
-  certificates  Certificate[]
-  payments      Payment[]
-  reviews       Review[]
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  enrollments          Enrollment[]
+  subscriptions        Subscription[]
+  certificates         Certificate[]
+  payments             Payment[]
+  reviews              Review[]
+  courseQuestions      CourseQuestion[]
+  courseReplies        CourseReply[]
+  courseAnnouncements  CourseAnnouncement[] @relation("AnnouncementAuthor")
 }
 
 model Course {
@@ -81,6 +84,7 @@ model Course {
   reviews          Review[]
   coupons          Coupon[]
   membershipAccess MembershipCourseAccess[]
+  questions        CourseQuestion[]
 }
 
 model Module {
@@ -250,4 +254,53 @@ model SiteSetting {
   key       String   @id
   value     Json
   updatedAt DateTime @updatedAt
+}
+
+model CourseQuestion {
+  id        String        @id @default(uuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessonId  String?
+  title     String
+  body      String        @db.Text
+  status    String        @default("OPEN")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  replies   CourseReply[]
+
+  @@index([courseId, createdAt])
+  @@index([lessonId])
+  @@index([status])
+}
+
+model CourseReply {
+  id           String         @id @default(uuid())
+  questionId   String
+  question     CourseQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body         String         @db.Text
+  isInstructor Boolean        @default(false)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([questionId, createdAt])
+}
+
+model CourseAnnouncement {
+  id              String   @id @default(uuid())
+  createdById     String
+  createdBy       User     @relation("AnnouncementAuthor", fields: [createdById], references: [id], onDelete: Cascade)
+  title           String
+  body            String   @db.Text
+  targetCourseIds Json
+  sendEmail       Boolean  @default(false)
+  emailStatus     String   @default("NOT_REQUESTED")
+  recipientCount  Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([createdAt])
 }
